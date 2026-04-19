@@ -12,7 +12,26 @@
   --blue:#4a9eda;--red:#e05252;--green:#3dba78;
   --t1:#5ba3d9;--t2:#3dba78;--t3:#f5a623;--t4:#b07ee8;
   --text:#c8d0d8;--tdim:#5a6270;--tbright:#eef2f6;
+  --cell-bg:#0d1117;--tf-color:#263040;--tf-f-color:#263040;
 }
+body.light{
+  --bg:#f0f2f5;--panel:#ffffff;--border:#d0d8e4;
+  --adim:#b07010;--aglow:rgba(245,166,35,.15);
+  --text:#2a3040;--tdim:#8090a8;--tbright:#111827;
+  --cell-bg:#f8fafc;--tf-color:#c8d4e0;--tf-f-color:#e05252;
+}
+body.light::before{background-image:linear-gradient(rgba(0,0,0,.04)1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04)1px,transparent 1px);}
+body.light .tscr{background:var(--cell-bg);}
+body.light table.gt th{background:var(--panel);color:var(--tdim);}
+body.light table.gt th.gn{background:var(--panel);}
+body.light table.gt td.gn{background:var(--panel);}
+body.light .sp,.light .ubar,.light .cal-top,.light .evp,.light .modal,.light .leg{background:var(--panel);}
+body.light .mh{background:var(--panel);}
+body.light select,body.light input[type=date],body.light input[type=text],body.light textarea,body.light .cal-g-sel{background:#f0f2f5;color:var(--tbright);}
+body.light .ds-sheet,.light .ds-note-inp{background:#fff;}
+/* Theme toggle button */
+.theme-btn{background:none;border:1px solid var(--border);color:var(--tdim);font-family:'Share Tech Mono',monospace;font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.theme-btn:hover{border-color:var(--amber);color:var(--amber);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh;}
 body::before{content:'';position:fixed;inset:0;
@@ -44,26 +63,38 @@ h1 span{color:var(--amber);}
 .no-u{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
 .no-u-t{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;}
 
-/* SEARCH */
-.sp{background:var(--panel);border:1px solid var(--border);border-top:2px solid var(--amber);border-radius:4px;padding:18px;margin-bottom:14px;position:relative;}
-.sp::before{content:'CONSULTA DE TURNO';position:absolute;top:-10px;left:14px;background:var(--panel);padding:0 9px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:3px;}
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:11px;}
-@media(max-width:480px){.sg{grid-template-columns:1fr;}}
-.fg{display:flex;flex-direction:column;gap:5px;}
-label{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--adim);letter-spacing:3px;text-transform:uppercase;}
-select,input[type=date],input[type=text]{background:#0d1117;border:1px solid var(--border);border-radius:3px;color:var(--tbright);font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px 10px;width:100%;appearance:none;cursor:pointer;transition:border-color .2s;}
+/* SEARCH — compact collapsible bar */
+.sp{background:var(--panel);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.sp-hdr{display:flex;align-items:center;gap:8px;padding:8px 11px;cursor:pointer;user-select:none;}
+.sp-hdr-tag{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--adim);letter-spacing:3px;flex:1;}
+.sp-hdr-arr{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);}
+.sp-body{padding:10px 11px 11px;border-top:1px solid var(--border);display:none;}
+.sp-body.on{display:block;}
+.sg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.fg{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
+label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--adim);letter-spacing:2px;text-transform:uppercase;}
+select,input[type=date],input[type=text]{background:#0d1117;border:1px solid var(--border);border-radius:3px;color:var(--tbright);font-family:'Share Tech Mono',monospace;font-size:12px;padding:6px 8px;width:100%;appearance:none;cursor:pointer;transition:border-color .2s;}
 select:focus,input[type=date]:focus,input[type=text]:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 2px var(--aglow);}
 select option{background:#0d1117;}
 textarea{background:#0d1117;border:1px solid var(--border);border-radius:3px;color:var(--tbright);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px 10px;width:100%;resize:vertical;min-height:52px;}
 textarea:focus{outline:none;border-color:var(--amber);}
-.btn{width:100%;padding:11px;background:var(--amber);border:none;border-radius:3px;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
-.btn:hover{background:#ffc04a;transform:translateY(-1px);}
-.today-btn{background:none;border:1px solid var(--border);color:var(--tdim);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;padding:4px 9px;border-radius:3px;cursor:pointer;transition:all .2s;margin-top:3px;}
+.btn{padding:6px 14px;background:var(--amber);border:none;border-radius:3px;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn:hover{background:#ffc04a;}
+.btn-row{display:flex;align-items:center;gap:6px;}
+.today-btn{background:none;border:1px solid var(--border);color:var(--tdim);font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:1px;padding:3px 7px;border-radius:3px;cursor:pointer;transition:all .2s;margin-top:2px;}
 .today-btn:hover{border-color:var(--adim);color:var(--amber);}
-.err{display:none;padding:9px 13px;background:rgba(224,82,82,.1);border:1px solid var(--red);border-radius:3px;color:var(--red);font-family:'Share Tech Mono',monospace;font-size:11px;margin-top:9px;}
+.err{display:none;padding:7px 11px;background:rgba(224,82,82,.1);border:1px solid var(--red);border-radius:3px;color:var(--red);font-family:'Share Tech Mono',monospace;font-size:10px;margin-top:7px;}
 .err.on{display:block;}
-.ldg{display:none;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;padding:5px 0;}
+.ldg{display:none;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:2px;padding:3px 0;}
 .ldg.on{display:block;}
+/* Quick action bar */
+.quick-bar{display:flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(61,186,120,.04);border-top:1px solid rgba(61,186,120,.12);flex-wrap:wrap;}
+.qb-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:2px;}
+.qb-btn{background:none;border:1px solid rgba(61,186,120,.3);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.qb-btn:hover{background:rgba(61,186,120,.12);border-color:var(--green);}
+/* Drag-select hint */
+.drag-hint{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);letter-spacing:1px;padding:3px 8px;background:rgba(61,186,120,.08);border:1px solid rgba(61,186,120,.2);border-radius:3px;display:none;}
+.drag-hint.on{display:inline-block;}
 
 /* RESULT */
 .ra{display:none;animation:fu .3s ease;margin-bottom:14px;}
@@ -137,7 +168,7 @@ textarea:focus{outline:none;border-color:var(--amber);}
 table.gt{border-collapse:collapse;min-width:max-content;}
 
 /* Column headers */
-table.gt th{padding:3px 2px;text-align:center;border:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--tdim);background:#0d1117;position:sticky;top:0;z-index:3;min-width:30px;}
+table.gt th{padding:4px 2px;text-align:center;border:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--tdim);background:#0d1117;position:sticky;top:0;z-index:3;min-width:36px;}
 table.gt th.gn{min-width:56px;width:56px;position:sticky;left:0;z-index:5;border-right:1px solid #2a3545;background:#0d1117;}
 table.gt th .dd{font-size:7px;color:var(--tdim);}
 table.gt th .dn{font-size:10px;font-weight:700;color:var(--tbright);}
@@ -152,18 +183,46 @@ table.gt tr.gs td.gn{color:var(--amber);border-left:2px solid var(--amber);}
 table.gt tr.srow td.gn{color:var(--blue);border-left:2px solid var(--blue);}
 
 /* Normal data cells */
-table.gt td{padding:0;text-align:center;border:1px solid var(--border);min-width:30px;height:30px;position:relative;vertical-align:middle;}
+table.gt td{padding:0;text-align:center;border:1px solid var(--border);min-width:36px;height:38px;position:relative;vertical-align:middle;transition:background .1s;}
+/* REL turno picker buttons */
+.rel-t-btn{background:#0d1117;border:2px solid;border-radius:8px;padding:12px 6px 8px;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;-webkit-tap-highlight-color:transparent;}
+body.light .rel-t-btn{background:#f0f4f8;}
+.rel-t-btn span{font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:.5px;opacity:.7;}
+.rel-t-btn:active,.rel-t-btn.sel{filter:brightness(1.3);transform:scale(.96);}
+/* REL row drag highlight */
+table.gt td.rel-ds-start{background:rgba(138,154,181,.4)!important;border-color:#8a9ab5!important;}
+table.gt td.rel-ds-range{background:rgba(138,154,181,.2)!important;border-color:rgba(138,154,181,.4)!important;}
+table.gt tr.op-row td.gn{color:var(--t2);border-left:2px solid var(--t2);}
+table.gt tr.rel-row td.gn{color:#8a9ab5;border-left:2px solid #8a9ab5;}
+table.gt tr.rel-row td.rel-cell[style*="cursor"]:hover{filter:brightness(1.4);}
+/* Today column header */
+table.gt th.th-today{border-color:var(--green)!important;background:rgba(61,186,120,.06)!important;}
+table.gt th.th-today .dn{color:var(--green);}
+.today-dot{width:4px;height:4px;background:var(--green);border-radius:50%;margin:1px auto 0;}
+table.gt td.ds-start{background:rgba(61,186,120,.35)!important;border-color:var(--green)!important;}
+table.gt td.ds-range{background:rgba(61,186,120,.18)!important;border-color:rgba(61,186,120,.4)!important;}
+table.gt td.ds-hover{background:rgba(61,186,120,.1)!important;}
+/* Make the row user is in have pointer cursor */
+table.gt tr.gs td:not(.gn){cursor:crosshair;}
 .cell-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2px;}
 
 /* Normal turno display */
 .cn{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;line-height:1;}
 .t1 .cn{color:var(--t1);}.t2 .cn{color:var(--t2);}.t3 .cn{color:var(--t3);}.t4 .cn{color:var(--t4);}
-.tf .cn{color:#263040;font-size:10px;}
+.tf .cn{color:var(--tf-f-color);font-size:10px;}
+body:not(.light) .tf .cn{color:#263040;}
 table.gt td.cs .cn{color:rgba(245,166,35,.5);}
 table.gt td.rs{background:rgba(245,166,35,.03);}
 table.gt td.ix{background:rgba(245,166,35,.15)!important;border:1px solid rgba(245,166,35,.4);}
 table.gt td.cf{background:rgba(224,82,82,.03);}
 table.gt td.ixf{background:rgba(224,82,82,.12)!important;border:1px solid rgba(224,82,82,.35);}
+/* Light mode: F = red, turno cells have subtle bg */
+body.light table.gt td{background:#f8fafc;}
+body.light table.gt td.tf{background:#fff0f0;}
+body.light table.gt td.t1{background:rgba(91,163,217,.08);}
+body.light table.gt td.t2{background:rgba(61,186,120,.08);}
+body.light table.gt td.t3{background:rgba(245,166,35,.08);}
+body.light table.gt td.t4{background:rgba(176,126,232,.08);}
 
 /* ★ LICENSE CODE IN CELL — the main new feature ★ */
 .lic-cell{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:1px;}
@@ -233,7 +292,34 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
 .ll-item{display:flex;align-items:center;gap:4px;}
 .ll-badge{padding:1px 5px;border-radius:2px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;color:#000;}
 
-/* MODALS */
+/* DRAG SELECT LICENSE PICKER */
+.ds-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:flex-end;justify-content:center;padding:0;}
+.ds-picker.off{display:none;}
+.ds-sheet{background:var(--panel);border:1px solid var(--border);border-top:2px solid var(--green);border-radius:12px 12px 0 0;width:100%;max-width:480px;padding:20px 18px 32px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.ds-range-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--green);letter-spacing:2px;margin-bottom:4px;}
+.ds-range-dates{font-size:18px;font-weight:700;color:var(--tbright);margin-bottom:14px;letter-spacing:1px;}
+.ds-lic-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.ds-lic-btn{background:#0d1117;border:2px solid var(--border);border-radius:6px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+.ds-lic-btn:active{transform:scale(.95);}
+.ds-lic-code{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#000;display:block;padding:2px 4px;border-radius:4px;margin-bottom:4px;}
+.ds-lic-name{font-family:'Share Tech Mono',monospace;font-size:7px;color:var(--tdim);letter-spacing:.5px;line-height:1.2;}
+.ds-dc-row{display:none;background:#0d1117;border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:12px;align-items:center;gap:10px;}
+.ds-dc-row.on{display:flex;}
+.ds-dc-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--adim);letter-spacing:2px;flex:1;}
+.ds-dc-ctrl{display:flex;align-items:center;gap:6px;}
+.ds-dc-ctrl button{background:#1a2030;border:1px solid var(--border);color:var(--tbright);font-size:16px;width:28px;height:28px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ds-dc-ctrl button:active{background:var(--amber);color:#000;}
+.ds-dc-val{font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:700;color:var(--amber);min-width:24px;text-align:center;}
+.ds-note-inp{background:#0d1117;border:1px solid var(--border);border-radius:4px;color:var(--tbright);font-family:'Share Tech Mono',monospace;font-size:12px;padding:8px 10px;width:100%;margin-bottom:12px;resize:none;height:44px;}
+.ds-note-inp:focus{outline:none;border-color:var(--green);}
+.ds-btns{display:flex;gap:8px;}
+.ds-save{flex:1;padding:12px;background:var(--green);border:none;border-radius:6px;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .2s;}
+.ds-save:active{background:#4dd48a;}
+.ds-cancel{padding:12px 16px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--tdim);font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;transition:all .2s;}
+.ds-cancel:hover{border-color:var(--tdim);color:var(--tbright);}
+/* Selected lic highlight in picker */
+.ds-lic-btn.sel{border-width:2px;transform:scale(1.04);}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:flex;align-items:center;justify-content:center;padding:12px;}
 .overlay.off{display:none;}
 .modal{background:var(--panel);border:1px solid var(--border);border-top:2px solid var(--amber);border-radius:6px;padding:22px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;animation:fu .2s ease;}
@@ -277,7 +363,10 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
   <h1 style="font-size:clamp(14px,3.5vw,28px);font-weight:700;color:var(--amber);letter-spacing:3px;margin-top:4px;">PLANTA DE AGUA PN</h1>
   <div class="hsub">5 Guardias &middot; Turnos de 6 horas &middot; 2025&ndash;2030</div>
   <div class="divr"></div>
-  <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;margin-top:4px;">Creado por <span style="color:var(--amber);font-weight:700;">Jonatan C.</span></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;">Creado por <span style="color:var(--amber);font-weight:700;">Jonatan C.</span></div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">☀ CLARO</button>
+  </div>
 </header>
 
 <!-- USER BAR -->
@@ -294,25 +383,40 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
   </div>
 </div>
 
-<!-- SEARCH -->
+<!-- SEARCH — compact collapsible -->
 <div class="sp">
-  <div class="sg">
-    <div class="fg"><label>Guardia</label>
-      <select id="sg2">
-        <option value="">&#8212; Seleccionar &#8212;</option>
-        <option value="A">GUARDIA A</option><option value="B">GUARDIA B</option>
-        <option value="C">GUARDIA C</option><option value="D">GUARDIA D</option>
-        <option value="E">GUARDIA E</option>
-      </select>
-    </div>
-    <div class="fg"><label>Fecha</label>
-      <input type="date" id="sf" min="2025-01-01" max="2030-12-31">
-      <button class="today-btn" onclick="setToday()">&#9654; Hoy</button>
-    </div>
+  <div class="sp-hdr" onclick="toggleSP()">
+    <span style="font-size:16px;color:var(--adim)">&#9776;</span>
+    <span class="sp-hdr-tag">CONSULTA DE TURNO</span>
+    <span class="sp-hdr-arr" id="sp-arr">&#9660;</span>
   </div>
-  <button class="btn" onclick="buscar()">CONSULTAR TURNO</button>
-  <div class="ldg" id="ldg">&#9654; Consultando feriados...</div>
-  <div class="err" id="err"></div>
+  <div class="sp-body" id="sp-body">
+    <div class="sg">
+      <div class="fg"><label>Guardia</label>
+        <select id="sg2">
+          <option value="">&#8212; Guardia &#8212;</option>
+          <option value="A">A</option><option value="B">B</option>
+          <option value="C">C</option><option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+      <div class="fg"><label>Fecha</label>
+        <input type="date" id="sf" min="2025-01-01" max="2030-12-31">
+        <button class="today-btn" onclick="setToday()">&#9654; Hoy</button>
+      </div>
+      <div class="btn-row" style="align-items:flex-start;padding-top:18px;">
+        <button class="btn" onclick="buscar()">&#9654; CONSULTAR</button>
+      </div>
+    </div>
+    <div class="ldg" id="ldg">&#9654; Consultando feriados...</div>
+    <div class="err" id="err"></div>
+  </div>
+  <!-- Quick action bar: always visible -->
+  <div class="quick-bar" id="quick-bar" style="display:none">
+    <span class="qb-label">&#9632; ACCIÓN RÁPIDA:</span>
+    <button class="qb-btn" onclick="openAddEvent()">+ PEDIR LICENCIA</button>
+    <span class="drag-hint" id="drag-hint">&#9654; Arrastrá en el diagrama para seleccionar días</span>
+  </div>
 </div>
 
 <!-- RESULT AREA -->
@@ -375,7 +479,112 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
   </div>
 </div>
 
-<!-- LEGEND -->
+<!-- RELEVANTE PANEL -->
+<div id="rel-panel" style="display:none;margin-top:12px;">
+  <div style="background:var(--panel);border:1px solid var(--border);border-top:2px solid #8a9ab5;border-radius:4px;overflow:hidden;">
+    <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;" onclick="toggleRelPanel()">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#8a9ab5;letter-spacing:3px;">&#9679; PANEL RELEVANTE</div>
+      <span id="rel-arr" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim)">&#9660;</span>
+    </div>
+    <div id="rel-body" style="display:none;padding:14px;border-top:1px solid var(--border);">
+
+      <!-- Horas de franco -->
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
+        <div id="rel-franco-stats" style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--tdim);"></div>
+      </div>
+
+      <!-- Licencias que cubre -->
+      <div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:1px;margin-bottom:8px;">Registrá las ausencias que estás cubriendo en cada turno</div>
+        <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+        <button class="ub p" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RELEVANTE COVERAGE -->
+<div class="overlay off" id="m-rel-cov">
+  <div class="modal" style="border-top-color:#8a9ab5;">
+    <div class="modal-title">&#9679; Agregar cobertura</div>
+    <div class="mfg">
+      <label>TURNO CUBIERTO</label>
+      <select id="rc-turno" style="font-size:15px;padding:11px 12px;">
+        <option value="">— Seleccionar —</option>
+        <option value="1">T1 · 00:00–05:59</option>
+        <option value="2">T2 · 06:00–11:59</option>
+        <option value="3">T3 · 12:00–17:59</option>
+        <option value="4">T4 · 18:00–23:59</option>
+      </select>
+    </div>
+    <div class="mfg">
+      <label>GUARDIA AUSENTE</label>
+      <select id="rc-guardia" style="font-size:15px;padding:11px 12px;">
+        <option value="">— Seleccionar —</option>
+        <option value="A">GUARDIA A</option><option value="B">GUARDIA B</option>
+        <option value="C">GUARDIA C</option><option value="D">GUARDIA D</option>
+        <option value="E">GUARDIA E</option>
+      </select>
+    </div>
+    <div class="mfg">
+      <label>OPERARIO AUSENTE (nombre)</label>
+      <input type="text" id="rc-quien" placeholder="Nombre del operario" style="font-size:15px;padding:11px 12px;">
+    </div>
+    <div class="modal-row">
+      <div class="mfg"><label>FECHA DESDE</label><input type="date" id="rc-from" min="2025-01-01" max="2030-12-31"></div>
+      <div class="mfg"><label>FECHA HASTA</label><input type="date" id="rc-to" min="2025-01-01" max="2030-12-31"></div>
+    </div>
+    <div class="mfg"><label>NOTA (opcional)</label><textarea id="rc-note" placeholder="Motivo, licencia cubierta..."></textarea></div>
+    <div class="err" id="rc-err"></div>
+    <div class="mbtns">
+      <button class="mbtn ok" style="background:#8a9ab5;" onclick="saveRelCoverage()">GUARDAR</button>
+      <button class="mbtn cancel" onclick="closeM('m-rel-cov')">CANCELAR</button>
+    </div>
+  </div>
+</div>
+<!-- DRAG-SELECT LICENSE PICKER (bottom sheet) -->
+<div class="ds-picker off" id="ds-picker">
+  <div class="ds-sheet" id="ds-sheet">
+    <div class="ds-range-lbl">&#9632; NUEVA LICENCIA</div>
+    <div class="ds-range-dates" id="ds-range-dates">—</div>
+    <div class="ds-lic-grid" id="ds-lic-grid"></div>
+    <div class="ds-dc-row" id="ds-dc-row">
+      <span class="ds-dc-lbl">HORAS DC / DÍA</span>
+      <div class="ds-dc-ctrl">
+        <button onclick="adjDCH(-1)">−</button>
+        <span class="ds-dc-val" id="ds-dc-val">6</span>
+        <button onclick="adjDCH(1)">+</button>
+      </div>
+    </div>
+    <textarea class="ds-note-inp" id="ds-note" placeholder="Nota opcional (motivo, médico...)"></textarea>
+    <div class="ds-btns">
+      <button class="ds-save" id="ds-save" onclick="dsSave()" disabled style="opacity:.4">GUARDAR</button>
+      <button class="ds-cancel" onclick="dsCancel()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+<!-- REL TURNO PICKER (bottom sheet) -->
+<div class="ds-picker off" id="rel-picker">
+  <div class="ds-sheet">
+    <div class="ds-range-lbl" style="color:#8a9ab5;">&#9679; RELEVANTE — ASIGNAR TURNO</div>
+    <div class="ds-range-dates" id="rel-picker-dates">—</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;" id="rel-turno-grid">
+      <button class="rel-t-btn" data-val="1" style="border-color:var(--t1);color:var(--t1)">T1<span>00:00–05:59</span></button>
+      <button class="rel-t-btn" data-val="2" style="border-color:var(--t2);color:var(--t2)">T2<span>06:00–11:59</span></button>
+      <button class="rel-t-btn" data-val="3" style="border-color:var(--t3);color:var(--t3)">T3<span>12:00–17:59</span></button>
+      <button class="rel-t-btn" data-val="4" style="border-color:var(--t4);color:var(--t4)">T4<span>18:00–23:59</span></button>
+      <button class="rel-t-btn" data-val="F" style="border-color:var(--red);color:var(--red)">F<span>Franco</span></button>
+      <button class="rel-t-btn" data-val="" style="border-color:var(--tdim);color:var(--tdim)">✕<span>Limpiar</span></button>
+    </div>
+    <div class="ds-btns">
+      <button class="ds-cancel" onclick="relPickerCancel()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
 <div class="leg">
   <strong>TURNOS:</strong>
   <span class="s1">T1</span> 00:00–05:59 &nbsp;
@@ -392,11 +601,16 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
 <div class="overlay off" id="m-login">
   <div class="modal blue-top">
     <div class="modal-title">&#9673; Identificarse</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;margin-bottom:7px">USUARIOS</div>
-    <div class="user-grid" id="user-grid"></div>
+    <div id="existing-users-section">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;margin-bottom:7px" id="users-section-label">USUARIOS REGISTRADOS</div>
+      <div class="user-grid" id="user-grid"></div>
+    </div>
     <div class="sep"></div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:3px;margin-bottom:12px;">&#9654; REGISTRAR NUEVO USUARIO</div>
-    <div class="new-user-form on" id="new-user-form">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:8px;" onclick="toggleNewUserForm()">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:3px;">&#9654; REGISTRAR NUEVO USUARIO</div>
+      <span id="new-user-arrow" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--adim)">&#9660;</span>
+    </div>
+    <div class="new-user-form" id="new-user-form">
       <div class="mfg">
         <label>NOMBRE COMPLETO</label>
         <input type="text" id="nu-nm" placeholder="Ingresá tu nombre" style="font-size:15px;padding:11px 12px;">
@@ -429,6 +643,12 @@ table.gt tr.spec-row.gs td.gn{color:var(--amber);}
     <div class="modal-row">
       <div class="mfg"><label>DESDE</label><input type="date" id="ev-from" min="2025-01-01" max="2030-12-31"></div>
       <div class="mfg"><label>HASTA</label><input type="date" id="ev-to" min="2025-01-01" max="2030-12-31"></div>
+    </div>
+    <!-- DC hours field — shown only when DC selected -->
+    <div class="mfg" id="dc-hours-row" style="display:none">
+      <label>HORAS DC (1–6 por día)</label>
+      <input type="number" id="ev-dc-hours" min="1" max="6" value="6" style="font-size:15px;padding:9px 12px;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);margin-top:3px;letter-spacing:1px">Máx 6h/día · Mín 1h/día · No se aplica en días franco</div>
     </div>
     <div class="mfg"><label>NOTA (opcional)</label><textarea id="ev-note" placeholder="Observación, motivo, médico tratante..."></textarea></div>
     <div class="err" id="ev-err"></div>
@@ -469,21 +689,7 @@ const G_LABEL ={A:'Guardia A',B:'Guardia B',C:'Guardia C',D:'Guardia D',E:'Guard
   });
 })();
 
-// Build add-event type grid
-(function(){
-  const g=document.getElementById('lic-type-grid');
-  Object.entries(LIC).forEach(([code,v])=>{
-    const b=document.createElement('div');b.className='lt-btn';b.dataset.k=code;
-    const lc=document.createElement('span');lc.className='lt-code';lc.style.background=v.color+'cc';lc.textContent=code;
-    const ln=document.createElement('span');ln.className='lt-name';ln.style.color=v.color;ln.textContent=v.name;
-    b.appendChild(lc);b.appendChild(ln);
-    b.onclick=()=>{
-      document.querySelectorAll('.lt-btn').forEach(x=>{x.classList.remove('sel');x.style.background='';});
-      b.classList.add('sel');b.style.background=v.color+'22';b.style.borderColor=v.color;
-    };
-    g.appendChild(b);
-  });
-})();
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ALGORITHM
@@ -541,7 +747,7 @@ function allFer(years){const m={};years.forEach(y=>{if(ferCache[y])Object.assign
 // ═══════════════════════════════════════════════════════════════════════════
 // STORAGE
 // ═══════════════════════════════════════════════════════════════════════════
-let USERS=[],EVENTS=[],ME=null;
+let USERS=[],EVENTS=[],ME=null,REL_SCHEDULE={};
 
 // ─── Persistencia con localStorage ───
 function lsGet(key){try{const v=localStorage.getItem(key);return v?JSON.parse(v):null;}catch(e){return null;}}
@@ -552,12 +758,18 @@ async function loadData(){
   USERS=lsGet('gd-users')||[];
   EVENTS=lsGet('gd-events')||[];
   ME=lsGet('gd-me')||null;
+  REL_SCHEDULE=lsGet('gd-rel-sched')||{};
   // Fallback: try window.storage if available
   if(typeof window.storage!=='undefined'){
     try{const r=await window.storage.get('gd-users',true);if(r&&JSON.parse(r.value).length>0&&USERS.length===0)USERS=JSON.parse(r.value);}catch(e){}
     try{const r=await window.storage.get('gd-events',true);if(r&&JSON.parse(r.value).length>0&&EVENTS.length===0)EVENTS=JSON.parse(r.value);}catch(e){}
     try{const r=await window.storage.get('gd-me',false);if(r&&!ME)ME=JSON.parse(r.value);}catch(e){}
+    try{const r=await window.storage.get('gd-rel-sched',true);if(r)REL_SCHEDULE=JSON.parse(r.value);}catch(e){}
   }
+}
+async function saveRelSchedule(){
+  lsSet('gd-rel-sched',REL_SCHEDULE);
+  if(typeof window.storage!=='undefined')try{await window.storage.set('gd-rel-sched',JSON.stringify(REL_SCHEDULE),true);}catch(e){}
 }
 async function saveUsers(){
   lsSet('gd-users',USERS);
@@ -575,10 +787,26 @@ async function saveMe(){
 // ═══════════════════════════════════════════════════════════════════════════
 // USER MANAGEMENT
 // ═══════════════════════════════════════════════════════════════════════════
+function toggleNewUserForm(){
+  const f=document.getElementById('new-user-form'),arr=document.getElementById('new-user-arrow');
+  const open=f.classList.toggle('on');
+  arr.textContent=open?'▲':'▼';
+}
 function openLogin(){buildUserGrid();document.getElementById('m-login').classList.remove('off');}
 function buildUserGrid(){
   const g=document.getElementById('user-grid');g.innerHTML='';
-  if(USERS.length===0){g.innerHTML='<div style="grid-column:1/-1;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px">SIN USUARIOS REGISTRADOS</div>';return;}
+  const lbl=document.getElementById('users-section-label');
+  // Auto-open new user form if no users exist
+  const hasUsers=USERS.length>0;
+  const form=document.getElementById('new-user-form');
+  const arr=document.getElementById('new-user-arrow');
+  if(!hasUsers){
+    form.classList.add('on');arr.textContent='▲';
+    g.innerHTML='<div style="grid-column:1/-1;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--tdim);letter-spacing:2px;padding:6px 0">SIN USUARIOS — REGISTRATE ABAJO</div>';
+    lbl.textContent='USUARIOS REGISTRADOS';return;
+  }
+  form.classList.remove('on');arr.textContent='▼';
+  lbl.textContent=`USUARIOS REGISTRADOS (${USERS.length})`;
   USERS.forEach(u=>{
     const card=el('div','usr-card'+(ME&&ME.id===u.id?' sel':''),'');
     const av=el('div','usr-av2','');av.style.background=G_COLORS[u.guardia]||'#8a9ab5';av.textContent=u.name.charAt(0).toUpperCase();
@@ -586,7 +814,6 @@ function buildUserGrid(){
     card.appendChild(el('div','usr-nm',u.name));
     card.appendChild(el('div','usr-gd',G_LABEL[u.guardia]||u.guardia));
     card.onclick=(e)=>{if(!e.target.classList.contains('usr-del'))selectUser(u);};
-    // Delete button on card
     const del=el('button','usr-del','✕');del.title='Eliminar usuario';del.style.cssText='position:absolute;top:4px;right:4px;background:none;border:none;color:#3a4a5a;font-size:11px;cursor:pointer;padding:1px 4px;border-radius:2px;line-height:1;';
     del.onmouseenter=()=>del.style.color='var(--red)';del.onmouseleave=()=>del.style.color='#3a4a5a';
     del.onclick=(e)=>{e.stopPropagation();deleteUser(u.id);};
@@ -594,6 +821,11 @@ function buildUserGrid(){
     card.appendChild(del);
     g.appendChild(card);
   });
+}
+function toggleSP(){
+  const body=document.getElementById('sp-body'),arr=document.getElementById('sp-arr');
+  const open=body.classList.toggle('on');
+  arr.textContent=open?'▲':'▼';
 }
 async function selectUser(u){ME=u;await saveMe();updateUBar();closeM('m-login');renderEvP();renderCal();}
 async function deleteUser(id){
@@ -613,6 +845,9 @@ async function registerUser(){
 async function logout(){ME=null;await saveMe();updateUBar();renderEvP();renderCal();}
 function updateUBar(){
   const nu=document.getElementById('no-u'),yu=document.getElementById('yes-u'),ua=document.getElementById('u-acts'),evp=document.getElementById('evp');
+  const relPanel=document.getElementById('rel-panel');
+  const qbar=document.getElementById('quick-bar');
+  const dHint=document.getElementById('drag-hint');
   if(ME){
     nu.style.display='none';yu.style.display='';ua.style.display='';
     document.getElementById('u-av').textContent=ME.name.charAt(0).toUpperCase();
@@ -620,8 +855,19 @@ function updateUBar(){
     document.getElementById('u-nm').textContent=ME.name.toUpperCase();
     document.getElementById('u-gd').textContent=G_LABEL[ME.guardia]||ME.guardia;
     evp.style.display='';
-    if(['A','B','C','D','E'].includes(ME.guardia)) document.getElementById('sg2').value=ME.guardia;
-  } else {nu.style.display='';yu.style.display='none';ua.style.display='none';evp.style.display='none';}
+    qbar.style.display='';
+    if(['A','B','C','D','E'].includes(ME.guardia)){
+      document.getElementById('sg2').value=ME.guardia;
+      dHint.classList.add('on');
+    } else {
+      dHint.classList.remove('on');
+    }
+    if(ME.guardia==='REL'){relPanel.style.display='';renderRelPanel();}
+    else relPanel.style.display='none';
+  } else {
+    nu.style.display='';yu.style.display='none';ua.style.display='none';evp.style.display='none';
+    qbar.style.display='none';relPanel.style.display='none';
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -637,9 +883,29 @@ function openAddEvent(){
   document.getElementById('ev-from').value=today;
   document.getElementById('ev-to').value=today;
   document.getElementById('ev-note').value='';
+  document.getElementById('ev-dc-hours').value=6;
+  document.getElementById('dc-hours-row').style.display='none';
   document.getElementById('ev-err').classList.remove('on');
   document.getElementById('m-event').classList.remove('off');
 }
+
+// Show DC hours field when DC type is selected
+(function(){
+  const g=document.getElementById('lic-type-grid');
+  Object.entries(LIC).forEach(([code,v])=>{
+    const b=document.createElement('div');b.className='lt-btn';b.dataset.k=code;
+    const lc=document.createElement('span');lc.className='lt-code';lc.style.background=v.color+'cc';lc.textContent=code;
+    const ln=document.createElement('span');ln.className='lt-name';ln.style.color=v.color;ln.textContent=v.name;
+    b.appendChild(lc);b.appendChild(ln);
+    b.onclick=()=>{
+      document.querySelectorAll('.lt-btn').forEach(x=>{x.classList.remove('sel');x.style.background='';x.style.borderColor='';});
+      b.classList.add('sel');b.style.background=v.color+'22';b.style.borderColor=v.color;
+      // Show DC hours row only for DC license
+      document.getElementById('dc-hours-row').style.display=code==='DC'?'':'none';
+    };
+    g.appendChild(b);
+  });
+})();
 
 async function saveEvent(){
   const typeEl=document.querySelector('.lt-btn.sel');
@@ -650,17 +916,79 @@ async function saveEvent(){
   if(!typeEl){err.textContent='⚠ Seleccioná el tipo de licencia.';err.classList.add('on');return;}
   if(!from||!to){err.textContent='⚠ Completá las fechas.';err.classList.add('on');return;}
   if(from>to){err.textContent='⚠ La fecha de inicio debe ser anterior o igual a la de fin.';err.classList.add('on');return;}
+
+  const licType=typeEl.dataset.k;
+  const userGuardia=ME.guardia;
+
+  // DC: hours per day validation
+  let dcHours=null;
+  if(licType==='DC'){
+    dcHours=parseInt(document.getElementById('ev-dc-hours').value)||6;
+    if(dcHours<1||dcHours>6){err.textContent='⚠ DC: las horas deben ser entre 1 y 6.';err.classList.add('on');return;}
+  }
+
+  // Validate: no license on franco days; shift if >6 consecutive working days
+  if(['A','B','C','D','E'].includes(userGuardia)){
+    const validDates=computeLicenseDates(userGuardia,from,to);
+    if(validDates.warnings.length>0){
+      const msg=validDates.warnings.join('\n');
+      if(!confirm('⚠ Advertencia:\n'+msg+'\n\n¿Continuar con el ajuste automático?'))return;
+    }
+    if(validDates.effectiveTo!==to){
+      document.getElementById('ev-to').value=validDates.effectiveTo;
+    }
+  }
+
   const now=new Date();
   const ev={
     id:'ev'+Date.now(),
     userId:ME.id,userName:ME.name,guardia:ME.guardia,
-    type:typeEl.dataset.k,
+    type:licType,
     startDate:from,endDate:to,note,
-    createdAt:now.toISOString(),          // ← timestamp ISO
-    createdAtStr:fmtTs(now),              // ← human readable
-    createdBy:ME.name                     // ← who entered it
+    dcHours:dcHours,
+    createdAt:now.toISOString(),
+    createdAtStr:fmtTs(now),
+    createdBy:ME.name
   };
   EVENTS.push(ev);await saveEvents();closeM('m-event');renderEvP();renderCal();if(S)renderRT(RT);
+  if(ME&&ME.guardia==='REL')renderRelPanel();
+}
+
+// Compute which dates a license actually applies (skipping francos, shifting if >6 consecutive)
+function computeLicenseDates(guardia,from,to){
+  const warnings=[];
+  // Build list of dates between from and to
+  let cur=new Date(from+'T12:00:00');
+  const end=new Date(to+'T12:00:00');
+  const days=[];
+  while(cur<=end){
+    days.push(dk(cur.getFullYear(),cur.getMonth()+1,cur.getDate()));
+    cur.setDate(cur.getDate()+1);
+  }
+  // Filter out franco days
+  const francos=days.filter(d=>getTurno(guardia,d)==='F');
+  if(francos.length>0)warnings.push(`Se omiten ${francos.length} día(s) franco en el rango seleccionado.`);
+
+  // Check: no more than 6 consecutive working days without a franco
+  // The algorithm ensures francos exist naturally; we warn if the range skips too many
+  const workDays=days.filter(d=>getTurno(guardia,d)!=='F');
+  let consec=0,maxConsec=0;
+  for(const d of days){
+    if(getTurno(guardia,d)!=='F'){consec++;maxConsec=Math.max(maxConsec,consec);}
+    else consec=0;
+  }
+  let effectiveTo=to;
+  if(maxConsec>6){
+    // Find the last date of the 6th consecutive working day
+    consec=0;let last6=from;
+    for(const d of days){
+      if(getTurno(guardia,d)!=='F'){consec++;if(consec<=6)last6=d;}
+      else consec=0;
+    }
+    effectiveTo=last6;
+    warnings.push(`La licencia supera 6 días laborables consecutivos. Se ajusta el fin al ${formatDate(last6)} (día siguiente si hay franco).`);
+  }
+  return{francos,workDays,effectiveTo,warnings};
 }
 
 async function deleteEvent(id){
@@ -668,8 +996,14 @@ async function deleteEvent(id){
   EVENTS=EVENTS.filter(e=>e.id!==id);await saveEvents();renderEvP();renderCal();if(S)renderRT(RT);
 }
 
-function getEvsByDate(date){return EVENTS.filter(e=>date>=e.startDate&&date<=e.endDate);}
-function getEvsByDateAndG(date,guardia){return getEvsByDate(date).filter(e=>e.guardia===guardia);}
+function getEvsByDate(date){
+  if(!ME)return[];
+  return EVENTS.filter(e=>date>=e.startDate&&date<=e.endDate);
+}
+function getEvsByDateAndG(date,guardia){
+  if(!ME)return[];
+  return EVENTS.filter(e=>e.guardia===guardia&&date>=e.startDate&&date<=e.endDate);
+}
 
 function toggleEvP(){
   const body=document.getElementById('evp-body');
@@ -694,6 +1028,7 @@ function renderEvList(){
     const tn=el('div','ev-type-name','');tn.style.color=li.color;tn.textContent=li.name;info.appendChild(tn);
     const dts=el('div','ev-dates','');
     dts.textContent=ev.startDate===ev.endDate?formatDate(ev.startDate):`${formatDate(ev.startDate)}  →  ${formatDate(ev.endDate)}`;
+    if(ev.type==='DC'&&ev.dcHours){dts.textContent+= `  ·  ${ev.dcHours}h/día`;}
     info.appendChild(dts);
     if(ev.note){const nt=el('div','ev-note','');nt.textContent=ev.note;info.appendChild(nt);}
     // Timestamp — key new feature
@@ -865,7 +1200,142 @@ async function renderCal(){
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TABLE BUILDER — with license codes in cells
+// THEME TOGGLE
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent=isLight?'● OSCURO':'☀ CLARO';
+  lsSet('gd-theme',isLight?'light':'dark');
+}
+(function(){
+  const t=lsGet('gd-theme');
+  if(t==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='● OSCURO';}
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REL TURNO PICKER
+// ═══════════════════════════════════════════════════════════════════════════
+let relPickerFrom=null,relPickerTo=null;
+let relDsDragging=false,relDsStart=null,relDsEnd=null;
+
+function openRelPicker(from,to){
+  relPickerFrom=from;relPickerTo=to;
+  const{d:d1,m:m1,y:y1}=pd(from),{d:d2,m:m2,y:y2}=pd(to);
+  const same=from===to;
+  document.getElementById('rel-picker-dates').textContent=same?`${d1} ${MES_S[m1]} ${y1}`:`${d1} ${MES_S[m1]} ${y1}  →  ${d2} ${MES_S[m2]} ${y2}`;
+  // Wire up buttons
+  document.querySelectorAll('.rel-t-btn').forEach(btn=>{
+    btn.onclick=async()=>{
+      const val=btn.dataset.val;
+      // Apply to all days in range
+      let cur=new Date(relPickerFrom+'T12:00:00');
+      const end=new Date(relPickerTo+'T12:00:00');
+      while(cur<=end){
+        const ds=dk(cur.getFullYear(),cur.getMonth()+1,cur.getDate());
+        if(val==='')delete REL_SCHEDULE[ds];
+        else REL_SCHEDULE[ds]=val==='F'?'F':parseInt(val);
+        cur.setDate(cur.getDate()+1);
+      }
+      await saveRelSchedule();
+      document.getElementById('rel-picker').classList.add('off');
+      relClearHighlights();
+      renderCal();if(S)renderRT(RT);
+    };
+  });
+  document.getElementById('rel-picker').classList.remove('off');
+}
+
+function relPickerCancel(){
+  document.getElementById('rel-picker').classList.add('off');
+  relClearHighlights();
+}
+
+function relClearHighlights(){
+  document.querySelectorAll('td.rel-ds-start,td.rel-ds-range').forEach(t=>{
+    t.classList.remove('rel-ds-start','rel-ds-range');
+  });
+  relDsDragging=false;relDsStart=null;relDsEnd=null;
+}
+// ═══════════════════════════════════════════════════════════════════════════
+let dsActive=false,dsStartDate=null,dsEndDate=null,dsGuardia=null,dsSelLic=null,dsDCH=6;
+let dsDragging=false;
+
+function dsInit(){
+  // Build lic grid in picker
+  const g=document.getElementById('ds-lic-grid');g.innerHTML='';
+  Object.entries(LIC).forEach(([code,v])=>{
+    const b=document.createElement('div');b.className='ds-lic-btn';
+    const lc=document.createElement('span');lc.className='ds-lic-code';lc.style.background=v.color;lc.textContent=code;
+    const ln=document.createElement('span');ln.className='ds-lic-name';ln.textContent=v.name;
+    b.appendChild(lc);b.appendChild(ln);
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.ds-lic-btn').forEach(x=>{x.classList.remove('sel');x.style.borderColor='';x.style.background='';});
+      b.classList.add('sel');b.style.borderColor=v.color;b.style.background=v.color+'18';
+      dsSelLic=code;
+      document.getElementById('ds-dc-row').classList.toggle('on',code==='DC');
+      const sv=document.getElementById('ds-save');sv.disabled=false;sv.style.opacity='1';
+    });
+    g.appendChild(b);
+  });
+}
+
+function dsOpen(fromDate,toDate,guardia){
+  if(!ME)return openLogin();
+  dsStartDate=fromDate;dsEndDate=toDate;dsGuardia=guardia;dsSelLic=null;dsDCH=6;
+  document.getElementById('ds-dc-val').textContent=6;
+  document.getElementById('ds-note').value='';
+  document.getElementById('ds-dc-row').classList.remove('on');
+  const sv=document.getElementById('ds-save');sv.disabled=true;sv.style.opacity='.4';
+  document.querySelectorAll('.ds-lic-btn').forEach(x=>{x.classList.remove('sel');x.style.borderColor='';x.style.background='';});
+  const{d:d1,m:m1,y:y1}=pd(fromDate),{d:d2,m:m2,y:y2}=pd(toDate);
+  const same=fromDate===toDate;
+  document.getElementById('ds-range-dates').textContent=same?`${d1} ${MES_S[m1]} ${y1}`:`${d1} ${MES_S[m1]} ${y1}  →  ${d2} ${MES_S[m2]} ${y2}`;
+  document.getElementById('ds-picker').classList.remove('off');
+}
+
+function dsCancel(){
+  document.getElementById('ds-picker').classList.add('off');
+  dsClearHighlights();
+}
+
+function adjDCH(d){
+  dsDCH=Math.min(6,Math.max(1,dsDCH+d));
+  document.getElementById('ds-dc-val').textContent=dsDCH;
+}
+
+async function dsSave(){
+  if(!dsSelLic||!dsStartDate||!dsEndDate)return;
+  const note=document.getElementById('ds-note').value.trim();
+  const now=new Date();
+  // Validate franco
+  let effectiveTo=dsEndDate;
+  if(['A','B','C','D','E'].includes(dsGuardia)){
+    const v=computeLicenseDates(dsGuardia,dsStartDate,dsEndDate);
+    effectiveTo=v.effectiveTo;
+  }
+  const ev={
+    id:'ev'+Date.now(),
+    userId:ME.id,userName:ME.name,guardia:dsGuardia||ME.guardia,
+    type:dsSelLic,
+    startDate:dsStartDate,endDate:effectiveTo,note,
+    dcHours:dsSelLic==='DC'?dsDCH:null,
+    createdAt:now.toISOString(),createdAtStr:fmtTs(now),createdBy:ME.name
+  };
+  EVENTS.push(ev);await saveEvents();
+  document.getElementById('ds-picker').classList.add('off');
+  dsClearHighlights();
+  renderEvP();renderCal();if(S)renderRT(RT);
+}
+
+function dsClearHighlights(){
+  document.querySelectorAll('td.ds-start,td.ds-range,td.ds-hover').forEach(td=>{
+    td.classList.remove('ds-start','ds-range','ds-hover');
+  });
+  dsStartDate=null;dsEndDate=null;dsDragging=false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TABLE BUILDER — with license codes in cells + drag-select
 // ═══════════════════════════════════════════════════════════════════════════
 function buildTable(days,selDate,selG,fmap,title,isCur){
   const sec=el('div','ms','');
@@ -875,14 +1345,19 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
   const scr=el('div','tscr','');const tbl=document.createElement('table');tbl.className='gt';
 
   // ─ Header row ─
+  const n=new Date();
+  const todayStr=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
   const thead=document.createElement('thead');const trh=document.createElement('tr');
   const corner=document.createElement('th');corner.className='gn';trh.appendChild(corner);
   days.forEach(date=>{
-    const{d:dd}=pd(date),dow=dowOf(date),isSel=date===selDate,isFer=!!fmap[date];
+    const{d:dd}=pd(date),dow=dowOf(date),isSel=date===selDate,isFer=!!fmap[date],isToday=date===todayStr;
     const th=document.createElement('th');
-    th.className=isSel&&isFer?'sfc':isSel?'sc':isFer?'fc':'';
+    let thCls=isSel&&isFer?'sfc':isSel?'sc':isFer?'fc':'';
+    if(isToday)thCls+=(thCls?' ':'')+'th-today';
+    th.className=thCls;
+    if(isToday)th.dataset.today='1';
     if(isFer)th.title=fmap[date].nombre;
-    th.innerHTML=`<div class="dd">${DOW_VS[dow]}</div><div class="dn">${dd}</div>${isFer?'<div class="fd2"></div>':''}`;
+    th.innerHTML=`<div class="dd">${DOW_VS[dow]}</div><div class="dn">${dd}</div>${isToday?'<div class="today-dot"></div>':''}${isFer?'<div class="fd2"></div>':''}`;
     trh.appendChild(th);
   });
   thead.appendChild(trh);tbl.appendChild(thead);
@@ -899,6 +1374,7 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
       const isSel=date===selDate,isFer=!!fmap[date],isSelG=g===selG;
       const dayEvs=getEvsByDateAndG(date,g);
       const td=document.createElement('td');
+      td.dataset.date=date;td.dataset.g=g;
 
       // Column/row highlight classes
       let cls='';
@@ -906,18 +1382,14 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
       else if(isSel)cls+=' cs';
       else if(isSelG)cls+=' rs';
       if(isFer&&!isSel)cls+=' cf';
-      // Turno color class (applies to cell inner when no license)
       if(dayEvs.length===0){
         if(turno==='F')cls+=' tf';else if(turno)cls+=` t${turno}`;
       }
       td.className=cls.trim();
 
       const inner=el('div','cell-inner','');
-
       if(dayEvs.length>0){
-        // ★ LICENSE CODE — fills cell like paper diagram ★
         const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        // Tinted background
         td.style.background=li.color+'28';
         if(isSel&&isSelG)td.style.background=li.color+'50';
         const licCell=el('div','lic-cell','');
@@ -925,12 +1397,10 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
         const code=el('div','lic-code','');code.style.color=li.color;code.textContent=ev.type;licCell.appendChild(code);
         if(turno&&turno!=='F'){const tsmall=el('div','lic-turno','');tsmall.style.color=li.color+'99';tsmall.textContent='T'+turno;licCell.appendChild(tsmall);}
         if(dayEvs.length>1){const more=el('div','lic-more','');more.style.background=li.color+'88';licCell.appendChild(more);}
-        // Tooltip with details + timestamp
         const tts=dayEvs.map(ev=>`${LIC[ev.type]?.name||ev.type}: ${ev.userName} (${ev.createdAtStr||fmtTs(new Date(ev.createdAt))})`).join('\n');
         td.title=tts;
         inner.appendChild(licCell);
       } else {
-        // Normal turno display
         const cn=el('div','cn','');
         cn.textContent=turno==='F'?'F':(turno?''+turno:'·');
         inner.appendChild(cn);
@@ -941,35 +1411,202 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
     tbody.appendChild(tr);
   });
 
-  // ─ Special rows: Operador & Relevante users ─
-  const specials=getSpecialRows();
-  specials.forEach(u=>{
-    const tr=document.createElement('tr');tr.className='spec-row'+(u.guardia===selG?' gs':'');
+  // ─ Fixed row: OPERADOR — follows Guardia D cycle ─
+  (()=>{
+    const tr=document.createElement('tr');
+    tr.className='spec-row op-row';
     const nameTd=document.createElement('td');nameTd.className='gn';
-    nameTd.innerHTML=`<span style="font-size:8px;color:${G_COLORS[u.guardia]}">${u.guardia==='OP'?'OP':'REL'}</span><br><span style="font-size:7px;opacity:.7">${u.name.split(' ')[0]}</span>`;
+    nameTd.innerHTML=`<span style="font-size:9px;color:var(--t2);font-weight:700;letter-spacing:.5px;">OP</span><br><span style="font-size:7px;color:var(--tdim)">Operador</span>`;
     tr.appendChild(nameTd);
     days.forEach(date=>{
+      const turno=getTurno('D',date);// OP sigue ciclo D
       const isSel=date===selDate,isFer=!!fmap[date];
-      const dayEvs=getEvsByDateAndG(date,u.guardia).filter(e=>e.userId===u.id);
+      const dayEvs=getEvsByDateAndG(date,'OP');
       const td=document.createElement('td');
-      let cls='tf';if(isSel)cls+=' cs';if(isFer&&!isSel)cls+=' cf';
-      td.className=cls;
+      let cls='';
+      if(turno==='F')cls='tf';else if(turno)cls=`t${turno}`;
+      if(isSel)cls+=' cs';if(isFer&&!isSel)cls+=' cf';
+      td.className=cls.trim();
       const inner=el('div','cell-inner','');
       if(dayEvs.length>0){
         const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        td.style.background=li.color+'25';
-        const code=el('div','lic-code','');code.style.color=li.color;code.style.fontSize='10px';code.textContent=ev.type;
-        td.title=`${li.name}: ${ev.userName} (${ev.createdAtStr||fmtTs(new Date(ev.createdAt))})`;
-        inner.appendChild(code);
+        td.style.background=li.color+'28';
+        const lc=el('div','lic-code','');lc.style.color=li.color;lc.style.fontSize='10px';lc.textContent=ev.type;
+        td.title=`${li.name}: ${ev.userName}`;inner.appendChild(lc);
       } else {
-        const cn=el('div','cn','');cn.textContent='·';inner.appendChild(cn);
+        const cn=el('div','cn','');cn.textContent=turno==='F'?'F':(turno?''+turno:'·');inner.appendChild(cn);
+        if(isFer)td.title=fmap[date].nombre;
       }
       td.appendChild(inner);tr.appendChild(td);
     });
     tbody.appendChild(tr);
+  })();
+
+  // ─ Fixed row: RELEVANTE — drag-select editable by REL user ─
+  (()=>{
+    const tr=document.createElement('tr');
+    tr.className='spec-row rel-row';
+    const nameTd=document.createElement('td');nameTd.className='gn';
+    nameTd.innerHTML=`<span style="font-size:9px;color:#8a9ab5;font-weight:700;letter-spacing:.5px;">REL</span><br><span style="font-size:7px;color:var(--tdim)">Relevante</span>`;
+    tr.appendChild(nameTd);
+    days.forEach(date=>{
+      const isSel=date===selDate,isFer=!!fmap[date];
+      const sched=REL_SCHEDULE[date];
+      const dayEvs=getEvsByDateAndG(date,'REL');
+      const td=document.createElement('td');
+      td.dataset.date=date;td.dataset.relrow='1';
+      let cls='rel-cell';
+      if(sched==='F')cls+=' tf';
+      else if(sched===undefined)cls+=' tf';
+      else cls+=` t${sched}`;
+      if(isSel)cls+=' cs';if(isFer&&!isSel)cls+=' cf';
+      td.className=cls.trim();
+      const inner=el('div','cell-inner','');
+      if(dayEvs.length>0&&ME){
+        const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+        td.style.background=li.color+'28';
+        const lc=el('div','lic-code','');lc.style.color=li.color;lc.style.fontSize='10px';lc.textContent=ev.type;
+        td.title=`${li.name}: ${ev.userName}`;inner.appendChild(lc);
+      } else {
+        const disp=sched!==undefined?String(sched):'·';
+        const cn=el('div','cn','');cn.textContent=disp;inner.appendChild(cn);
+        if(isFer)td.title=fmap[date].nombre;
+      }
+      td.appendChild(inner);tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+
+    // ── REL drag-select (only for REL user) ──
+    if(ME&&ME.guardia==='REL'){
+      tr.style.cursor='crosshair';
+      const getRelTd=(cx,cy)=>{
+        const e=document.elementFromPoint(cx,cy);
+        return e?.closest('td[data-relrow]')||null;
+      };
+      const updateRelRange=(endTd)=>{
+        if(!endTd||!relDsStart)return;
+        const hd=endTd.dataset.date;
+        const[a,b]=hd<relDsStart?[hd,relDsStart]:[relDsStart,hd];
+        relDsStart=a;relDsEnd=b;
+        tr.querySelectorAll('td[data-relrow]').forEach(t=>{
+          const d=t.dataset.date;
+          t.classList.remove('rel-ds-start','rel-ds-range');
+          if(d===relDsStart)t.classList.add('rel-ds-start');
+          else if(d>relDsStart&&d<=relDsEnd)t.classList.add('rel-ds-range');
+        });
+      };
+      scr.addEventListener('mousedown',(e)=>{
+        const td=e.target.closest('td[data-relrow]');
+        if(!td)return;
+        e.preventDefault();
+        relClearHighlights();
+        relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;
+        td.classList.add('rel-ds-start');
+      },{passive:false,capture:false});
+      scr.addEventListener('touchstart',(e)=>{
+        const td=e.target.closest('td[data-relrow]');
+        if(!td)return;
+        e.preventDefault();
+        relClearHighlights();
+        relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;
+        td.classList.add('rel-ds-start');
+      },{passive:false,capture:false});
+      scr.addEventListener('mousemove',(e)=>{
+        if(!relDsDragging)return;
+        updateRelRange(getRelTd(e.clientX,e.clientY));
+      });
+      scr.addEventListener('touchmove',(e)=>{
+        if(!relDsDragging)return;
+        e.preventDefault();
+        const t=e.touches[0];
+        updateRelRange(getRelTd(t.clientX,t.clientY));
+      },{passive:false});
+      const finishRelDrag=()=>{
+        if(!relDsDragging)return;
+        relDsDragging=false;
+        if(relDsStart)openRelPicker(relDsStart,relDsEnd||relDsStart);
+      };
+      scr.addEventListener('mouseup',finishRelDrag);
+      scr.addEventListener('touchend',finishRelDrag);
+    }
+  })();
+
+  tbl.appendChild(tbody);scr.appendChild(tbl);sec.appendChild(scr);
+
+  // Scroll so today's column is visible (left-aligned with a little padding)
+  requestAnimationFrame(()=>{
+    const todayTh=scr.querySelector('th[data-today]');
+    if(todayTh){
+      const nameColW=56;// width of sticky name column
+      scr.scrollLeft=Math.max(0,todayTh.offsetLeft-nameColW-4);
+    }
   });
 
-  tbl.appendChild(tbody);scr.appendChild(tbl);sec.appendChild(scr);return sec;
+  // ── Drag-select: attach to scroll container so touch move works across cells ──
+  if(ME && ['A','B','C','D','E'].includes(ME.guardia)){
+    const userG=ME.guardia;
+
+    const getTdAt=(clientX,clientY)=>{
+      const el=document.elementFromPoint(clientX,clientY);
+      return el?.closest('td[data-date][data-g="'+userG+'"]')||null;
+    };
+
+    const updateRange=(endTd)=>{
+      if(!endTd||!dsStartDate)return;
+      const hoverDate=endTd.dataset.date;
+      // support dragging left too
+      const [a,b]=hoverDate<dsStartDate?[hoverDate,dsStartDate]:[dsStartDate,hoverDate];
+      dsStartDate=a;dsEndDate=b;
+      tbl.querySelectorAll(`td[data-g="${userG}"]`).forEach(t=>{
+        const d=t.dataset.date;
+        t.classList.remove('ds-start','ds-range');
+        if(d===dsStartDate)t.classList.add('ds-start');
+        else if(d>dsStartDate&&d<=dsEndDate)t.classList.add('ds-range');
+      });
+    };
+
+    scr.addEventListener('mousedown',(e)=>{
+      const td=e.target.closest(`td[data-date][data-g="${userG}"]`);
+      if(!td)return;
+      e.preventDefault();
+      dsClearHighlights();
+      dsDragging=true;
+      dsStartDate=td.dataset.date;dsEndDate=td.dataset.date;dsGuardia=userG;
+      td.classList.add('ds-start');
+    },{passive:false});
+
+    scr.addEventListener('touchstart',(e)=>{
+      const td=e.target.closest(`td[data-date][data-g="${userG}"]`);
+      if(!td)return;
+      e.preventDefault();
+      dsClearHighlights();
+      dsDragging=true;
+      dsStartDate=td.dataset.date;dsEndDate=td.dataset.date;dsGuardia=userG;
+      td.classList.add('ds-start');
+    },{passive:false});
+
+    scr.addEventListener('mousemove',(e)=>{
+      if(!dsDragging)return;
+      updateRange(getTdAt(e.clientX,e.clientY));
+    });
+
+    scr.addEventListener('touchmove',(e)=>{
+      if(!dsDragging)return;
+      e.preventDefault();
+      const t=e.touches[0];
+      updateRange(getTdAt(t.clientX,t.clientY));
+    },{passive:false});
+
+    const finishDrag=()=>{
+      if(!dsDragging)return;
+      dsDragging=false;
+      if(dsStartDate)dsOpen(dsStartDate,dsEndDate||dsStartDate,userG);
+    };
+    scr.addEventListener('mouseup',finishDrag);
+    scr.addEventListener('touchend',finishDrag);
+  }
+
+  return sec;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -977,17 +1614,148 @@ function buildTable(days,selDate,selG,fmap,title,isCur){
 // ═══════════════════════════════════════════════════════════════════════════
 function closeM(id){document.getElementById(id).classList.add('off');}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.add('off');}));
+// Close drag-select picker on overlay click
+document.getElementById('ds-picker').addEventListener('click',e=>{if(e.target===document.getElementById('ds-picker'))dsCancel();});
+document.getElementById('rel-picker').addEventListener('click',e=>{if(e.target===document.getElementById('rel-picker'))relPickerCancel();});
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt)e.textContent=txt;return e;}
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')document.querySelectorAll('.overlay:not(.off)').forEach(o=>o.classList.add('off'));
+  if(e.key==='Escape'){document.querySelectorAll('.overlay:not(.off)').forEach(o=>o.classList.add('off'));dsCancel();}
   if(e.key==='Enter'&&!e.target.closest('.overlay'))buscar();
 });
+// Safety: if user releases completely outside any table, reset drag flag
+document.addEventListener('mouseup',()=>{dsDragging=false;});
+document.addEventListener('touchend',()=>{dsDragging=false;});
 
 // ═══════════════════════════════════════════════════════════════════════════
-// INIT
+// RELEVANTE PANEL
+// ═══════════════════════════════════════════════════════════════════════════
+let REL_COVERAGES=[];
+
+async function loadRelData(){
+  REL_COVERAGES=lsGet('gd-rel-cov')||[];
+  if(typeof window.storage!=='undefined')try{const r=await window.storage.get('gd-rel-cov',false);if(r&&!REL_COVERAGES.length)REL_COVERAGES=JSON.parse(r.value);}catch(e){}
+}
+async function saveRelData(){
+  lsSet('gd-rel-cov',REL_COVERAGES);
+  if(typeof window.storage!=='undefined')try{await window.storage.set('gd-rel-cov',JSON.stringify(REL_COVERAGES),false);}catch(e){}
+}
+
+function toggleRelPanel(){
+  const body=document.getElementById('rel-body'),arr=document.getElementById('rel-arr');
+  const open=body.style.display==='none';body.style.display=open?'':'none';arr.textContent=open?'▲':'▼';
+  if(open)renderRelPanel();
+}
+
+function renderRelPanel(){
+  if(!ME||ME.guardia!=='REL')return;
+  renderRelFranco();
+  renderRelCoverageList();
+}
+
+function renderRelFranco(){
+  const div=document.getElementById('rel-franco-stats');div.innerHTML='';
+  // Count franco hours in current month from last worked day
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth()+1;
+  const todayStr=dk(y,m,now.getDate());
+  // Relevante has no algorithmic turno, so we look at their coverages to find last worked day
+  const myCovs=REL_COVERAGES.filter(c=>c.userId===ME.id).sort((a,b)=>b.fromDate.localeCompare(a.fromDate));
+  // Find last day worked this month
+  const workedDaysThisMonth=myCovs.filter(c=>{
+    // any coverage day in this month
+    return c.fromDate.startsWith(`${y}-${String(m).padStart(2,'0')}`)||c.toDate.startsWith(`${y}-${String(m).padStart(2,'0')}`);
+  });
+  // Count total days this month so far
+  const daysInMonth=new Date(y,m,0).getDate();
+  const daysElapsed=Math.min(now.getDate(),daysInMonth);
+  // Count worked days (coverage days) this month
+  let workedCount=0;
+  const monthDays=getMonthDays(y,m).filter(d=>d<=todayStr);
+  monthDays.forEach(d=>{
+    const covered=myCovs.some(c=>d>=c.fromDate&&d<=c.toDate);
+    if(covered)workedCount++;
+  });
+  const francoCount=daysElapsed-workedCount;
+  const francoHours=francoCount*6; // 6h por turno = 1 día franco
+  div.innerHTML=`
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="background:#0d1117;border:1px solid var(--border);border-radius:3px;padding:9px 14px;min-width:110px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:4px">DÍAS TRABAJADOS</div>
+        <div style="font-size:26px;font-weight:900;color:#8a9ab5;line-height:1">${workedCount}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--tdim);margin-top:2px">en ${MES_L[m]}</div>
+      </div>
+      <div style="background:#0d1117;border:1px solid var(--border);border-radius:3px;padding:9px 14px;min-width:110px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:4px">DÍAS FRANCO</div>
+        <div style="font-size:26px;font-weight:900;color:var(--amber);line-height:1">${francoCount}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--tdim);margin-top:2px">desde últ. trabajado</div>
+      </div>
+      <div style="background:#0d1117;border:1px solid var(--border);border-radius:3px;padding:9px 14px;min-width:110px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:4px">HORAS FRANCO</div>
+        <div style="font-size:26px;font-weight:900;color:var(--green);line-height:1">${francoHours}h</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--tdim);margin-top:2px">aprox. (6h/día)</div>
+      </div>
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">
+      Período: ${MES_L[m]} ${y} · Días transcurridos: ${daysElapsed}
+    </div>`;
+}
+
+function renderRelCoverageList(){
+  const list=document.getElementById('rel-coverage-list');list.innerHTML='';
+  const myCovs=REL_COVERAGES.filter(c=>c.userId===ME.id).sort((a,b)=>b.fromDate.localeCompare(a.fromDate));
+  if(myCovs.length===0){
+    list.innerHTML='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--tdim);padding:10px 0;letter-spacing:1px">Sin coberturas registradas</div>';
+    return;
+  }
+  myCovs.forEach(cov=>{
+    const item=el('div','ev-item','');
+    const lbar=el('div','ev-lbar','');lbar.style.background='#8a9ab5';item.appendChild(lbar);
+    const info=el('div','ev-info','');
+    const who=el('div','ev-who','');who.textContent=`T${cov.turno} · Guardia ${cov.guardia} · ${cov.quien}`;info.appendChild(who);
+    const dts=el('div','ev-dates','');dts.textContent=cov.fromDate===cov.toDate?formatDate(cov.fromDate):`${formatDate(cov.fromDate)} → ${formatDate(cov.toDate)}`;info.appendChild(dts);
+    if(cov.note){const nt=el('div','ev-note','');nt.textContent=cov.note;info.appendChild(nt);}
+    const ts=el('div','ev-ts','');ts.innerHTML=`&#9203; ${fmtTs(new Date(cov.createdAt))}`;info.appendChild(ts);
+    item.appendChild(info);
+    const del=el('button','ev-del','✕');del.title='Eliminar';del.onclick=async()=>{if(!confirm('¿Eliminar cobertura?'))return;REL_COVERAGES=REL_COVERAGES.filter(c=>c.id!==cov.id);await saveRelData();renderRelPanel();};
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+}
+
+function openAddRelCoverage(){
+  const n=new Date();const today=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
+  document.getElementById('rc-turno').value='';
+  document.getElementById('rc-guardia').value='';
+  document.getElementById('rc-quien').value='';
+  document.getElementById('rc-from').value=today;
+  document.getElementById('rc-to').value=today;
+  document.getElementById('rc-note').value='';
+  document.getElementById('rc-err').classList.remove('on');
+  document.getElementById('m-rel-cov').classList.remove('off');
+}
+
+async function saveRelCoverage(){
+  const turno=document.getElementById('rc-turno').value;
+  const guardia=document.getElementById('rc-guardia').value;
+  const quien=document.getElementById('rc-quien').value.trim();
+  const from=document.getElementById('rc-from').value;
+  const to=document.getElementById('rc-to').value;
+  const note=document.getElementById('rc-note').value.trim();
+  const err=document.getElementById('rc-err');
+  if(!turno||!guardia||!quien||!from||!to){err.textContent='⚠ Completá todos los campos obligatorios.';err.classList.add('on');return;}
+  if(from>to){err.textContent='⚠ La fecha de inicio debe ser anterior o igual a la de fin.';err.classList.add('on');return;}
+  const cov={id:'rc'+Date.now(),userId:ME.id,turno,guardia,quien,fromDate:from,toDate:to,note,createdAt:new Date().toISOString()};
+  REL_COVERAGES.push(cov);await saveRelData();closeM('m-rel-cov');renderRelPanel();
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
+  // Apply saved theme before render
+  const savedTheme=lsGet('gd-theme');
+  if(savedTheme==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='● OSCURO';}
   await loadData();
+  await loadRelData();
+  dsInit();
   updateUBar();
   const n=new Date();calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
   await renderCal();
