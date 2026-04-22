@@ -1,0 +1,131 @@
+:root {
+    --color-primary: #3498db;
+    --color-secondary: #2ecc71;
+    --color-accent: #e74c3c;
+    --color-background: #ffffff;
+    --color-text: #333333;
+    --color-border: #dddddd;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text);
+}
+
+header {
+    background-color: var(--color-primary);
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    color: #ffffff;
+    margin: 0;
+}
+
+.user-bar {
+    background-color: var(--color-secondary);
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.user-bar a {
+    color: #ffffff;
+    margin-left: 15px;
+    text-decoration: none;
+}
+
+.search {
+    margin: 20px;
+}
+
+.search input[type="text"] {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+}
+
+.search button {
+    padding: 10px 15px;
+    background-color: var(--color-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+form {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+}
+
+form input, form select {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+table, th, td {
+    border: 1px solid var(--color-border);
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    width: 80%;
+}
+
+.license-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.license-option {
+    background-color: var(--color-secondary);
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.license-option:hover {
+    background-color: var(--color-accent);
+}
