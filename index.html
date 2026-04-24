@@ -984,10 +984,27 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
 </div>
 
-<script>
+<!-- Firebase SDK + App (todo en un solo módulo) -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import {
+  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot,
+  getDoc, getDocs
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDt4Xjuo1H8kfBgpN0vyTPIlOwdyp5g7Dc",
+  authDomain: "diagrama-537aa.firebaseapp.com",
+  projectId: "diagrama-537aa",
+  storageBucket: "diagrama-537aa.firebasestorage.app",
+  messagingSenderId: "1039943615847",
+  appId: "1:1039943615847:web:d0e53d4275302c839cdbc2"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
 // ═══════════════════════════════════════════════════════════════════════════
-// TIPOS DE LICENCIA — sin fallecimiento, solo personales/laborales
-// ═══════════════════════════════════════════════════════════════════════════
+// TIPOS DE LICENCIA
 const LIC = {
   V:  { name: 'Vacaciones',          color: '#3dba78' },
   DC: { name: 'Desc. Compensatorio', color: '#4a9eda' },
@@ -1138,25 +1155,150 @@ async function getFeriados(y) {
 function allFer(years) { const m = {}; years.forEach(y => { if (ferCache[y]) Object.assign(m, ferCache[y]); }); return m; }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// STORAGE
+// STORAGE — Firebase Firestore (sincronización en tiempo real)
+// localStorage solo para: deviceId, ME (sesión local), tema
 // ═══════════════════════════════════════════════════════════════════════════
 let USERS = [], EVENTS = [], ME = null, REL_SCHEDULE = {}, RECARGOS = [];
+let REL_COVERAGES_ALL = []; // para el panel relevante global
+
+// LocalStorage helpers (solo para datos de sesión/preferencias)
 function lsGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch(e) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
 function lsDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
 
-async function loadData() {
-  USERS    = lsGet('gd-users')     || [];
-  EVENTS   = lsGet('gd-events')    || [];
-  ME       = lsGet('gd-me')        || null;
-  REL_SCHEDULE = lsGet('gd-rel-sched') || {};
-  RECARGOS = lsGet('gd-recargos')  || [];
+// ── Device ID ─────────────────────────────────────────────────────────────
+function getDeviceId() {
+  let did = localStorage.getItem('gd-device-id');
+  if (!did) {
+    did = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
+    localStorage.setItem('gd-device-id', did);
+  }
+  return did;
 }
-async function saveUsers()   { lsSet('gd-users',    USERS); }
-async function saveEvents()  { lsSet('gd-events',   EVENTS); }
-async function saveMe()      { if (ME) lsSet('gd-me', ME); else lsDel('gd-me'); }
-async function saveRelSchedule() { lsSet('gd-rel-sched', REL_SCHEDULE); }
-async function saveRecargos()    { lsSet('gd-recargos',  RECARGOS); }
+const DEVICE_ID = getDeviceId();
+
+// ── Helpers de Firestore ──────────────────────────────────────────────────
+function fbCol(name)      { return collection(db, name); }
+function fbDoc(col, id)   { return doc(db, col, id); }
+async function fbSet(col, id, data) { await setDoc(fbDoc(col, id), data); }
+async function fbDel(col, id)       { await deleteDoc(fbDoc(col, id)); }
+
+// ── CARGA INICIAL ─────────────────────────────────────────────────────────
+async function loadData() {
+  const savedMeId = lsGet('gd-me-id');
+
+  const usersSnap = await getDocs(fbCol('users'));
+  USERS = [];
+  usersSnap.forEach(d => USERS.push(d.data()));
+
+  if (savedMeId) {
+    ME = USERS.find(u => u.id === savedMeId) || null;
+    if (!ME) lsDel('gd-me-id');
+  }
+
+  const evSnap = await getDocs(fbCol('events'));
+  EVENTS = [];
+  evSnap.forEach(d => EVENTS.push(d.data()));
+
+  const rsDoc = await getDoc(fbDoc('config', 'rel-schedule'));
+  REL_SCHEDULE = rsDoc.exists() ? (rsDoc.data().schedule || {}) : {};
+
+  const recSnap = await getDocs(fbCol('recargos'));
+  RECARGOS = [];
+  recSnap.forEach(d => RECARGOS.push(d.data()));
+}
+
+// ── LISTENERS EN TIEMPO REAL ──────────────────────────────────────────────
+function startRealtimeListeners() {
+  onSnapshot(fbCol('users'), snap => {
+    USERS = [];
+    snap.forEach(d => USERS.push(d.data()));
+    if (ME) { const updated = USERS.find(u => u.id === ME.id); if (updated) ME = updated; }
+    buildUserGrid();
+    updateUBar();
+  });
+
+  onSnapshot(fbCol('events'), snap => {
+    EVENTS = [];
+    snap.forEach(d => EVENTS.push(d.data()));
+    renderEvP();
+    renderCal();
+    if (window.S) renderRT(window.RT || 'dia');
+  });
+
+  onSnapshot(fbCol('recargos'), snap => {
+    RECARGOS = [];
+    snap.forEach(d => RECARGOS.push(d.data()));
+    if (ME) renderRecPanel();
+    renderCal();
+    if (window.S) renderRT(window.RT || 'dia');
+  });
+
+  onSnapshot(fbDoc('config', 'rel-schedule'), snap => {
+    REL_SCHEDULE = snap.exists() ? (snap.data().schedule || {}) : {};
+    renderCal();
+    if (window.S) renderRT(window.RT || 'dia');
+  });
+
+  onSnapshot(fbCol('rel-coverages'), snap => {
+    REL_COVERAGES = [];
+    snap.forEach(d => REL_COVERAGES.push(d.data()));
+    if (ME && ME.guardia === 'REL') renderRelPanel();
+  });
+}
+
+// ── GUARDAR USUARIO ───────────────────────────────────────────────────────
+async function saveUsers() {
+  // Guardar cada usuario como documento en Firestore
+  for (const u of USERS) {
+    await fbSet('users', u.id, u);
+  }
+}
+async function saveMe() {
+  if (ME) lsSet('gd-me-id', ME.id);
+  else lsDel('gd-me-id');
+}
+
+// ── GUARDAR EVENTOS ───────────────────────────────────────────────────────
+async function saveEvents() {
+  // Solo guardamos el último evento añadido (el resto ya está en Firestore)
+  // La lógica de eliminación se maneja en deleteEvent directamente
+}
+async function saveOneEvent(ev) {
+  await fbSet('events', ev.id, ev);
+}
+async function deleteOneEvent(id) {
+  await fbDel('events', id);
+}
+
+// ── GUARDAR REL_SCHEDULE ──────────────────────────────────────────────────
+async function saveRelSchedule() {
+  await fbSet('config', 'rel-schedule', { schedule: REL_SCHEDULE });
+}
+
+// ── GUARDAR RECARGOS ──────────────────────────────────────────────────────
+async function saveRecargos() {}
+async function saveOneRecargo(rec) {
+  await fbSet('recargos', rec.id, rec);
+}
+async function deleteOneRecargo(id) {
+  await fbDel('recargos', id);
+}
+
+// ── REL COVERAGES ─────────────────────────────────────────────────────────
+let REL_COVERAGES = [];
+async function loadRelData() {
+  const snap = await getDocs(fbCol('rel-coverages'));
+  REL_COVERAGES = [];
+  snap.forEach(d => REL_COVERAGES.push(d.data()));
+}
+async function saveRelData() {}
+async function saveOneRelCoverage(cov) {
+  await fbSet('rel-coverages', cov.id, cov);
+}
+async function deleteOneRelCoverage(id) {
+  await fbDel('rel-coverages', id);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // USER MANAGEMENT
@@ -1193,21 +1335,54 @@ function buildUserGrid() {
 async function selectUser(u) { ME = u; await saveMe(); updateUBar(); renderEvP(); renderCal(); renderVacTable(); }
 async function deleteUser(id) {
   if (!confirm('¿Eliminar este usuario? Sus licencias también serán borradas.')) return;
-  USERS  = USERS.filter(u => u.id !== id);
-  EVENTS = EVENTS.filter(e => e.userId !== id);
+  // Solo puede borrar su propio usuario (el del dispositivo)
+  const target = USERS.find(u => u.id === id);
+  if (target && target.deviceId !== DEVICE_ID) {
+    alert('⚠ Solo podés eliminar tu propio usuario.');
+    return;
+  }
+  // Borrar usuario de Firestore
+  await fbDel('users', id);
+  // Borrar sus eventos de Firestore
+  const myEvs = EVENTS.filter(e => e.userId === id);
+  for (const ev of myEvs) { await fbDel('events', ev.id); }
+  // Borrar sus recargos
+  const myRecs = RECARGOS.filter(r => r.userId === id);
+  for (const r of myRecs) { await fbDel('recargos', r.id); }
   if (ME && ME.id === id) { ME = null; await saveMe(); updateUBar(); }
-  await saveUsers(); await saveEvents(); buildUserGrid(); renderEvP(); renderCal();
+  buildUserGrid(); renderEvP(); renderCal();
 }
 async function registerUser() {
   const name = document.getElementById('nu-nm').value.trim();
   const g    = document.getElementById('nu-g').value;
   if (!name || !g) { alert('Completá nombre y rol'); return; }
-  const u = { id:'u'+Date.now(), name, guardia:g, createdAt:new Date().toISOString() };
-  USERS.push(u); await saveUsers(); ME = u; await saveMe(); updateUBar();
-  // Update section badge and rebuild grid
+
+  // ── 1 usuario por dispositivo ─────────────────────────────────────────
+  const existingDevice = USERS.find(u => u.deviceId === DEVICE_ID);
+  if (existingDevice) {
+    alert('⚠ Ya existe un usuario registrado en este dispositivo.\nSolo se permite un usuario por dispositivo.');
+    return;
+  }
+
+  const u = { id:'u'+Date.now(), name, guardia:g, deviceId: DEVICE_ID, createdAt:new Date().toISOString() };
+  USERS.push(u);
+  await fbSet('users', u.id, u);
+  ME = u; await saveMe(); updateUBar();
   buildUserGrid(); renderEvP(); renderCal(); renderVacTable();
 }
 async function logout() { ME = null; await saveMe(); updateUBar(); renderEvP(); renderCal(); renderVacTable(); }
+
+// Muestra u oculta el form de registro según si el dispositivo ya tiene usuario
+function updateRegisterFormVisibility() {
+  const existingDevice = USERS.find(u => u.deviceId === DEVICE_ID);
+  const toggleWrap = document.querySelector('.new-user-toggle');
+  const formEl = document.getElementById('new-user-form');
+  if (toggleWrap) toggleWrap.style.display = existingDevice ? 'none' : '';
+  if (formEl && existingDevice && !ME) {
+    // Auto-seleccionar el usuario del dispositivo si existe y no hay sesión
+    selectUser(existingDevice);
+  }
+}
 
 function updateUBar() {
   const nu = document.getElementById('no-user-state');
@@ -1305,13 +1480,15 @@ async function saveEvent() {
     dcHours: type==='DC' ? dcHours : null,
     createdAt: now.toISOString(), createdAtStr: fmtTs(now), createdBy: ME.name
   };
-  EVENTS.push(ev); await saveEvents();
+  EVENTS.push(ev);
+  await saveOneEvent(ev);  // Firebase
   closeM('m-event'); renderEvP(); renderCal(); if (S) renderRT(RT);
 }
 async function deleteEvent(id) {
   if (!confirm('¿Eliminar esta licencia?')) return;
   EVENTS = EVENTS.filter(e => e.id !== id);
-  await saveEvents(); renderEvP(); renderCal(); if (S) renderRT(RT);
+  await deleteOneEvent(id);  // Firebase
+  renderEvP(); renderCal(); if (S) renderRT(RT);
 }
 function renderEvP() {
   const cnt = document.getElementById('evp-cnt');
@@ -1774,7 +1951,7 @@ async function dsSave(){
   let effectiveTo=dsEndDate;
   if(['A','B','C','D','E'].includes(dsGuardia)){effectiveTo=computeLicenseDates(dsGuardia,dsStartDate,dsEndDate).effectiveTo;}
   const ev={id:'ev'+Date.now(),userId:ME.id,userName:ME.name,guardia:dsGuardia||ME.guardia,type:dsSelLic,startDate:dsStartDate,endDate:effectiveTo,note,dcHours:dsSelLic==='DC'?dsDCH:null,createdAt:now.toISOString(),createdAtStr:fmtTs(now),createdBy:ME.name};
-  EVENTS.push(ev);await saveEvents();
+  EVENTS.push(ev);await saveOneEvent(ev);  // Firebase
   document.getElementById('ds-picker').classList.add('off');dsClearHighlights();renderEvP();renderCal();if(S)renderRT(RT);
 }
 function dsClearHighlights(){
@@ -1863,11 +2040,11 @@ async function saveRecargo(){
   if(!guardia||!turno){err.textContent='⚠ Seleccioná guardia y turno.';err.classList.add('show');return;}
   const sobreFranco=isEsSobreFranco(guardia,recPickerDate,turno);
   const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
-  RECARGOS.push(rec);await saveRecargos();closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
+  RECARGOS.push(rec);await saveOneRecargo(rec);closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
 }
 async function deleteRecargo(id){
   if(!confirm('¿Eliminar este recargo?'))return;
-  RECARGOS=RECARGOS.filter(r=>r.id!==id);await saveRecargos();renderRecPanel();renderCal();if(S)renderRT(RT);
+  RECARGOS=RECARGOS.filter(r=>r.id!==id);await deleteOneRecargo(id);renderRecPanel();renderCal();if(S)renderRT(RT);
 }
 function recNavMonth(d){recMonth+=d;if(recMonth>12){recMonth=1;recYear++;}if(recMonth<1){recMonth=12;recYear--;}renderRecPanel();}
 function renderRecPanel(){
@@ -1902,28 +2079,32 @@ function renderRecPanel(){
 // ═══════════════════════════════════════════════════════════════════════════
 // RELEVANTE PANEL
 // ═══════════════════════════════════════════════════════════════════════════
-let REL_COVERAGES=[];
-async function loadRelData(){REL_COVERAGES=lsGet('gd-rel-cov')||[];}
-async function saveRelData(){lsSet('gd-rel-cov',REL_COVERAGES);}
 function toggleRelPanel(){const body=document.getElementById('rel-body'),arr=document.getElementById('rel-arr');const open=body.classList.toggle('open');arr.textContent=open?'▲':'▼';if(open)renderRelPanel();}
 function renderRelPanel(){if(!ME||ME.guardia!=='REL')return;renderRelFranco();renderRelCoverageList();}
 function renderRelFranco(){
   const div=document.getElementById('rel-franco-stats');div.innerHTML='';
   const now=new Date();const y=now.getFullYear(),m=now.getMonth()+1;
   const todayStr=dk(y,m,now.getDate());
-  const myCovs=REL_COVERAGES.filter(c=>c.userId===ME.id).sort((a,b)=>b.fromDate.localeCompare(a.fromDate));
-  const daysInMonth=new Date(y,m,0).getDate();
-  const daysElapsed=Math.min(now.getDate(),daysInMonth);
-  let workedCount=0;
   const monthDays=getMonthDays(y,m).filter(d=>d<=todayStr);
-  monthDays.forEach(d=>{if(myCovs.some(c=>d>=c.fromDate&&d<=c.toDate))workedCount++;});
-  const francoCount=daysElapsed-workedCount;
+
+  // Solo cuenta días con turno asignado explícitamente en REL_SCHEDULE
+  // Franco = solo cuando sched === 'F'  → 6h cada uno
+  // Trabajado = cuando sched es número (1, 2, 3…)
+  let francoCount=0;
+  let workedCount=0;
+  monthDays.forEach(d=>{
+    const sched=REL_SCHEDULE[d];
+    if(sched==='F') francoCount++;
+    else if(sched!==undefined && sched!==null) workedCount++;
+    // undefined = sin asignar → no cuenta
+  });
+
   const francoHours=francoCount*6;
   div.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;">
     <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
     <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoCount}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
     <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${francoHours}h</div><div class="rec-stat-lbl">HS FRANCO</div></div>
-  </div><div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">${MES_L[m]} ${y} · ${daysElapsed} días transcurridos</div>`;
+  </div><div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}</div>`;
 }
 function renderRelCoverageList(){
   const list=document.getElementById('rel-coverage-list');list.innerHTML='';
@@ -1938,7 +2119,7 @@ function renderRelCoverageList(){
     if(cov.note){info.appendChild(el('div','ev-note',cov.note));}
     const ts=el('div','ev-ts','');ts.innerHTML=`⏱ ${fmtTs(new Date(cov.createdAt))}`;info.appendChild(ts);
     item.appendChild(info);
-    const del=el('button','ev-del','✕');del.onclick=async()=>{if(!confirm('¿Eliminar cobertura?'))return;REL_COVERAGES=REL_COVERAGES.filter(c=>c.id!==cov.id);await saveRelData();renderRelPanel();};item.appendChild(del);
+    const del=el('button','ev-del','✕');del.onclick=async()=>{if(!confirm('¿Eliminar cobertura?'))return;REL_COVERAGES=REL_COVERAGES.filter(c=>c.id!==cov.id);await deleteOneRelCoverage(cov.id);renderRelPanel();};item.appendChild(del);
     list.appendChild(item);
   });
 }
@@ -1958,7 +2139,7 @@ async function saveRelCoverage(){
   if(!turno||!guardia||!quien||!from||!to){err.textContent='⚠ Completá todos los campos obligatorios.';err.classList.add('show');return;}
   if(from>to){err.textContent='⚠ La fecha de inicio debe ser anterior o igual a la de fin.';err.classList.add('show');return;}
   const cov={id:'rc'+Date.now(),userId:ME.id,turno,guardia,quien,fromDate:from,toDate:to,note,createdAt:new Date().toISOString()};
-  REL_COVERAGES.push(cov);await saveRelData();closeM('m-rel-cov');renderRelPanel();
+  REL_COVERAGES.push(cov);await saveOneRelCoverage(cov);closeM('m-rel-cov');renderRelPanel();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2082,20 +2263,48 @@ function renderVacTable() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// EXPONER FUNCIONES AL HTML (necesario en type="module")
+// ═══════════════════════════════════════════════════════════════════════════
+Object.assign(window, {
+  // Navegación
+  showSection, toggleSection, toggleTheme,
+  // Usuarios
+  registerUser, selectUser, deleteUser, logout, toggleNewUserForm,
+  // Eventos / Licencias
+  openAddEvent, saveEvent, deleteEvent, closeM, showET,
+  // Drag-select picker
+  dsInit, dsSave, dsCancel, dsOpen, adjDCH,
+  // Calendario
+  showCT, calNav, calGoToday, renderCal, setToday,
+  // Resumen
+  showRT, renderRT, renderRDia, renderRSemana, renderRMes, renderRAnio,
+  // Recargos
+  openRecPicker, closeRecPicker, saveRecargo, deleteRecargo, recNavMonth,
+  // REL
+  toggleRelPanel, openAddRelCoverage, saveRelCoverage,
+  openRelPicker, relPickerCancel,
+  // Cell actions
+  openCellActions, closeCellActions,
+  // Búsqueda
+  buscar,
+  // Vacaciones
+  renderVacTable,
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
   const savedTheme=lsGet('gd-theme');
   if(savedTheme==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='● OSCURO';}
   await loadData();
-  await loadRelData();
+  startRealtimeListeners();
   dsInit();
   updateUBar();
   renderVacTable();
   const n=new Date();calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
   await renderCal();
-  // Solo renderizar panel de eventos si está identificado — sin abrir la sección
-  if(ME){ renderEvP(); renderRecPanel(); }
+  if(ME){ renderEvP(); renderRecPanel(); if(ME.guardia==='REL') renderRelPanel(); }
 })();
 </script>
 </body>
