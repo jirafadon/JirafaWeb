@@ -529,31 +529,8 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   <div class="section-body open" id="sec-user-body">
     <!-- Estado: sin usuario -->
     <div id="no-user-state">
-      <p class="no-user-msg">&#9673; No estás identificado. Seleccioná tu usuario o registrate.</p>
+      <p class="no-user-msg">&#9673; Tocá tu nombre para identificarte.</p>
       <div id="user-grid" class="user-grid"></div>
-      <div class="sep"></div>
-      <div class="new-user-toggle" onclick="toggleNewUserForm()">
-        <span>&#9654; REGISTRAR NUEVO USUARIO</span>
-        <span id="new-user-arrow">&#9660;</span>
-      </div>
-      <div class="new-user-form" id="new-user-form">
-        <div class="mfg">
-          <label>Nombre completo</label>
-          <input type="text" id="nu-nm" placeholder="Ingresá tu nombre" style="font-size:15px;padding:11px 12px;">
-        </div>
-        <div class="mfg">
-          <label>Rol / Guardia</label>
-          <select id="nu-g" style="font-size:15px;padding:11px 12px;">
-            <option value="">— Seleccionar —</option>
-            <option value="A">GUARDIA A</option><option value="B">GUARDIA B</option>
-            <option value="C">GUARDIA C</option><option value="D">GUARDIA D</option>
-            <option value="E">GUARDIA E</option>
-            <option value="OP">OPERADOR</option>
-            <option value="REL">RELEVANTE</option>
-          </select>
-        </div>
-        <button class="btn" style="width:100%;padding:13px;font-size:16px;" onclick="registerUser()">&#9654; REGISTRAR</button>
-      </div>
     </div>
     <!-- Estado: con usuario -->
     <div id="yes-user-state" style="display:none">
@@ -805,6 +782,21 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
         <div class="leg-items" id="guard-leg"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECCIÓN 8: AUDITORÍA (solo Jonatan)
+════════════════════════════════════════ -->
+<div class="section s-audit" id="sec-audit" style="display:none">
+  <div class="section-header" onclick="toggleSection('sec-audit')">
+    <span class="section-icon" style="color:var(--amber)">&#9670;</span>
+    <span class="section-title">Auditoría de accesos</span>
+    <span class="section-badge" id="audit-badge">—</span>
+    <span class="section-arrow" id="sec-audit-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-audit-body">
+    <div id="audit-content" style="padding:4px 0"></div>
   </div>
 </div>
 
@@ -1303,77 +1295,206 @@ function toggleNewUserForm() {
 }
 function buildUserGrid() {
   const g = document.getElementById('user-grid'); g.innerHTML = '';
-  if (USERS.length === 0) {
-    g.innerHTML = '<div style="grid-column:1/-1;font-family:var(--font-mono);font-size:10px;color:var(--tdim);letter-spacing:2px;padding:6px 0">SIN USUARIOS — REGISTRATE ABAJO</div>';
-    document.getElementById('new-user-form').classList.add('open');
-    document.getElementById('new-user-arrow').textContent = '▲';
-    return;
-  }
-  document.getElementById('new-user-form').classList.remove('open');
-  document.getElementById('new-user-arrow').textContent = '▼';
-  USERS.forEach(u => {
-    const card = el('div','usr-card'+(ME&&ME.id===u.id?' sel':''),'');
-    const av = el('div','usr-av2',''); av.style.background = G_COLORS[u.guardia]||'#8a9ab5'; av.textContent = u.name.charAt(0).toUpperCase();
+  // Mostrar en el orden de PRESET_USERS
+  const ordered = PRESET_USERS.map(p => USERS.find(u => u.name === p.name)).filter(Boolean);
+  ordered.forEach(u => {
+    const isSel = ME && ME.id === u.id;
+    const isLinked = u.deviceId === DEVICE_ID;
+    const takenByOther = u.deviceId && u.deviceId !== DEVICE_ID;
+    const card = el('div','usr-card'+(isSel?' sel':'')+(takenByOther?' usr-taken':''),'');
+    const av = el('div','usr-av2','');
+    av.style.background = G_COLORS[u.guardia]||'#8a9ab5';
+    av.textContent = u.name.charAt(0).toUpperCase();
     card.appendChild(av);
     card.appendChild(el('div','usr-nm', u.name));
     card.appendChild(el('div','usr-gd', G_LABEL[u.guardia]||u.guardia));
-    card.onclick = e => { if (!e.target.classList.contains('usr-del')) selectUser(u); };
-    const del = el('button','usr-del','✕'); del.title = 'Eliminar';
-    del.onclick = e => { e.stopPropagation(); deleteUser(u.id); };
-    card.appendChild(del);
+    if (isLinked) {
+      const badge = el('div','usr-linked-badge','● MI DISPOSITIVO');
+      badge.style.cssText = 'font-size:8px;color:var(--green);letter-spacing:1px;margin-top:2px;font-family:var(--font-mono)';
+      card.appendChild(badge);
+    } else if (takenByOther) {
+      const badge = el('div','','● EN USO');
+      badge.style.cssText = 'font-size:8px;color:var(--tdim);letter-spacing:1px;margin-top:2px;font-family:var(--font-mono)';
+      card.appendChild(badge);
+    }
+    if (!takenByOther) {
+      card.style.cursor = 'pointer';
+      card.onclick = () => selectUser(u);
+    }
     g.appendChild(card);
   });
 }
-async function selectUser(u) { ME = u; await saveMe(); updateUBar(); renderEvP(); renderCal(); renderVacTable(); }
+// ═══════════════════════════════════════════════════════════════════════════
+// USUARIOS PREDEFINIDOS
+// ═══════════════════════════════════════════════════════════════════════════
+const PRESET_USERS = [
+  { name: 'Lisandro', guardia: 'A' },
+  { name: 'Matías',   guardia: 'B' },
+  { name: 'Jonatan',  guardia: 'C' },
+  { name: 'Rodrigo',  guardia: 'D' },
+  { name: 'Sergio',   guardia: 'OP' },
+  { name: 'Gastón',   guardia: 'E' },
+  { name: 'Lucas',    guardia: 'REL' },
+];
+const ADMIN_NAME = 'Jonatan'; // único que ve auditoría
+
+async function ensurePresetUsers() {
+  // Para cada usuario predefinido, si no existe en Firestore lo crea
+  for (const p of PRESET_USERS) {
+    const exists = USERS.find(u => u.name === p.name);
+    if (!exists) {
+      const u = { id: 'preset_' + p.name.toLowerCase(), name: p.name, guardia: p.guardia, preset: true, createdAt: new Date().toISOString() };
+      USERS.push(u);
+      await fbSet('users', u.id, u);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// AUDITORÍA DE ACCESOS
+// ═══════════════════════════════════════════════════════════════════════════
+async function logAccess(userName) {
+  const now = new Date();
+  const entry = {
+    id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    userName,
+    deviceId: DEVICE_ID,
+    ts: now.toISOString(),
+    date: now.toLocaleDateString('es-AR'),
+    time: now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }),
+  };
+  await fbSet('access-log', entry.id, entry);
+}
+
+async function clearAccessLogs() {
+  if (!confirm('¿Borrar todos los registros de acceso?')) return;
+  const snap = await getDocs(fbCol('access-log'));
+  for (const d of snap.docs) await fbDel('access-log', d.id);
+  renderAuditPanel();
+}
+
+async function unlinkDevice(userId) {
+  const u = USERS.find(x => x.id === userId);
+  if (!u) return;
+  if (!confirm(`¿Desvincular el dispositivo de ${u.name}? Podrá volver a vincularse desde otro teléfono.`)) return;
+  const updated = { ...u, deviceId: null };
+  await fbSet('users', u.id, updated);
+  renderAuditPanel();
+  buildUserGrid();
+}
+
+async function renderAuditPanel() {
+  if (!ME || ME.name !== ADMIN_NAME) return;
+  const sec = document.getElementById('sec-audit');
+  sec.style.display = '';
+
+  const snap = await getDocs(fbCol('access-log'));
+  const logs = [];
+  snap.forEach(d => logs.push(d.data()));
+  logs.sort((a,b) => b.ts.localeCompare(a.ts));
+
+  const counts = {};
+  logs.forEach(l => { counts[l.userName] = (counts[l.userName]||0)+1; });
+
+  document.getElementById('audit-badge').textContent = logs.length + ' accesos';
+
+  const div = document.getElementById('audit-content');
+
+  // ── Botones de administración ─────────────────────────────────────────
+  let adminHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <button onclick="clearAccessLogs()" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-family:var(--font-mono);letter-spacing:1px;cursor:pointer">🗑 BORRAR TODOS LOS LOGS</button>
+  </div>`;
+
+  // ── Resumen por usuario + botón desvincular ───────────────────────────
+  let summaryHtml = '<div style="margin-bottom:16px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:8px">INGRESOS POR USUARIO</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+  PRESET_USERS.forEach(p => {
+    const u = USERS.find(x => x.name === p.name);
+    const c = counts[p.name] || 0;
+    const linked = u?.deviceId ? u.deviceId.slice(-6) : null;
+    summaryHtml += `<div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:90px;text-align:center;position:relative">
+      <div style="font-size:22px;font-weight:700;color:${G_COLORS[p.guardia]||'#8a9ab5'}">${c}</div>
+      <div style="font-size:10px;color:var(--tdim);margin-top:2px">${p.name.toUpperCase()}</div>
+      ${linked
+        ? `<div style="font-size:8px;color:var(--green);font-family:var(--font-mono);margin-top:3px">···${linked}</div>
+           <button onclick="unlinkDevice('${u.id}')" style="margin-top:5px;background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:2px 6px;font-size:8px;cursor:pointer;font-family:var(--font-mono)">DESVINCULAR</button>`
+        : `<div style="font-size:8px;color:var(--tdim);font-family:var(--font-mono);margin-top:3px">SIN VINCULAR</div>`
+      }
+    </div>`;
+  });
+  summaryHtml += '</div></div>';
+
+  // ── Log detallado ─────────────────────────────────────────────────────
+  let logHtml = '<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:8px">ÚLTIMOS ACCESOS</div>';
+  if (logs.length === 0) {
+    logHtml += '<div style="color:var(--tdim);font-size:11px;padding:8px 0">Sin registros.</div>';
+  } else {
+    logHtml += '<div style="display:flex;flex-direction:column;gap:4px">';
+    logs.slice(0,50).forEach(l => {
+      const col = G_COLORS[PRESET_USERS.find(p=>p.name===l.userName)?.guardia]||'#8a9ab5';
+      logHtml += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${col}">
+        <span style="font-weight:700;font-size:12px;color:${col};min-width:72px">${l.userName}</span>
+        <span style="font-size:11px;color:var(--tbright)">${l.date}</span>
+        <span style="font-size:11px;color:var(--tdim)">${l.time}</span>
+        <span style="font-size:9px;color:var(--adim);margin-left:auto;font-family:var(--font-mono)">${l.deviceId?.slice(-6)||'—'}</span>
+      </div>`;
+    });
+    logHtml += '</div>';
+  }
+
+  div.innerHTML = adminHtml + summaryHtml + logHtml;
+}
+
+async function selectUser(u) {
+  if (!u.deviceId) {
+    // Verificar si este device ya está vinculado a otro usuario existente
+    const alreadyMine = USERS.find(x => x.deviceId === DEVICE_ID && x.id !== u.id);
+    if (alreadyMine) {
+      if (!confirm(`Este dispositivo está vinculado a "${alreadyMine.name}".\n¿Desvincularlo y usar ${u.name}?`)) return;
+      // Desvincular el anterior
+      await fbSet('users', alreadyMine.id, { ...alreadyMine, deviceId: null });
+    }
+    const updated = { ...u, deviceId: DEVICE_ID };
+    await fbSet('users', u.id, updated);
+    u = updated;
+  } else if (u.deviceId !== DEVICE_ID) {
+    alert(`⚠ Este usuario ya está vinculado a otro dispositivo.`);
+    return;
+  }
+  // Limpiar deviceId del localStorage viejo (por si quedó algo)
+  ME = u;
+  await saveMe();
+  await logAccess(u.name);
+  updateUBar();
+  renderEvP();
+  renderCal();
+  renderVacTable();
+  if (u.name === ADMIN_NAME) renderAuditPanel();
+}
+
+async function logout() {
+  ME = null;
+  await saveMe();
+  updateUBar();
+  renderEvP();
+  renderCal();
+  renderVacTable();
+  document.getElementById('sec-audit').style.display = 'none';
+}
+
 async function deleteUser(id) {
   if (!confirm('¿Eliminar este usuario? Sus licencias también serán borradas.')) return;
-  // Solo puede borrar su propio usuario (el del dispositivo)
   const target = USERS.find(u => u.id === id);
   if (target && target.deviceId !== DEVICE_ID) {
     alert('⚠ Solo podés eliminar tu propio usuario.');
     return;
   }
-  // Borrar usuario de Firestore
   await fbDel('users', id);
-  // Borrar sus eventos de Firestore
   const myEvs = EVENTS.filter(e => e.userId === id);
-  for (const ev of myEvs) { await fbDel('events', ev.id); }
-  // Borrar sus recargos
+  for (const ev of myEvs) await fbDel('events', ev.id);
   const myRecs = RECARGOS.filter(r => r.userId === id);
-  for (const r of myRecs) { await fbDel('recargos', r.id); }
+  for (const r of myRecs) await fbDel('recargos', r.id);
   if (ME && ME.id === id) { ME = null; await saveMe(); updateUBar(); }
   buildUserGrid(); renderEvP(); renderCal();
-}
-async function registerUser() {
-  const name = document.getElementById('nu-nm').value.trim();
-  const g    = document.getElementById('nu-g').value;
-  if (!name || !g) { alert('Completá nombre y rol'); return; }
-
-  // ── 1 usuario por dispositivo ─────────────────────────────────────────
-  const existingDevice = USERS.find(u => u.deviceId === DEVICE_ID);
-  if (existingDevice) {
-    alert('⚠ Ya existe un usuario registrado en este dispositivo.\nSolo se permite un usuario por dispositivo.');
-    return;
-  }
-
-  const u = { id:'u'+Date.now(), name, guardia:g, deviceId: DEVICE_ID, createdAt:new Date().toISOString() };
-  USERS.push(u);
-  await fbSet('users', u.id, u);
-  ME = u; await saveMe(); updateUBar();
-  buildUserGrid(); renderEvP(); renderCal(); renderVacTable();
-}
-async function logout() { ME = null; await saveMe(); updateUBar(); renderEvP(); renderCal(); renderVacTable(); }
-
-// Muestra u oculta el form de registro según si el dispositivo ya tiene usuario
-function updateRegisterFormVisibility() {
-  const existingDevice = USERS.find(u => u.deviceId === DEVICE_ID);
-  const toggleWrap = document.querySelector('.new-user-toggle');
-  const formEl = document.getElementById('new-user-form');
-  if (toggleWrap) toggleWrap.style.display = existingDevice ? 'none' : '';
-  if (formEl && existingDevice && !ME) {
-    // Auto-seleccionar el usuario del dispositivo si existe y no hay sesión
-    selectUser(existingDevice);
-  }
 }
 
 function updateUBar() {
@@ -2223,29 +2344,18 @@ function renderVacTable() {
 // EXPONER FUNCIONES AL HTML (necesario en type="module")
 // ═══════════════════════════════════════════════════════════════════════════
 Object.assign(window, {
-  // Navegación
   showSection, toggleSection, toggleTheme,
-  // Usuarios
-  registerUser, selectUser, deleteUser, logout, toggleNewUserForm,
-  // Eventos / Licencias
+  selectUser, deleteUser, logout,
   openAddEvent, saveEvent, deleteEvent, closeM, showET,
-  // Drag-select picker
   dsInit, dsSave, dsCancel, dsOpen, adjDCH,
-  // Calendario
   showCT, calNav, calGoToday, renderCal, setToday,
-  // Resumen
   showRT, renderRT, renderRDia, renderRSemana, renderRMes, renderRAnio,
-  // Recargos
   openRecPicker, closeRecPicker, saveRecargo, deleteRecargo, recNavMonth,
-  // REL
   toggleRelPanel, openAddRelCoverage, saveRelCoverage,
   openRelPicker, relPickerCancel,
-  // Cell actions
   openCellActions, closeCellActions,
-  // Búsqueda
-  buscar,
-  // Vacaciones
-  renderVacTable,
+  buscar, renderVacTable,
+  renderAuditPanel, clearAccessLogs, unlinkDevice,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2255,17 +2365,24 @@ Object.assign(window, {
   const savedTheme=lsGet('gd-theme');
   if(savedTheme==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='● OSCURO';}
   const n=new Date(); calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
-  // Pre-cargar feriados y Firebase en paralelo para máxima velocidad
+  // Cargar Firebase y feriados en paralelo
   const [,] = await Promise.all([
     getFeriados(n.getFullYear()),
     loadData()
   ]);
+  // Crear usuarios predefinidos si no existen
+  await ensurePresetUsers();
   startRealtimeListeners();
   dsInit();
   updateUBar();
   renderVacTable();
   await renderCal();
-  if(ME){ renderEvP(); renderRecPanel(); if(ME.guardia==='REL') renderRelPanel(); }
+  if(ME){
+    renderEvP();
+    renderRecPanel();
+    if(ME.guardia==='REL') renderRelPanel();
+    if(ME.name===ADMIN_NAME) renderAuditPanel();
+  }
 })();
 </script>
 </body>
