@@ -2,18 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0c0f">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Diagrama DG">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <style>
 /* ══════════════════════════════════════════════
    VARIABLES Y RESET
@@ -755,6 +745,81 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 <!-- ════════════════════════════════════════
+     SECCIÓN: HORARIO COMBI
+════════════════════════════════════════ -->
+<div class="section s-combi">
+  <div class="section-header" onclick="toggleSection('sec-combi')">
+    <span class="section-icon" style="color:#4fc3f7">🚌</span>
+    <span class="section-title">Horario Combi</span>
+    <span style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:1px;margin-left:auto;margin-right:8px">VIG. 16/03/26</span>
+    <span class="section-arrow" id="sec-combi-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-combi-body">
+    <div style="padding:4px 0 8px">
+
+      <!-- TABS -->
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <button onclick="showCombiTab('lv')" id="ctab-lv" class="tab on" style="flex:1">LUN–VIE</button>
+        <button onclick="showCombiTab('sab')" id="ctab-sab" class="tab" style="flex:1">SÁB</button>
+        <button onclick="showCombiTab('dom')" id="ctab-dom" class="tab" style="flex:1">DOM/FER</button>
+      </div>
+
+      <!-- LUNES A VIERNES -->
+      <div id="combi-lv">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--panel)">
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
+          </tr></thead>
+          <tbody id="combi-lv-body"></tbody>
+        </table>
+        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
+          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
+          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
+        </div>
+      </div>
+
+      <!-- SÁBADO -->
+      <div id="combi-sab" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--panel)">
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
+          </tr></thead>
+          <tbody id="combi-sab-body"></tbody>
+        </table>
+        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
+          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
+          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
+        </div>
+      </div>
+
+      <!-- DOMINGO Y FERIADOS -->
+      <div id="combi-dom" style="display:none">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--panel)">
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
+            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
+          </tr></thead>
+          <tbody id="combi-dom-body"></tbody>
+        </table>
+        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
+          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
+          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
      SECCIÓN 7: LEYENDAS
 ════════════════════════════════════════ -->
 <div class="section s-leg">
@@ -1161,15 +1226,35 @@ function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch
 function lsDel(k) { try { localStorage.removeItem(k); } catch(e) {} }
 
 // ── Device ID ─────────────────────────────────────────────────────────────
-function getDeviceId() {
+// ── Device fingerprint — identifica el hardware, no el navegador ──────────
+async function getDeviceId() {
+  // 1. Si ya tenemos uno guardado en localStorage, usarlo
   let did = localStorage.getItem('gd-device-id');
-  if (!did) {
-    did = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
-    localStorage.setItem('gd-device-id', did);
+  if (did) return did;
+
+  // 2. Generar huella del hardware (pantalla + CPU + timezone + idioma)
+  //    Esto es igual en Chrome y Brave del mismo teléfono
+  const fp = [
+    screen.width, screen.height, screen.colorDepth,
+    navigator.hardwareConcurrency || 0,
+    navigator.deviceMemory || 0,
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+    navigator.language,
+    navigator.platform || '',
+  ].join('|');
+
+  // 3. Hash simple
+  let hash = 0;
+  for (let i = 0; i < fp.length; i++) {
+    hash = ((hash << 5) - hash) + fp.charCodeAt(i);
+    hash |= 0;
   }
+  did = 'fp_' + Math.abs(hash).toString(36) + '_' + (screen.width * screen.height).toString(36);
+
+  localStorage.setItem('gd-device-id', did);
   return did;
 }
-const DEVICE_ID = getDeviceId();
+const DEVICE_ID = await getDeviceId();
 
 // ── Helpers de Firestore ──────────────────────────────────────────────────
 function fbCol(name)      { return collection(db, name); }
@@ -1305,13 +1390,13 @@ function toggleNewUserForm() {
 }
 function buildUserGrid() {
   const g = document.getElementById('user-grid'); g.innerHTML = '';
-  // Mostrar en el orden de PRESET_USERS
   const ordered = PRESET_USERS.map(p => USERS.find(u => u.name === p.name)).filter(Boolean);
   ordered.forEach(u => {
+    const ids = u.deviceIds || (u.deviceId ? [u.deviceId] : []);
     const isSel = ME && ME.id === u.id;
-    const isLinked = u.deviceId === DEVICE_ID;
-    const takenByOther = u.deviceId && u.deviceId !== DEVICE_ID;
-    const card = el('div','usr-card'+(isSel?' sel':'')+(takenByOther?' usr-taken':''),'');
+    const isLinked = ids.includes(DEVICE_ID);
+    const takenByOther = ids.length > 0 && !isLinked;
+    const card = el('div','usr-card'+(isSel?' sel':''),'');
     const av = el('div','usr-av2','');
     av.style.background = G_COLORS[u.guardia]||'#8a9ab5';
     av.textContent = u.name.charAt(0).toUpperCase();
@@ -1319,18 +1404,18 @@ function buildUserGrid() {
     card.appendChild(el('div','usr-nm', u.name));
     card.appendChild(el('div','usr-gd', G_LABEL[u.guardia]||u.guardia));
     if (isLinked) {
-      const badge = el('div','usr-linked-badge','● MI DISPOSITIVO');
+      const badge = el('div','','● MI DISPOSITIVO');
       badge.style.cssText = 'font-size:8px;color:var(--green);letter-spacing:1px;margin-top:2px;font-family:var(--font-mono)';
       card.appendChild(badge);
     } else if (takenByOther) {
-      const badge = el('div','','● EN USO');
+      // Tiene otros dispositivos pero no el mío — igual puede entrar
+      const badge = el('div','','● ' + ids.length + ' dispositivo' + (ids.length>1?'s':''));
       badge.style.cssText = 'font-size:8px;color:var(--tdim);letter-spacing:1px;margin-top:2px;font-family:var(--font-mono)';
       card.appendChild(badge);
     }
-    if (!takenByOther) {
-      card.style.cursor = 'pointer';
-      card.onclick = () => selectUser(u);
-    }
+    // Siempre se puede tocar — multi-dispositivo
+    card.style.cursor = 'pointer';
+    card.onclick = () => selectUser(u);
     g.appendChild(card);
   });
 }
@@ -1376,19 +1461,21 @@ async function logAccess(userName) {
   await fbSet('access-log', entry.id, entry);
 }
 
-async function clearAccessLogs() {
-  if (!confirm('¿Borrar todos los registros de acceso?')) return;
+async function clearUserLogs(userName) {
+  if (!confirm(`¿Borrar todos los registros de acceso de ${userName}?`)) return;
   const snap = await getDocs(fbCol('access-log'));
-  for (const d of snap.docs) await fbDel('access-log', d.id);
+  for (const d of snap.docs) {
+    if (d.data().userName === userName) await fbDel('access-log', d.id);
+  }
   renderAuditPanel();
 }
 
-async function unlinkDevice(userId) {
+async function unlinkDevice(userId, deviceId) {
   const u = USERS.find(x => x.id === userId);
   if (!u) return;
-  if (!confirm(`¿Desvincular el dispositivo de ${u.name}? Podrá volver a vincularse desde otro teléfono.`)) return;
-  const updated = { ...u, deviceId: null };
-  await fbSet('users', u.id, updated);
+  if (!confirm(`¿Desvincular este dispositivo de ${u.name}?`)) return;
+  const ids = (u.deviceIds || (u.deviceId ? [u.deviceId] : [])).filter(d => d !== deviceId);
+  await fbSet('users', u.id, { ...u, deviceIds: ids, deviceId: ids[0] || null });
   renderAuditPanel();
   buildUserGrid();
 }
@@ -1410,67 +1497,87 @@ async function renderAuditPanel() {
 
   const div = document.getElementById('audit-content');
 
-  // ── Botones de administración ─────────────────────────────────────────
-  let adminHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-    <button onclick="clearAccessLogs()" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11px;font-family:var(--font-mono);letter-spacing:1px;cursor:pointer">🗑 BORRAR TODOS LOS LOGS</button>
-  </div>`;
+  // ── Tarjetas por usuario con logs individuales ────────────────────────
+  let html = '<div style="display:flex;flex-direction:column;gap:14px">';
 
-  // ── Resumen por usuario + botón desvincular ───────────────────────────
-  let summaryHtml = '<div style="margin-bottom:16px"><div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:8px">INGRESOS POR USUARIO</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
   PRESET_USERS.forEach(p => {
     const u = USERS.find(x => x.name === p.name);
     const c = counts[p.name] || 0;
-    const linked = u?.deviceId ? u.deviceId.slice(-6) : null;
-    summaryHtml += `<div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:90px;text-align:center;position:relative">
-      <div style="font-size:22px;font-weight:700;color:${G_COLORS[p.guardia]||'#8a9ab5'}">${c}</div>
-      <div style="font-size:10px;color:var(--tdim);margin-top:2px">${p.name.toUpperCase()}</div>
-      ${linked
-        ? `<div style="font-size:8px;color:var(--green);font-family:var(--font-mono);margin-top:3px">···${linked}</div>
-           <button onclick="unlinkDevice('${u.id}')" style="margin-top:5px;background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:2px 6px;font-size:8px;cursor:pointer;font-family:var(--font-mono)">DESVINCULAR</button>`
-        : `<div style="font-size:8px;color:var(--tdim);font-family:var(--font-mono);margin-top:3px">SIN VINCULAR</div>`
-      }
+    const col = G_COLORS[p.guardia] || '#8a9ab5';
+    const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
+    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 10);
+
+    // Dispositivos vinculados
+    let devicesHtml = '';
+    if (ids.length > 0) {
+      devicesHtml = ids.map(did => {
+        const isMe = did === DEVICE_ID;
+        return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
+          ···${did.slice(-6)} ${isMe?'(este)':''}
+          <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
+        </span>`;
+      }).join(' ');
+    } else {
+      devicesHtml = `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
+    }
+
+    // Últimos accesos del usuario
+    let logsHtml = '';
+    if (userLogs.length > 0) {
+      logsHtml = userLogs.map(l =>
+        `<div style="display:flex;gap:8px;font-size:10px;padding:3px 0;border-bottom:1px solid var(--border)">
+          <span style="color:var(--tbright)">${l.date}</span>
+          <span style="color:var(--tdim)">${l.time}</span>
+          <span style="color:var(--adim);margin-left:auto;font-family:var(--font-mono)">···${l.deviceId?.slice(-6)||'—'}</span>
+        </div>`
+      ).join('');
+    } else {
+      logsHtml = `<div style="font-size:10px;color:var(--tdim);padding:4px 0">Sin accesos registrados</div>`;
+    }
+
+    html += `<div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid ${col};border-radius:8px;padding:12px 14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:700;font-size:14px;color:${col}">${p.name}</span>
+          <span style="font-size:10px;color:var(--tdim)">${G_LABEL[p.guardia]||p.guardia}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px;font-weight:700;color:${col}">${c}</span>
+          ${c > 0 ? `<button onclick="clearUserLogs('${p.name}')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:2px 8px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">🗑 BORRAR</button>` : ''}
+        </div>
+      </div>
+      <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
+      <div>${logsHtml}</div>
     </div>`;
   });
-  summaryHtml += '</div></div>';
 
-  // ── Log detallado ─────────────────────────────────────────────────────
-  let logHtml = '<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:8px">ÚLTIMOS ACCESOS</div>';
-  if (logs.length === 0) {
-    logHtml += '<div style="color:var(--tdim);font-size:11px;padding:8px 0">Sin registros.</div>';
-  } else {
-    logHtml += '<div style="display:flex;flex-direction:column;gap:4px">';
-    logs.slice(0,50).forEach(l => {
-      const col = G_COLORS[PRESET_USERS.find(p=>p.name===l.userName)?.guardia]||'#8a9ab5';
-      logHtml += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${col}">
-        <span style="font-weight:700;font-size:12px;color:${col};min-width:72px">${l.userName}</span>
-        <span style="font-size:11px;color:var(--tbright)">${l.date}</span>
-        <span style="font-size:11px;color:var(--tdim)">${l.time}</span>
-        <span style="font-size:9px;color:var(--adim);margin-left:auto;font-family:var(--font-mono)">${l.deviceId?.slice(-6)||'—'}</span>
-      </div>`;
-    });
-    logHtml += '</div>';
-  }
-
-  div.innerHTML = adminHtml + summaryHtml + logHtml;
+  html += '</div>';
+  div.innerHTML = html;
 }
 
 async function selectUser(u) {
-  if (!u.deviceId) {
-    // Verificar si este device ya está vinculado a otro usuario existente
-    const alreadyMine = USERS.find(x => x.deviceId === DEVICE_ID && x.id !== u.id);
+  // Soporte multi-dispositivo: deviceIds es un array
+  const ids = u.deviceIds || (u.deviceId ? [u.deviceId] : []);
+
+  if (!ids.includes(DEVICE_ID)) {
+    // Este dispositivo no está vinculado a este usuario
+    // Verificar si ya está vinculado a OTRO usuario
+    const alreadyMine = USERS.find(x => {
+      const xids = x.deviceIds || (x.deviceId ? [x.deviceId] : []);
+      return xids.includes(DEVICE_ID) && x.id !== u.id;
+    });
     if (alreadyMine) {
       if (!confirm(`Este dispositivo está vinculado a "${alreadyMine.name}".\n¿Desvincularlo y usar ${u.name}?`)) return;
-      // Desvincular el anterior
-      await fbSet('users', alreadyMine.id, { ...alreadyMine, deviceId: null });
+      const prevIds = alreadyMine.deviceIds || [alreadyMine.deviceId];
+      await fbSet('users', alreadyMine.id, { ...alreadyMine, deviceIds: prevIds.filter(d => d !== DEVICE_ID), deviceId: null });
     }
-    const updated = { ...u, deviceId: DEVICE_ID };
+    // Agregar este dispositivo al usuario
+    const newIds = [...ids, DEVICE_ID];
+    const updated = { ...u, deviceIds: newIds, deviceId: newIds[0] };
     await fbSet('users', u.id, updated);
     u = updated;
-  } else if (u.deviceId !== DEVICE_ID) {
-    alert(`⚠ Este usuario ya está vinculado a otro dispositivo.`);
-    return;
   }
-  // Limpiar deviceId del localStorage viejo (por si quedó algo)
+
   ME = u;
   await saveMe();
   await logAccess(u.name);
@@ -2365,8 +2472,116 @@ Object.assign(window, {
   openRelPicker, relPickerCancel,
   openCellActions, closeCellActions,
   buscar, renderVacTable,
-  renderAuditPanel, clearAccessLogs, unlinkDevice,
+  renderAuditPanel, clearUserLogs, unlinkDevice,
+  showCombiTab,
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HORARIO COMBI
+// ═══════════════════════════════════════════════════════════════════════════
+const COMBI_LV = [
+  // [n, hora, desde, hacia, nocturno]
+  [1,  '05:15', 'Constitución', 'Retiro (1)'],
+  [1,  '05:35', 'Retiro',       'PN / NP'],
+  [2,  '06:05', 'NP / PN',      'Constitución'],
+  [3,  '06:15', 'Constitución', 'Retiro (1)'],
+  [3,  '06:35', 'Retiro',       'PN / NP'],
+  [4,  '06:35', 'Retiro',       'PN / NP'],
+  [5,  '07:15', 'Constitución', 'Retiro (1)'],
+  [5,  '07:40', 'Retiro',       'PN / NP'],
+  [6,  '08:15', 'Constitución', 'Retiro (1)'],
+  [6,  '08:40', 'Retiro',       'PN / NP'],
+  [7,  '11:00', 'Constitución', 'Retiro (1)'],
+  [7,  '11:25', 'Retiro',       'PN / NP'],
+  [8,  '12:05', 'NP / PN',      'Constitución (2)'],
+  [9,  '14:35', 'NP / PN',      'Constitución (2)'],
+  [10, '15:05', 'NP / PN',      'Constitución (2)'],
+  [11, '15:35', 'NP / PN',      'Retiro'],
+  [12, '16:05', 'NP / PN',      'Constitución (2)'],
+  [13, '16:35', 'NP / PN',      'Constitución (2)'],
+  [14, '17:00', 'Constitución', 'Retiro (1)'],
+  [14, '17:25', 'Retiro',       'PN / NP'],
+  [15, '17:05', 'NP / PN',      'Constitución (2)'],
+  [16, '18:05', 'NP / PN',      'Constitución (2)'],
+  [17, '19:05', 'NP / PN',      'Constitución (2)'],
+  ['—', 'NOCTURNOS', '', ''],
+  [18, '23:05', 'Constitución', 'Retiro (1)'],
+  [18, '23:25', 'Retiro (3)',   'PN / NP (3)'],
+  [19, '00:10', 'NP / PN',      'Constitución (2)'],
+];
+
+const COMBI_SAB = [
+  [1,  '05:15', 'Constitución', 'Retiro (1)'],
+  [1,  '05:35', 'Retiro',       'PN / NP'],
+  [2,  '06:10', 'NP / PN',      'Constitución'],
+  [3,  '06:15', 'Constitución', 'Retiro (1)'],
+  [3,  '06:35', 'Retiro',       'PN / NP'],
+  [4,  '11:00', 'Constitución', 'Retiro (1)'],
+  [4,  '11:25', 'Retiro',       'PN / NP'],
+  [5,  '12:10', 'NP / PN',      'Constitución (2)'],
+  [6,  '14:40', 'NP / PN',      'Constitución (2)'],
+  [7,  '17:00', 'Constitución', 'Retiro (1)'],
+  [7,  '17:25', 'Retiro',       'PN / NP'],
+  [8,  '18:10', 'NP / PN',      'Constitución (2)'],
+  ['—', 'NOCTURNOS', '', ''],
+  [9,  '23:05', 'Constitución', 'Retiro (1)'],
+  [9,  '23:25', 'Retiro (3)',   'PN / NP (3)'],
+  [10, '00:10', 'NP / PN',      'Constitución (2)'],
+];
+
+const COMBI_DOM = [
+  [1,  '05:15', 'Constitución', 'Retiro (1)'],
+  [1,  '05:35', 'Retiro',       'PN / NP'],
+  [2,  '06:10', 'NP / PN',      'Constitución'],
+  [3,  '11:00', 'Constitución', 'Retiro (1)'],
+  [3,  '11:25', 'Retiro',       'PN / NP'],
+  [4,  '12:10', 'NP / PN',      'Constitución (2)'],
+  [5,  '17:00', 'Constitución', 'Retiro (1)'],
+  [5,  '17:25', 'Retiro',       'PN / NP'],
+  [6,  '18:10', 'NP / PN',      'Constitución (2)'],
+  ['—', 'NOCTURNOS', '', ''],
+  [7,  '23:05', 'Constitución', 'Retiro (1)'],
+  [7,  '23:25', 'Retiro (3)',   'PN / NP (3)'],
+  [8,  '00:10', 'NP / PN',      'Constitución (2)'],
+];
+
+function renderCombiTable(data, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  data.forEach(([n, hora, desde, hacia]) => {
+    const isNoc = hora === 'NOCTURNOS';
+    const tr = document.createElement('tr');
+    if (isNoc) {
+      tr.innerHTML = `<td colspan="4" style="padding:6px 4px;font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;text-align:center;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">— NOCTURNOS —</td>`;
+    } else {
+      const isNight = hora >= '22:00' || hora <= '01:00';
+      const rowBg = isNight ? 'background:rgba(100,100,180,0.07)' : '';
+      tr.style.cssText = rowBg + ';border-bottom:1px solid rgba(255,255,255,0.04)';
+      tr.innerHTML = `
+        <td style="padding:5px 4px;text-align:center;color:var(--tdim);font-size:11px">${n}</td>
+        <td style="padding:5px 4px;text-align:center;font-weight:700;color:var(--tbright);font-family:var(--font-mono);font-size:12px;letter-spacing:1px">${hora}</td>
+        <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--t2)">${desde}</td>
+        <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--t3)">${hacia}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function showCombiTab(tab) {
+  ['lv','sab','dom'].forEach(t => {
+    document.getElementById('combi-'+t).style.display = t===tab ? '' : 'none';
+    const btn = document.getElementById('ctab-'+t);
+    if (btn) btn.classList.toggle('on', t===tab);
+  });
+}
+
+function initCombi() {
+  renderCombiTable(COMBI_LV,  'combi-lv-body');
+  renderCombiTable(COMBI_SAB, 'combi-sab-body');
+  renderCombiTable(COMBI_DOM, 'combi-dom-body');
+  showCombiTab('lv');
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // INIT
@@ -2384,6 +2599,7 @@ Object.assign(window, {
   await ensurePresetUsers();
   startRealtimeListeners();
   dsInit();
+  initCombi();
   updateUBar();
   renderVacTable();
   await renderCal();
@@ -2394,17 +2610,6 @@ Object.assign(window, {
     if(ME.name===ADMIN_NAME) renderAuditPanel();
   }
 })();
-</script>
-
-<!-- PWA Service Worker -->
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(r => console.log('SW registrado:', r.scope))
-      .catch(e => console.log('SW error:', e));
-  });
-}
 </script>
 </body>
 </html>
