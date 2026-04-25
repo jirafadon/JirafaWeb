@@ -4,16 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════
    VARIABLES Y RESET
 ══════════════════════════════════════════════ */
 :root {
-  --font-ui: 'Rajdhani', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --font-mono: ui-monospace, 'Courier New', monospace;
   --bg: #0a0c0f;
   --panel: #111418;
   --border: #1e2530;
@@ -39,7 +36,7 @@ body.light {
   --text: #2a3040; --tdim: #8090a8; --tbright: #111827;
   --cell-bg: #f8fafc;
 }
-body.light::before { background-image: linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px); }
+body.light::before { display: none; }
 body.light select, body.light input[type=date], body.light input[type=text], body.light textarea { background: #f0f2f5; color: var(--tbright); }
 body.light .tscr { background: var(--cell-bg); }
 body.light table.gt th { background: var(--panel); color: var(--tdim); }
@@ -60,24 +57,16 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: linear-gradient(rgba(245,166,35,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,.025) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none; z-index: 0;
-}
+body::before { display: none; }
 .wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 20px 12px 60px; }
 
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-header { text-align: center; margin-bottom: 20px; }
-.htag { font-family: var(--font-mono); font-size: 11px; color: var(--adim); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 4px; }
-h1 { font-size: clamp(22px,5vw,44px); font-weight: 700; color: var(--tbright); letter-spacing: 3px; text-transform: uppercase; line-height: 1; }
+header { text-align: center; margin-bottom: 16px; position: relative; padding: 10px 0 6px; }
+h1 { font-size: clamp(16px,4vw,28px); font-weight: 700; color: var(--tbright); letter-spacing: 2px; text-transform: uppercase; line-height: 1.2; }
 h1 span { color: var(--amber); }
-.hsub { margin-top: 5px; font-size: 12px; color: var(--tdim); letter-spacing: 2px; text-transform: uppercase; }
-.divr { width: 60px; height: 2px; background: linear-gradient(90deg,transparent,var(--amber),transparent); margin: 8px auto; }
+.hsub { margin-top: 4px; font-size: 11px; color: var(--tdim); letter-spacing: 1px; }
 .header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .header-author { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 2px; }
 .header-author span { color: var(--amber); font-weight: 700; }
@@ -520,13 +509,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
      HEADER
 ════════════════════════════════════════ -->
 <header>
-  <div class="htag">Sistema de Guardias Rotativas</div>
-  <h1>DIAGRAMA DE GUARDIA</h1>
-  <h1 style="font-size:clamp(14px,3.5vw,28px);font-weight:700;color:var(--amber);letter-spacing:3px;margin-top:4px;">PLANTA DE AGUA PN</h1>
-  <div class="divr"></div>
-  <div class="hsub">5 Guardias &middot; Turnos de 6 horas &middot; 2025&ndash;2030</div>
-  <div class="header-meta">
-    <span class="header-author">Creado por <span>Jonatan C.</span></span>
+  <h1>DIAGRAMA DE GUARDIA · <span>PLANTA DE AGUA PN</span></h1>
+  <div class="hsub">Creado por Joni Cimiotta</div>
+  <div style="position:absolute;top:12px;right:12px;">
     <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">&#9728; CLARO</button>
   </div>
 </header>
@@ -1143,12 +1128,19 @@ function buildFutureHols(y) {
 async function getFeriados(y) {
   if (ferCache[y]) return ferCache[y];
   if (y > 2026) { ferCache[y] = buildFutureHols(y); return ferCache[y]; }
+  // sessionStorage cache — no vuelve a fetchear si ya lo tiene en esta sesión
+  const ssKey = 'fer-' + y;
+  try {
+    const cached = sessionStorage.getItem(ssKey);
+    if (cached) { ferCache[y] = JSON.parse(cached); return ferCache[y]; }
+  } catch(e) {}
   try {
     const r = await fetch('https://argentinadatos.com/v1/feriados/' + y);
     if (!r.ok) throw 0;
     const data = await r.json();
     const map = {}; data.forEach(f => { map[f.fecha] = {nombre:f.nombre,tipo:f.tipo}; });
     ferCache[y] = map;
+    try { sessionStorage.setItem(ssKey, JSON.stringify(map)); } catch(e) {}
   } catch(e) { ferCache[y] = buildFutureHols(y); }
   return ferCache[y];
 }
@@ -1696,206 +1688,147 @@ let relDsDragging=false,relDsStart=null,relDsEnd=null;
 
 function buildTable(days, selDate, selG, fmap, title, isCurrent) {
   const today = dk(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
-  const sec  = el('div','month-section','');
-  const mh   = el('div','month-header'+(isCurrent?' current':''), title);
-  sec.appendChild(mh);
-  const scr  = el('div','tscr','');
-  const tbl  = document.createElement('table'); tbl.className='gt';
-  const thead= document.createElement('thead');
-  const hr   = document.createElement('tr');
-  const thN  = document.createElement('th'); thN.className='gn';
-  thN.innerHTML='<span style="font-size:7px;letter-spacing:1px">GUARDIA</span>'; hr.appendChild(thN);
-  days.forEach(date=>{
-    const{m,d}=pd(date),isSel=date===selDate,isFer=!!fmap[date],isToday=date===today;
-    const th=document.createElement('th');
-    let cls='';
-    if(isSel&&selG)cls='sc';
-    if(isFer&&!isSel)cls='fc';
-    if(isSel&&isFer)cls='sfc';
-    if(isToday)cls='th-today';
-    th.className=cls;
-    if(isToday)th.dataset.today='1';
-    th.innerHTML=`<div class="dd">${['D','L','M','M','J','V','S'][new Date(pd(date).y,pd(date).m-1,pd(date).d).getDay()]}</div><div class="dn">${d}</div>`;
-    if(isFer)th.innerHTML+=`<div class="fd2"></div>`;
-    if(isToday)th.innerHTML+=`<div class="today-dot"></div>`;
-    if(isFer&&!isToday)th.title=fmap[date].nombre;
-    hr.appendChild(th);
-  });
-  thead.appendChild(hr); tbl.appendChild(thead);
-  const tbody=document.createElement('tbody');
+  const DAYS_ABBR = ['D','L','M','M','J','V','S'];
 
-  // ── Rows for each guardia A-E ──
-  ['A','B','C','D','E'].forEach(g=>{
-    const isMe=ME&&ME.guardia===g;
-    const tr=document.createElement('tr');
-    if(isMe)tr.className='gs';
-    const nameTd=document.createElement('td');nameTd.className='gn';
-    nameTd.innerHTML=`<span style="font-size:11px;font-weight:700;color:${G_COLORS[g]};">${g}</span>`;
-    if(isMe)nameTd.innerHTML+=`<br><span style="font-size:7px;color:var(--adim)">YO</span>`;
-    tr.appendChild(nameTd);
-    days.forEach(date=>{
-      const turno=getTurno(g,date);
-      const isSel=date===selDate&&g===selG;
-      const isFer=!!fmap[date];
-      const dayEvs=getEvsByDateAndG(date,g);
-      const dayRecs=RECARGOS.filter(r=>r.date===date&&r.guardia===g);
-      const hasRec=dayRecs.length>0;
-      const td=document.createElement('td');
-      td.dataset.date=date;td.dataset.g=g;
-      let cls='';
-      if(dayEvs.length===0&&dayRecs.length===0){
-        if(turno==='F')cls='tf';else if(turno)cls=`t${turno}`;
-      }
-      if(isSel&&!cls.includes('cs'))cls+=' cs';
-      if(isFer&&turno!=='F'&&!isSel)cls+=' cf';
-      if(isFer&&turno==='F')cls+=' ixf';
-      if(isSel&&turno!=='F')cls+=' ix';
-
-      // ★ Recargo cell styling
-      if(hasRec&&dayEvs.length===0){
-        const isFranco=dayRecs.some(r=>isEsSobreFranco(g,date,r.turno));
-        cls = (isFranco ? 'has-rec-franco' : 'has-rec');
-      }
-      td.className=cls.trim();
-
-      const inner=el('div','cell-inner','');
-      if(dayEvs.length>0){
-        const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        td.style.background=li.color+'28';
-        if(isSel)td.style.background=li.color+'50';
-        const licCell=el('div','lic-cell','');
-        licCell.style.background=li.color+'18';
-        const code=el('div','lic-code','');code.style.color=li.color;code.textContent=ev.type;licCell.appendChild(code);
-        if(turno&&turno!=='F'){const ts=el('div','lic-turno','');ts.style.color=li.color+'99';ts.textContent='T'+turno;licCell.appendChild(ts);}
-        if(dayEvs.length>1){const more=el('div','lic-more','');more.style.background=li.color+'88';licCell.appendChild(more);}
-        td.title=dayEvs.map(e=>`${LIC[e.type]?.name||e.type}: ${e.userName}`).join('\n');
-        inner.appendChild(licCell);
-      } else if(hasRec) {
-        // ★ Show R label in recargo cell
-        const isFranco=dayRecs.some(r=>isEsSobreFranco(g,date,r.turno));
-        const recOv=el('div','rec-cell-overlay','');
-        const rl=el('div','rec-label',isFranco?'R':'R');
-        const rs=el('div','rec-label-sub',turno&&turno!=='F'?'T'+turno:'F');
-        recOv.appendChild(rl);recOv.appendChild(rs);
-        td.title=dayRecs.map(r=>`Recargo${r.sobreFranco?' sobre franco':''}: T${r.turno}${r.note?' ('+r.note+')':''}`).join('\n');
-        inner.appendChild(recOv);
-      } else {
-        const cn=el('div','cn','');cn.textContent=turno==='F'?'F':(turno?''+turno:'·');inner.appendChild(cn);
-        if(isFer)td.title=fmap[date].nombre;
-      }
-      td.appendChild(inner);tr.appendChild(td);
-
-      if(ME){
-        td.style.cursor='pointer';
-        td.addEventListener('click',e=>{if(dsDragging)return;openCellActions(date,g,turno,dayEvs);});
-      }
-    });
-    tbody.appendChild(tr);
+  // ── Build header row HTML ──────────────────────────────────────────────
+  let thsHtml = '<th class="gn"><span style="font-size:7px;letter-spacing:1px">GUARDIA</span></th>';
+  days.forEach(date => {
+    const {m,d} = pd(date);
+    const isSel = date===selDate, isFer = !!fmap[date], isToday = date===today;
+    let cls = isSel&&selG ? 'sc' : '';
+    if (isFer && !isSel) cls = 'fc';
+    if (isSel && isFer) cls = 'sfc';
+    if (isToday) cls = 'th-today';
+    const dow = DAYS_ABBR[new Date(pd(date).y, pd(date).m-1, pd(date).d).getDay()];
+    const title_attr = isFer&&!isToday ? ` title="${fmap[date].nombre}"` : '';
+    const data_today = isToday ? ' data-today="1"' : '';
+    thsHtml += `<th class="${cls}"${title_attr}${data_today}><div class="dd">${dow}</div><div class="dn">${d}</div>${isFer?'<div class="fd2"></div>':''}${isToday?'<div class="today-dot"></div>':''}</th>`;
   });
 
-  // ── OP row ──
-  (()=>{
-    const tr=document.createElement('tr');tr.className='spec-row op-row';
-    const ntd=document.createElement('td');ntd.className='gn';
-    ntd.innerHTML=`<span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--tdim)">Operador</span>`;
-    tr.appendChild(ntd);
-    days.forEach(date=>{
-      const turno=getTurno('D',date);const isSel=date===selDate;const isFer=!!fmap[date];
-      const dayEvs=getEvsByDateAndG(date,'OP');
-      const td=document.createElement('td');
-      let cls=turno==='F'?'tf':(turno?`t${turno}`:'');
-      if(isSel)cls+=' cs';if(isFer&&!isSel)cls+=' cf';
-      td.className=cls.trim();
-      const inner=el('div','cell-inner','');
-      if(dayEvs.length>0){
-        const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        td.style.background=li.color+'28';
-        const lc=el('div','lic-code','');lc.style.color=li.color;lc.style.fontSize='10px';lc.textContent=ev.type;
-        td.title=`${li.name}: ${ev.userName}`;inner.appendChild(lc);
-      } else {
-        const cn=el('div','cn','');cn.textContent=turno==='F'?'F':(turno?''+turno:'·');inner.appendChild(cn);
-        if(isFer)td.title=fmap[date].nombre;
+  // ── Build guardia rows A-E ─────────────────────────────────────────────
+  let rowsHtml = '';
+  ['A','B','C','D','E'].forEach(g => {
+    const isMe = ME && ME.guardia === g;
+    rowsHtml += `<tr class="${isMe?'gs':''}">`;
+    rowsHtml += `<td class="gn"><span style="font-size:11px;font-weight:700;color:${G_COLORS[g]}">${g}</span>${isMe?'<br><span style="font-size:7px;color:var(--adim)">YO</span>':''}</td>`;
+    days.forEach(date => {
+      const turno = getTurno(g, date);
+      const isSel = date===selDate && g===selG;
+      const isFer = !!fmap[date];
+      const dayEvs = getEvsByDateAndG(date, g);
+      const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g);
+      const hasRec = dayRecs.length > 0;
+      let cls = '';
+      if (dayEvs.length===0 && dayRecs.length===0) {
+        if (turno==='F') cls='tf'; else if (turno) cls=`t${turno}`;
       }
-      td.appendChild(inner);tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  })();
-
-  // ── REL row ──
-  (()=>{
-    const tr=document.createElement('tr');tr.className='spec-row rel-row';
-    const ntd=document.createElement('td');ntd.className='gn';
-    ntd.innerHTML=`<span style="font-size:9px;color:#8a9ab5;font-weight:700">REL</span><br><span style="font-size:7px;color:var(--tdim)">Relevante</span>`;
-    tr.appendChild(ntd);
-    days.forEach(date=>{
-      const isSel=date===selDate;const isFer=!!fmap[date];
-      const sched=REL_SCHEDULE[date];const dayEvs=getEvsByDateAndG(date,'REL');
-      const td=document.createElement('td');
-      td.dataset.date=date;td.dataset.relrow='1';
-      let cls='rel-cell';
-      if(sched==='F'||sched===undefined)cls+=' tf';else cls+=` t${sched}`;
-      if(isSel)cls+=' cs';if(isFer&&!isSel)cls+=' cf';
-      td.className=cls.trim();
-      const inner=el('div','cell-inner','');
-      if(dayEvs.length>0&&ME){
-        const ev=dayEvs[0];const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        td.style.background=li.color+'28';
-        const lc=el('div','lic-code','');lc.style.color=li.color;lc.style.fontSize='10px';lc.textContent=ev.type;
-        td.title=`${li.name}: ${ev.userName}`;inner.appendChild(lc);
+      if (isSel && !cls.includes('cs')) cls += ' cs';
+      if (isFer && turno!=='F' && !isSel) cls += ' cf';
+      if (isFer && turno==='F') cls += ' ixf';
+      if (isSel && turno!=='F') cls += ' ix';
+      let inlineStyle = '';
+      let innerHtml = '';
+      if (dayEvs.length > 0) {
+        const ev = dayEvs[0]; const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+        inlineStyle = `background:${li.color}${isSel?'50':'28'}`;
+        innerHtml = `<div class="lic-cell" style="background:${li.color}18"><div class="lic-code" style="color:${li.color}">${ev.type}</div>${turno&&turno!=='F'?`<div class="lic-turno" style="color:${li.color}99">T${turno}</div>`:''}${dayEvs.length>1?`<div class="lic-more" style="background:${li.color}88"></div>`:''}</div>`;
+        const tdTitle = dayEvs.map(e=>`${LIC[e.type]?.name||e.type}: ${e.userName}`).join('\n');
+        if (hasRec) { const isFranco = dayRecs.some(r=>isEsSobreFranco(g,date,r.turno)); cls = isFranco?'has-rec-franco':'has-rec'; }
+        rowsHtml += `<td class="${cls.trim()}" style="${inlineStyle}" data-date="${date}" data-g="${g}" title="${tdTitle}"><div class="cell-inner">${innerHtml}</div></td>`;
+      } else if (hasRec) {
+        const isFranco = dayRecs.some(r=>isEsSobreFranco(g,date,r.turno));
+        cls = isFranco ? 'has-rec-franco' : 'has-rec';
+        const recTitle = dayRecs.map(r=>`Recargo${r.sobreFranco?' sobre franco':''}: T${r.turno}${r.note?' ('+r.note+')':''}`).join('\n');
+        innerHtml = `<div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">${turno&&turno!=='F'?'T'+turno:'F'}</div></div>`;
+        rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="${g}" title="${recTitle}"><div class="cell-inner">${innerHtml}</div></td>`;
       } else {
-        const disp=sched!==undefined?String(sched):'·';
-        inner.appendChild(el('div','cn',disp));
-        if(isFer)td.title=fmap[date].nombre;
+        const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
+        innerHtml = `<div class="cn">${turno==='F'?'F':(turno?''+turno:'·')}</div>`;
+        rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="${g}"${ferTitle}><div class="cell-inner">${innerHtml}</div></td>`;
       }
-      td.appendChild(inner);tr.appendChild(td);
     });
-    tbody.appendChild(tr);
+    rowsHtml += '</tr>';
+  });
 
-    // REL drag-select
-    if(ME&&ME.guardia==='REL'){
-      tr.style.cursor='crosshair';
-      const getRelTd=(cx,cy)=>{ const e=document.elementFromPoint(cx,cy);return e?.closest('td[data-relrow]')||null; };
-      const updateRelRange=(endTd)=>{
-        if(!endTd||!relDsStart)return;
-        const hd=endTd.dataset.date;
-        const[a,b]=hd<relDsStart?[hd,relDsStart]:[relDsStart,hd];
-        relDsStart=a;relDsEnd=b;
-        tr.querySelectorAll('td[data-relrow]').forEach(t=>{
-          const d=t.dataset.date;t.classList.remove('rel-ds-start','rel-ds-range');
-          if(d===relDsStart)t.classList.add('rel-ds-start');
-          else if(d>relDsStart&&d<=relDsEnd)t.classList.add('rel-ds-range');
-        });
-      };
-      scr.addEventListener('mousedown',e=>{const td=e.target.closest('td[data-relrow]');if(!td)return;e.preventDefault();relClearHighlights();relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;td.classList.add('rel-ds-start');},{passive:false});
-      scr.addEventListener('touchstart',e=>{const td=e.target.closest('td[data-relrow]');if(!td)return;e.preventDefault();relClearHighlights();relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;td.classList.add('rel-ds-start');},{passive:false});
-      scr.addEventListener('mousemove',e=>{if(!relDsDragging)return;updateRelRange(getRelTd(e.clientX,e.clientY));});
-      scr.addEventListener('touchmove',e=>{if(!relDsDragging)return;e.preventDefault();const t=e.touches[0];updateRelRange(getRelTd(t.clientX,t.clientY));},{passive:false});
-      const finishRelDrag=()=>{if(!relDsDragging)return;relDsDragging=false;if(relDsStart)openRelPicker(relDsStart,relDsEnd||relDsStart);};
-      scr.addEventListener('mouseup',finishRelDrag);scr.addEventListener('touchend',finishRelDrag);
+  // ── OP row ──────────────────────────────────────────────────────────────
+  rowsHtml += '<tr class="spec-row op-row">';
+  rowsHtml += `<td class="gn"><span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--tdim)">Operador</span></td>`;
+  days.forEach(date => {
+    const turno = getTurno('D', date);
+    const isSel = date===selDate, isFer = !!fmap[date];
+    const dayEvs = getEvsByDateAndG(date, 'OP');
+    let cls = turno==='F'?'tf':(turno?`t${turno}`:'');
+    if (isSel) cls += ' cs'; if (isFer&&!isSel) cls += ' cf';
+    if (dayEvs.length > 0) {
+      const ev=dayEvs[0]; const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+      rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
+    } else {
+      const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
+      rowsHtml += `<td class="${cls.trim()}"${ferTitle}><div class="cell-inner"><div class="cn">${turno==='F'?'F':(turno?''+turno:'·')}</div></div></td>`;
     }
-  })();
+  });
+  rowsHtml += '</tr>';
 
-  tbl.appendChild(tbody);scr.appendChild(tbl);sec.appendChild(scr);
+  // ── REL row ─────────────────────────────────────────────────────────────
+  rowsHtml += '<tr class="spec-row rel-row">';
+  rowsHtml += `<td class="gn"><span style="font-size:9px;color:#8a9ab5;font-weight:700">REL</span><br><span style="font-size:7px;color:var(--tdim)">Relevante</span></td>`;
+  days.forEach(date => {
+    const isSel = date===selDate, isFer = !!fmap[date];
+    const sched = REL_SCHEDULE[date];
+    const dayEvs = getEvsByDateAndG(date, 'REL');
+    let cls = 'rel-cell';
+    if (sched==='F'||sched===undefined) cls += ' tf'; else cls += ` t${sched}`;
+    if (isSel) cls += ' cs'; if (isFer&&!isSel) cls += ' cf';
+    const disp = sched!==undefined ? String(sched) : '·';
+    if (dayEvs.length>0 && ME) {
+      const ev=dayEvs[0]; const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+      rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" data-date="${date}" data-relrow="1" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
+    } else {
+      const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
+      rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-relrow="1"${ferTitle}><div class="cell-inner"><div class="cn">${disp}</div></div></td>`;
+    }
+  });
+  rowsHtml += '</tr>';
 
-  // Scroll to today
-  requestAnimationFrame(()=>{
-    const todayTh=scr.querySelector('th[data-today]');
-    if(todayTh)scr.scrollLeft=Math.max(0,todayTh.offsetLeft-60);
+  // ── Assemble DOM ─────────────────────────────────────────────────────────
+  const sec = el('div','month-section','');
+  sec.innerHTML = `<div class="month-header${isCurrent?' current':''}">${title}</div>`;
+  const scr = el('div','tscr','');
+  scr.innerHTML = `<table class="gt"><thead><tr>${thsHtml}</tr></thead><tbody>${rowsHtml}</tbody></table>`;
+  sec.appendChild(scr);
+
+  // ── Scroll to today ───────────────────────────────────────────────────────
+  requestAnimationFrame(() => {
+    const todayTh = scr.querySelector('th[data-today]');
+    if (todayTh) scr.scrollLeft = Math.max(0, todayTh.offsetLeft - 60);
   });
 
-  // Drag-select for own guardia
-  if(ME&&['A','B','C','D','E'].includes(ME.guardia)){
-    const userG=ME.guardia;
-    const getTdAt=(cx,cy)=>{const e=document.elementFromPoint(cx,cy);return e?.closest(`td[data-date][data-g="${userG}"]`)||null;};
-    const updateRange=(endTd)=>{
-      if(!endTd||!dsStartDate)return;
-      const hd=endTd.dataset.date;
-      const[a,b]=hd<dsStartDate?[hd,dsStartDate]:[dsStartDate,hd];
-      dsStartDate=a;dsEndDate=b;
-      tbl.querySelectorAll(`td[data-g="${userG}"]`).forEach(t=>{
-        const d=t.dataset.date;t.classList.remove('ds-start','ds-range');
-        if(d===dsStartDate)t.classList.add('ds-start');
-        else if(d>dsStartDate&&d<=dsEndDate)t.classList.add('ds-range');
+  // ── Click listeners on guardia cells ─────────────────────────────────────
+  if (ME) {
+    scr.querySelectorAll('td[data-date][data-g]').forEach(td => {
+      td.style.cursor = 'pointer';
+      td.addEventListener('click', e => {
+        if (dsDragging) return;
+        const date = td.dataset.date, g = td.dataset.g;
+        const turno = getTurno(g, date);
+        openCellActions(date, g, turno, getEvsByDateAndG(date, g));
+      });
+    });
+  }
+
+  // ── Drag-select for own guardia ───────────────────────────────────────────
+  if (ME && ['A','B','C','D','E'].includes(ME.guardia)) {
+    const userG = ME.guardia;
+    const getTdAt = (cx,cy) => { const e=document.elementFromPoint(cx,cy); return e?.closest(`td[data-date][data-g="${userG}"]`)||null; };
+    const updateRange = endTd => {
+      if (!endTd||!dsStartDate) return;
+      const hd = endTd.dataset.date;
+      const [a,b] = hd<dsStartDate ? [hd,dsStartDate] : [dsStartDate,hd];
+      dsStartDate=a; dsEndDate=b;
+      scr.querySelectorAll(`td[data-g="${userG}"]`).forEach(t => {
+        const d=t.dataset.date; t.classList.remove('ds-start','ds-range');
+        if (d===dsStartDate) t.classList.add('ds-start');
+        else if (d>dsStartDate && d<=dsEndDate) t.classList.add('ds-range');
       });
     };
     scr.addEventListener('mousedown',e=>{const td=e.target.closest(`td[data-date][data-g="${userG}"]`);if(!td)return;e.preventDefault();dsClearHighlights();dsDragging=true;dsStartDate=td.dataset.date;dsEndDate=td.dataset.date;dsGuardia=userG;td.classList.add('ds-start');},{passive:false});
@@ -1903,7 +1836,31 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     scr.addEventListener('mousemove',e=>{if(!dsDragging)return;updateRange(getTdAt(e.clientX,e.clientY));});
     scr.addEventListener('touchmove',e=>{if(!dsDragging)return;e.preventDefault();const t=e.touches[0];updateRange(getTdAt(t.clientX,t.clientY));},{passive:false});
     const finishDrag=()=>{if(!dsDragging)return;dsDragging=false;if(dsStartDate)dsOpen(dsStartDate,dsEndDate||dsStartDate,userG);};
-    scr.addEventListener('mouseup',finishDrag);scr.addEventListener('touchend',finishDrag);
+    scr.addEventListener('mouseup',finishDrag); scr.addEventListener('touchend',finishDrag);
+  }
+
+  // ── REL drag-select ───────────────────────────────────────────────────────
+  if (ME && ME.guardia==='REL') {
+    const relTr = scr.querySelector('tr.rel-row');
+    if (relTr) relTr.style.cursor = 'crosshair';
+    const getRelTd=(cx,cy)=>{const e=document.elementFromPoint(cx,cy);return e?.closest('td[data-relrow]')||null;};
+    const updateRelRange=endTd=>{
+      if(!endTd||!relDsStart)return;
+      const hd=endTd.dataset.date;
+      const[a,b]=hd<relDsStart?[hd,relDsStart]:[relDsStart,hd];
+      relDsStart=a;relDsEnd=b;
+      scr.querySelectorAll('td[data-relrow]').forEach(t=>{
+        const d=t.dataset.date;t.classList.remove('rel-ds-start','rel-ds-range');
+        if(d===relDsStart)t.classList.add('rel-ds-start');
+        else if(d>relDsStart&&d<=relDsEnd)t.classList.add('rel-ds-range');
+      });
+    };
+    scr.addEventListener('mousedown',e=>{const td=e.target.closest('td[data-relrow]');if(!td)return;e.preventDefault();relClearHighlights();relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;td.classList.add('rel-ds-start');},{passive:false});
+    scr.addEventListener('touchstart',e=>{const td=e.target.closest('td[data-relrow]');if(!td)return;e.preventDefault();relClearHighlights();relDsDragging=true;relDsStart=td.dataset.date;relDsEnd=td.dataset.date;td.classList.add('rel-ds-start');},{passive:false});
+    scr.addEventListener('mousemove',e=>{if(!relDsDragging)return;updateRelRange(getRelTd(e.clientX,e.clientY));});
+    scr.addEventListener('touchmove',e=>{if(!relDsDragging)return;e.preventDefault();const t=e.touches[0];updateRelRange(getRelTd(t.clientX,t.clientY));},{passive:false});
+    const finishRelDrag=()=>{if(!relDsDragging)return;relDsDragging=false;if(relDsStart)openRelPicker(relDsStart,relDsEnd||relDsStart);};
+    scr.addEventListener('mouseup',finishRelDrag); scr.addEventListener('touchend',finishRelDrag);
   }
 
   return sec;
@@ -2297,12 +2254,16 @@ Object.assign(window, {
 (async()=>{
   const savedTheme=lsGet('gd-theme');
   if(savedTheme==='light'){document.body.classList.add('light');const b=document.getElementById('theme-btn');if(b)b.textContent='● OSCURO';}
-  await loadData();
+  const n=new Date(); calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
+  // Pre-cargar feriados y Firebase en paralelo para máxima velocidad
+  const [,] = await Promise.all([
+    getFeriados(n.getFullYear()),
+    loadData()
+  ]);
   startRealtimeListeners();
   dsInit();
   updateUBar();
   renderVacTable();
-  const n=new Date();calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
   await renderCal();
   if(ME){ renderEvP(); renderRecPanel(); if(ME.guardia==='REL') renderRelPanel(); }
 })();
