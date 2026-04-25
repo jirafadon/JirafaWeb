@@ -1,0 +1,24 @@
+{
+  "name": "Diagrama de Guardia · Planta de Agua PN",
+  "short_name": "Diagrama DG",
+  "description": "Diagrama de guardias rotativas para la Planta de Agua PN",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0c0f",
+  "theme_color": "#0a0c0f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
