@@ -63,10 +63,10 @@ body::before { display: none; }
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-header { text-align: center; margin-bottom: 16px; position: relative; padding: 10px 0 6px; }
-h1 { font-size: clamp(16px,4vw,28px); font-weight: 700; color: var(--tbright); letter-spacing: 2px; text-transform: uppercase; line-height: 1.2; }
+header { text-align: center; margin-bottom: 16px; padding: 14px 0 8px; }
+h1 { font-size: clamp(18px,4.5vw,32px); font-weight: 700; color: var(--tbright); letter-spacing: 2px; text-transform: uppercase; line-height: 1.15; }
 h1 span { color: var(--amber); }
-.hsub { margin-top: 4px; font-size: 11px; color: var(--tdim); letter-spacing: 1px; }
+.hsub { margin-top: 5px; font-size: 11px; color: var(--tdim); letter-spacing: 1px; }
 .header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
 .header-author { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 2px; }
 .header-author span { color: var(--amber); font-weight: 700; }
@@ -302,8 +302,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .tscr::-webkit-scrollbar-track { background: var(--cell-bg); }
 .tscr::-webkit-scrollbar-thumb { background: var(--border); }
 table.gt { border-collapse: collapse; min-width: max-content; }
-table.gt th { padding: 4px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 8px; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 36px; }
-table.gt th.gn { min-width: 56px; width: 56px; position: sticky; left: 0; z-index: 5; border-right: 1px solid #2a3545; }
+table.gt th { padding: 4px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 9px; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 40px; }
+table.gt th.gn { min-width: 62px; width: 62px; position: sticky; left: 0; z-index: 5; border-right: 1px solid #2a3545; }
 table.gt th .dd { font-size: 7px; color: var(--tdim); }
 table.gt th .dn { font-size: 10px; font-weight: 700; color: var(--tbright); }
 table.gt th .fd2 { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin: 1px auto 0; }
@@ -314,12 +314,12 @@ table.gt th.th-today .dn { color: var(--green); }
 table.gt td.gn { font-size: 9px; color: var(--tdim); letter-spacing: .5px; padding: 3px 6px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
 table.gt tr.gs td.gn { color: var(--amber); border-left: 2px solid var(--amber); }
 table.gt tr.srow td.gn { color: var(--blue); border-left: 2px solid var(--blue); }
-table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 36px; height: 38px; position: relative; vertical-align: middle; transition: background .1s; }
+table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 40px; height: 44px; position: relative; vertical-align: middle; transition: background .1s; }
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
-.cn { font-family: var(--font-mono); font-size: 11px; font-weight: 700; line-height: 1; }
+.cn { font-family: var(--font-mono); font-size: 13px; font-weight: 700; line-height: 1; }
 .t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
 .tf { background: rgba(220,38,38,.18) !important; }
-.tf .cn { color: #ff2d2d; font-size: 13px; font-weight: 900; letter-spacing: 0; }
+.tf .cn { color: #ff2d2d; font-size: 15px; font-weight: 900; letter-spacing: 0; }
 body.light .tf { background: rgba(220,38,38,.12) !important; }
 body.light .tf .cn { color: #cc0000; }
 table.gt td.cs .cn { color: rgba(245,166,35,.5); }
@@ -514,11 +514,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
      HEADER
 ════════════════════════════════════════ -->
 <header>
-  <h1>DIAGRAMA DE GUARDIA · <span>PLANTA DE AGUA PN</span></h1>
+  <h1>DIAGRAMA DE GUARDIA</h1>
+  <h2 style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin:3px 0 0">PLANTA DE AGUA PN</h2>
   <div class="hsub">Creado por Joni Cimiotta</div>
-  <div style="position:absolute;top:12px;right:12px;">
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">&#9728; CLARO</button>
-  </div>
 </header>
 
 <!-- ════════════════════════════════════════
@@ -527,7 +525,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <div class="section s-user">
   <div class="section-header" onclick="toggleSection('sec-user')">
     <span class="section-icon" style="color:var(--amber)">&#9673;</span>
-    <span class="section-title">Identificación</span>
+    <span class="section-title" id="sec-user-title">Identificación</span>
     <span class="section-badge" id="user-section-badge">SIN IDENTIFICAR</span>
     <span class="section-arrow" id="sec-user-arrow">&#9660;</span>
   </div>
@@ -549,6 +547,11 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <div class="btn-row">
         <button class="btn btn-outline btn-blue" onclick="openAddEvent()">+ LICENCIA</button>
         <button class="btn btn-outline" onclick="showSection('sec-lic')">&#9776; MIS LICENCIAS</button>
+      </div>
+      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
+          🏭 USINA DIGITAL
+        </a>
         <button class="btn btn-danger" onclick="logout()">SALIR</button>
       </div>
       <!-- Panel relevante (solo si REL) -->
@@ -575,63 +578,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SECCIÓN 2: CONSULTA DE TURNO
-════════════════════════════════════════ -->
-<div class="section s-turno">
-  <div class="section-header" onclick="toggleSection('sec-turno')">
-    <span class="section-icon" style="color:var(--blue)">&#9632;</span>
-    <span class="section-title">Consultar Turno</span>
-    <span class="section-badge" id="turno-section-badge"></span>
-    <span class="section-arrow" id="sec-turno-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-turno-body">
-    <div class="form-grid">
-      <div class="fg">
-        <label>Guardia</label>
-        <select id="sg2">
-          <option value="">&#8212; Guardia &#8212;</option>
-          <option value="A">A</option><option value="B">B</option>
-          <option value="C">C</option><option value="D">D</option>
-          <option value="E">E</option>
-        </select>
-      </div>
-      <div class="fg">
-        <label>Fecha</label>
-        <input type="date" id="sf" min="2025-01-01" max="2030-12-31">
-      </div>
-      <div class="fg fg-btn">
-        <label style="visibility:hidden">‌</label>
-        <button class="btn" onclick="buscar()">&#9654; CONSULTAR</button>
-      </div>
-    </div>
-    <button class="today-link" onclick="setToday()">&#9654; Usar fecha de hoy</button>
-    <div class="loading-msg" id="ldg">&#9654; Consultando feriados...</div>
-    <div class="err-msg" id="err"></div>
-    <div class="drag-hint" id="drag-hint">&#9654; Arrastrá en el diagrama para seleccionar días</div>
-
-    <!-- Resultado -->
-    <div class="result-area" id="ra">
-      <div class="result-header">
-        <div>
-          <div class="rh-date" id="rd"></div>
-          <div class="rh-title" id="rt2"></div>
-        </div>
-        <div class="badges" id="rb"></div>
-      </div>
-      <div class="tabs" id="rtabs">
-        <button class="tab on" data-t="dia" onclick="showRT('dia')">D&Iacute;A</button>
-        <button class="tab" data-t="semana" onclick="showRT('semana')">SEMANA</button>
-        <button class="tab" data-t="mes" onclick="showRT('mes')">MES</button>
-        <button class="tab" data-t="anio" onclick="showRT('anio')">A&Ntilde;O</button>
-      </div>
-      <div class="tab-content on" id="t-dia"></div>
-      <div class="tab-content" id="t-semana"></div>
-      <div class="tab-content" id="t-mes"></div>
-      <div class="tab-content" id="t-anio"></div>
-    </div>
-  </div>
-</div>
+<!-- Consultar Turno eliminado — el diagrama lo reemplaza -->
 
 <!-- ════════════════════════════════════════
      SECCIÓN 3: DIAGRAMA
@@ -667,6 +614,18 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       </div>
     </div>
     <div class="feriado-note" id="fn">&#9432; 2027–2030: feriados inamovibles + Semana Santa. Los días puente se confirman cada año.</div>
+    <!-- Elementos requeridos por JS (antes en Consultar Turno) -->
+    <select id="sg2" style="display:none"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select>
+    <input type="date" id="sf" style="display:none">
+    <div class="loading-msg" id="ldg">&#9654; Consultando feriados...</div>
+    <div class="err-msg" id="err"></div>
+    <div class="drag-hint" id="drag-hint">&#9654; Arrastrá en el diagrama para seleccionar días</div>
+    <!-- Resultado de consulta (oculto pero requerido por JS) -->
+    <div class="result-area" id="ra" style="display:none">
+      <div class="result-header"><div><div class="rh-date" id="rd"></div><div class="rh-title" id="rt2"></div></div><div class="badges" id="rb"></div></div>
+      <div class="tabs" id="rtabs"><button class="tab on" data-t="dia" onclick="showRT('dia')">DÍA</button><button class="tab" data-t="semana" onclick="showRT('semana')">SEMANA</button><button class="tab" data-t="mes" onclick="showRT('mes')">MES</button><button class="tab" data-t="anio" onclick="showRT('anio')">AÑO</button></div>
+      <div class="tab-content on" id="t-dia"></div><div class="tab-content" id="t-semana"></div><div class="tab-content" id="t-mes"></div><div class="tab-content" id="t-anio"></div>
+    </div>
     <div id="cal-body"></div>
   </div>
 </div>
@@ -750,7 +709,52 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 <!-- ════════════════════════════════════════
-     SECCIÓN: HORARIO COMBI
+     SALDO DE LICENCIAS (SAP SF)
+════════════════════════════════════════ -->
+<div class="section s-saldo" id="sec-saldo" style="display:none">
+  <div class="section-header" onclick="toggleSection('sec-saldo')">
+    <span class="section-icon" style="color:#4a9eda">📋</span>
+    <span class="section-title">Saldo de Licencias</span>
+    <span class="section-badge" id="saldo-badge">—</span>
+    <span class="section-arrow" id="sec-saldo-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-saldo-body">
+    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px">SALDO EN SAP SUCCESSFACTORS</div>
+      <a href="https://hcm19.sapsf.com/sf/timeoff?_s.crb=LfHC0XLr7mF90%2b4gm30KqSnrcBWuOJxCmDr8tXRt%2fYs%3d" target="_blank" rel="noopener" style="font-family:var(--font-mono);font-size:9px;color:#4a9eda;text-decoration:none;letter-spacing:1px;border:1px solid rgba(74,158,218,.3);padding:3px 8px;border-radius:4px">↗ VER EN SAP</a>
+    </div>
+    <div id="saldo-cards" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:10px">ACTUALIZAR SALDO</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--tdim);min-width:140px">Vacaciones (días)</label>
+          <input type="number" id="saldo-vac" min="0" max="60" placeholder="16" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--tdim);min-width:140px">Perm. Esp. Guardia (días)</label>
+          <input type="number" id="saldo-peg" min="0" max="30" placeholder="6" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--tdim);min-width:140px">PEG Adicional (días)</label>
+          <input type="number" id="saldo-pega" min="0" max="30" placeholder="4" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label style="font-size:11px;color:var(--tdim);min-width:140px">Desc. Compensatorio (hs)</label>
+          <input type="number" id="saldo-dc" min="0" max="500" placeholder="56" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
+          <label style="font-size:10px;color:var(--tdim);min-width:140px">Última actualización</label>
+          <span id="saldo-updated" style="font-size:10px;color:var(--adim);font-family:var(--font-mono)">—</span>
+        </div>
+      </div>
+      <button onclick="saveSaldo()" style="width:100%;margin-top:12px;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">💾 GUARDAR SALDO</button>
+    </div>
+    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;line-height:1.6">
+      Ingresá los datos desde SAP SF → Ver tipo de tiempo → A fecha de hoy
+    </div>
+  </div>
+</div>
 ════════════════════════════════════════ -->
 <div class="section s-combi">
   <div class="section-header" onclick="toggleSection('sec-combi')">
@@ -879,6 +883,12 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   <div class="section-body" id="sec-audit-body">
     <div id="audit-content" style="padding:4px 0"></div>
   </div>
+</div>
+
+<!-- Botón tema — al pie de la página -->
+<div style="text-align:center;padding:20px 0 10px;border-top:1px solid var(--border);margin-top:8px">
+  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" style="padding:8px 20px;font-size:11px">&#9728; CLARO / OSCURO</button>
+  <div style="margin-top:8px;font-family:var(--font-mono);font-size:8px;color:var(--adim);letter-spacing:2px">DIAGRAMA DE GUARDIA · PLANTA DE AGUA PN</div>
 </div>
 
 </div><!-- /wrap -->
@@ -1619,6 +1629,7 @@ function updateUBar() {
   const rp  = document.getElementById('rec-panel');
   const dh  = document.getElementById('drag-hint');
   const sb  = document.getElementById('user-section-badge');
+  const title = document.getElementById('sec-user-title');
   if (ME) {
     nu.style.display = 'none'; yu.style.display = '';
     document.getElementById('u-av').textContent = ME.name.charAt(0).toUpperCase();
@@ -1626,6 +1637,7 @@ function updateUBar() {
     document.getElementById('u-nm').textContent = ME.name.toUpperCase();
     document.getElementById('u-gd').textContent = G_LABEL[ME.guardia]||ME.guardia;
     sb.textContent = ME.name.toUpperCase();
+    if (title) title.textContent = 'Usuario';
     evp.style.display = ''; rp.style.display = '';
     renderRecPanel();
     if (['A','B','C','D','E'].includes(ME.guardia)) {
@@ -1641,6 +1653,7 @@ function updateUBar() {
     evp.style.display = 'none'; rp.style.display = 'none';
     dh.classList.remove('show');
     sb.textContent = 'SIN IDENTIFICAR';
+    if (title) title.textContent = 'Identificación';
     buildUserGrid();
   }
 }
