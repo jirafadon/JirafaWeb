@@ -1946,7 +1946,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
       const isSel = date===selDate && g===selG;
       const isFer = !!fmap[date];
       const dayEvs = getEvsByDateAndG(date, g);
-      const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g);
+      const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g && ME && r.userId===ME.id);
       const hasRec = dayRecs.length > 0;
       let cls = '';
       if (dayEvs.length===0 && dayRecs.length===0) {
@@ -2238,7 +2238,9 @@ function renderRecPanel(){
   const lbl=document.getElementById('rec-month-lbl');
   if(!lbl)return;
   lbl.textContent=`${MES_L[recMonth].toUpperCase()} ${recYear}`;
-  const monthRecs=RECARGOS.filter(r=>{const p=pd(r.date);return p.m===recMonth&&p.y===recYear;});
+  // Solo recargos del usuario logueado
+  const myRecs=RECARGOS.filter(r=>ME&&r.userId===ME.id);
+  const monthRecs=myRecs.filter(r=>{const p=pd(r.date);return p.m===recMonth&&p.y===recYear;});
   const franco=monthRecs.filter(r=>r.sobreFranco);
   document.getElementById('rec-cnt-badge').textContent=monthRecs.length?`${monthRecs.length} recargo${monthRecs.length>1?'s':''}` :'';
   const sum=document.getElementById('rec-summary');sum.innerHTML='';
@@ -2270,28 +2272,92 @@ function toggleRelPanel(){const body=document.getElementById('rel-body'),arr=doc
 function renderRelPanel(){if(!ME||ME.guardia!=='REL')return;renderRelFranco();renderRelCoverageList();}
 function renderRelFranco(){
   const div=document.getElementById('rel-franco-stats');div.innerHTML='';
-  const now=new Date();const y=now.getFullYear(),m=now.getMonth()+1;
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth()+1;
   const todayStr=dk(y,m,now.getDate());
-  const monthDays=getMonthDays(y,m).filter(d=>d<=todayStr);
 
-  // Solo cuenta días con turno asignado explícitamente en REL_SCHEDULE
-  // Franco = solo cuando sched === 'F'  → 6h cada uno
-  // Trabajado = cuando sched es número (1, 2, 3…)
-  let francoCount=0;
-  let workedCount=0;
-  monthDays.forEach(d=>{
-    const sched=REL_SCHEDULE[d];
-    if(sched==='F') francoCount++;
-    else if(sched!==undefined && sched!==null) workedCount++;
-    // undefined = sin asignar → no cuenta
-  });
+  // Hora de inicio de cada turno (en horas)
+  const TURNO_START = { 1:0, 2:6, 3:12, 4:18 };
+  // Hora de fin de cada turno
+  const TURNO_END   = { 1:6, 2:12, 3:18, 4:24 };
 
-  const francoHours=francoCount*6;
-  div.innerHTML=`<div style="display:flex;gap:10px;flex-wrap:wrap;">
-    <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
-    <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoCount}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
-    <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${francoHours}h</div><div class="rec-stat-lbl">HS FRANCO</div></div>
-  </div><div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}</div>`;
+  // Obtener todos los días del mes hasta hoy con su schedule
+  const monthDays = getMonthDays(y,m).filter(d=>d<=todayStr);
+
+  // Construir lista de días con turno asignado (trabajado o F)
+  const schedule = monthDays.map(d=>({ date:d, sched: REL_SCHEDULE[d] }));
+
+  let workedCount = 0;
+  let francoFullDays = 0;
+  let totalFrancoHours = 0;
+
+  // Recorrer bloques: buscar grupos de F entre días trabajados
+  // Para cada día F, contar 24h. Para los bordes, sumar horas parciales.
+  for (let i = 0; i < schedule.length; i++) {
+    const { date, sched } = schedule[i];
+    if (sched === undefined || sched === null) continue; // sin asignar
+
+    const turno = parseInt(sched);
+    if (!isNaN(turno)) {
+      workedCount++;
+      // Buscar el bloque de F que sigue a este día trabajado
+      // Horas desde fin del turno hasta medianoche = 24 - TURNO_END[turno]
+      // (si T3 termina a las 24 = inicio del día siguiente, no hay horas extra ese día)
+      // Horas después de terminar turno en este día:
+      const hoursAfter = 24 - TURNO_END[turno]; // horas libres en este día laboral
+
+      // Contar días F consecutivos después
+      let j = i + 1;
+      let fDays = 0;
+      while (j < schedule.length && schedule[j].sched === 'F') { fDays++; j++; }
+
+      if (fDays > 0) {
+        // Hay días F después — sumar horas parciales del día trabajado
+        totalFrancoHours += hoursAfter;
+        francoFullDays += fDays;
+        totalFrancoHours += fDays * 24;
+
+        // Horas antes de empezar el siguiente día trabajado (si existe)
+        if (j < schedule.length && schedule[j].sched !== undefined && schedule[j].sched !== null) {
+          const nextTurno = parseInt(schedule[j].sched);
+          if (!isNaN(nextTurno)) {
+            // Horas desde medianoche hasta inicio del siguiente turno
+            const hoursBefore = TURNO_START[nextTurno];
+            totalFrancoHours += hoursBefore;
+          }
+        } else if (j >= schedule.length) {
+          // El bloque F llega hasta hoy (último día del período)
+          // Contar horas hasta ahora
+          const nowHour = now.getHours() + now.getMinutes()/60;
+          totalFrancoHours += nowHour;
+        }
+      } else if (hoursAfter > 0 && i === schedule.length - 1) {
+        // Último día trabajado hoy — contar horas transcurridas desde fin del turno
+        const endH = TURNO_END[turno];
+        const nowH = now.getHours() + now.getMinutes()/60;
+        if (nowH > endH) totalFrancoHours += nowH - endH;
+      }
+    } else if (sched === 'F') {
+      francoFullDays++;
+      // Los días F sueltos sin contexto de días trabajados ya se cuentan en el bloque
+    }
+  }
+
+  // Redondear a 1 decimal
+  const hDisplay = Number.isInteger(totalFrancoHours)
+    ? totalFrancoHours + 'h'
+    : totalFrancoHours.toFixed(1) + 'h';
+
+  div.innerHTML=`
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
+      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoFullDays}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
+      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${hDisplay}</div><div class="rec-stat-lbl">HS FRANCO</div></div>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">
+      ${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}
+      <span style="color:var(--adim);margin-left:6px">· incluye horas parciales</span>
+    </div>`;
 }
 function renderRelCoverageList(){
   const list=document.getElementById('rel-coverage-list');list.innerHTML='';
