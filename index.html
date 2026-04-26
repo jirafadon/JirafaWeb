@@ -22,7 +22,7 @@
   --green: #3dba78;
   --t1: #5ba3d9;
   --t2: #3dba78;
-  --t3: #f5a623;
+  --t3: #ff8c42;
   --t4: #b07ee8;
   --text: #c8d0d8;
   --tdim: #5a6270;
@@ -189,7 +189,7 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .b-dow { background: #1a2030; border: 1px solid var(--border); color: var(--blue); }
 .b-tur { background: var(--aglow); border: 1px solid var(--adim); color: var(--amber); }
 .b-fra { background: #1a2030; border: 1px solid var(--border); color: var(--tdim); }
-.b-fer { background: rgba(224,82,82,.1); border: 1px solid var(--red); color: var(--red); }
+.b-fer { background: rgba(245,208,32,.1); border: 1px solid rgba(245,208,32,.4); color: #f5d020; }
 .b-nol { background: rgba(74,158,218,.1); border: 1px solid var(--blue); color: var(--blue); }
 
 /* TABS */
@@ -221,20 +221,20 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .week-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; padding: 8px; }
 .wd { border: 1px solid var(--border); border-radius: 3px; padding: 6px 3px 5px; text-align: center; position: relative; }
 .wd.ws { border-color: var(--amber); background: var(--aglow); }
-.wd.wf2 { border-color: var(--red) !important; }
+.wd.wf2 { border-color: #f5d020 !important; }
 .wd.wp { opacity: .33; }
 .wdn { font-family: var(--font-mono); font-size: 7px; color: var(--tdim); letter-spacing: 1px; margin-bottom: 2px; }
 .wdd { font-size: 15px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
 .wd.ws .wdd { color: var(--amber); }
-.wd.wf2 .wdd { color: var(--red); }
+.wd.wf2 .wdd { color: #f5d020; }
 .wdt { font-size: 12px; font-weight: 900; color: var(--tdim); }
 .wd.ws .wdt { color: var(--amber) !important; }
 .wdt.c1 { color: var(--t1); } .wdt.c2 { color: var(--t2); } .wdt.c3 { color: var(--t3); } .wdt.c4 { color: var(--t4); }
 .wd-lic { font-size: 9px; font-weight: 700; padding: 1px 3px; border-radius: 2px; display: inline-block; color: #000; margin-top: 1px; }
 .w-evdots { display: flex; justify-content: center; gap: 2px; margin-top: 2px; flex-wrap: wrap; }
 .evdot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-.fdot { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin: 2px auto 0; }
-.ftt { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); background: #160808; border: 1px solid var(--red); border-radius: 2px; padding: 3px 5px; font-family: var(--font-mono); font-size: 8px; color: var(--red); white-space: nowrap; z-index: 20; display: none; pointer-events: none; }
+.fdot { width: 4px; height: 4px; background: #f5d020; border-radius: 50%; margin: 2px auto 0; }
+.ftt { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); background: #161200; border: 1px solid #f5d020; border-radius: 2px; padding: 3px 5px; font-family: var(--font-mono); font-size: 8px; color: #f5d020; white-space: nowrap; z-index: 20; display: none; pointer-events: none; }
 .wd.wf2:hover .ftt { display: block; }
 
 /* Yscroll */
@@ -269,13 +269,13 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .rec-stat-val { font-size: 24px; font-weight: 900; line-height: 1; }
 .rec-stat-lbl { font-family: var(--font-mono); font-size: 8px; color: var(--tdim); letter-spacing: 1px; margin-top: 2px; }
 .rec-item { display: flex; align-items: center; gap: 0; background: var(--cell-bg); border: 1px solid var(--border); border-left: 3px solid var(--rec-color); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
-.rec-item.franco { border-left-color: #ff3b30; }
+.rec-item.franco { border-left-color: #c832c8; }
 .rec-item-info { padding: 8px 10px; flex: 1; }
 .rec-item-date { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); margin-bottom: 2px; }
 .rec-item-main { font-size: 13px; font-weight: 700; color: var(--tbright); margin-bottom: 2px; }
 .rec-item-tag { display: inline-block; font-family: var(--font-mono); font-size: 9px; padding: 1px 6px; border-radius: 2px; }
 .rec-item-tag.normal { background: rgba(255,107,53,.15); color: var(--rec-color); }
-.rec-item-tag.franco { background: rgba(255,59,48,.15); color: #ff3b30; }
+.rec-item-tag.franco { background: rgba(200,50,200,.15); color: #c832c8; border: 1px solid rgba(200,50,200,.3); }
 .rec-del { background: none; border: none; color: #3a4a5a; font-size: 13px; cursor: pointer; padding: 8px 10px; }
 .rec-del:hover { color: var(--red); }
 .nav-btn { background: none; border: 1px solid var(--border); color: var(--tdim); font-family: var(--font-mono); font-size: 10px; padding: 4px 8px; border-radius: 3px; cursor: pointer; transition: all .2s; }
@@ -308,7 +308,6 @@ table.gt th .dd { font-size: 7px; color: var(--tdim); }
 table.gt th .dn { font-size: 10px; font-weight: 700; color: var(--tbright); }
 table.gt th .fd2 { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin: 1px auto 0; }
 table.gt th.sc .dn { color: var(--amber); } table.gt th.sc { border-color: var(--amber) !important; background: rgba(245,166,35,.06) !important; }
-table.gt th.fc .dn { color: var(--red); } table.gt th.fc { border-color: var(--red) !important; }
 table.gt th.th-today { border-color: var(--green) !important; background: rgba(61,186,120,.06) !important; }
 table.gt th.th-today .dn { color: var(--green); }
 .today-dot { width: 4px; height: 4px; background: var(--green); border-radius: 50%; margin: 1px auto 0; }
@@ -319,12 +318,18 @@ table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); m
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
 .cn { font-family: var(--font-mono); font-size: 11px; font-weight: 700; line-height: 1; }
 .t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
-.tf .cn { color: #263040; font-size: 10px; }
-body:not(.light) .tf .cn { color: #263040; }
+.tf { background: rgba(220,38,38,.18) !important; }
+.tf .cn { color: #ff2d2d; font-size: 13px; font-weight: 900; letter-spacing: 0; }
+body.light .tf { background: rgba(220,38,38,.12) !important; }
+body.light .tf .cn { color: #cc0000; }
 table.gt td.cs .cn { color: rgba(245,166,35,.5); }
+/* Feriado: solo amarillo en el número del día del header */
+table.gt th.fc .dn { color: #f5d020; font-weight: 900; }
+table.gt th.fc { border-color: rgba(245,208,32,.4) !important; background: rgba(245,208,32,.04) !important; }
+table.gt th.fc .fd2 { background: #f5d020; }
 table.gt td.rs { background: rgba(245,166,35,.03); }
 table.gt td.ix { background: rgba(245,166,35,.15) !important; border: 1px solid rgba(245,166,35,.4); }
-table.gt td.cf { background: rgba(224,82,82,.03); }
+table.gt td.cf { background: rgba(245,208,32,.04); }
 table.gt td.ixf { background: rgba(224,82,82,.12) !important; border: 1px solid rgba(224,82,82,.35); }
 table.gt td.ds-start { background: rgba(61,186,120,.35) !important; border-color: var(--green) !important; }
 table.gt td.ds-range { background: rgba(61,186,120,.18) !important; border-color: rgba(61,186,120,.4) !important; }
@@ -349,8 +354,8 @@ table.gt tr.rel-row td.rel-cell[style*="cursor"]:hover { filter: brightness(1.4)
 .rec-label-sub { font-family: var(--font-mono); font-size: 7px; font-weight: 700; color: rgba(255,255,255,.7); line-height: 1; margin-top: 1px; }
 /* Celda con recargo normal */
 table.gt td.has-rec { background: rgba(255,107,53,.22) !important; border: 1px solid rgba(255,107,53,.5) !important; }
-/* Celda con recargo sobre franco */
-table.gt td.has-rec-franco { background: rgba(255,59,48,.22) !important; border: 1px solid rgba(255,59,48,.5) !important; }
+/* Celda con recargo sobre franco — magenta para distinguir del rojo de franco */
+table.gt td.has-rec-franco { background: rgba(200,50,200,.22) !important; border: 1px solid rgba(200,50,200,.5) !important; }
 
 /* REL turno picker */
 .rel-t-btn { background: var(--cell-bg); border: 2px solid; border-radius: 8px; padding: 12px 6px 8px; font-family: var(--font-ui); font-size: 22px; font-weight: 900; cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 3px; -webkit-tap-highlight-color: transparent; }
@@ -369,7 +374,7 @@ body.light .rel-t-btn { background: #f0f4f8; }
 .ll-name { font-family: var(--font-mono); font-size: 9px; color: var(--tdim); }
 /* Recargo legend badge */
 .ll-badge.rec-badge { background: var(--rec-color) !important; color: #fff; }
-.ll-badge.rec-franco-badge { background: #ff3b30 !important; color: #fff; }
+.ll-badge.rec-franco-badge { background: #c832c8 !important; color: #fff; }
 
 /* Turno color dots */
 .t-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
@@ -437,7 +442,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .lt-name { font-family: var(--font-mono); font-size: 9px; letter-spacing: .5px; flex: 1; color: var(--text); }
 
 /* Franco indicator */
-.rec-franco-tag { display: inline-block; background: rgba(255,59,48,.15); color: #ff3b30; border: 1px solid rgba(255,59,48,.3); padding: 4px 10px; border-radius: 3px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+.rec-franco-tag { display: inline-block; background: rgba(200,50,200,.15); color: #c832c8; border: 1px solid rgba(200,50,200,.3); padding: 4px 10px; border-radius: 3px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
 .rec-normal-tag { display: inline-block; background: rgba(255,107,53,.12); color: var(--rec-color); border: 1px solid rgba(255,107,53,.3); padding: 4px 10px; border-radius: 3px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
 
 /* Bottom sheets */
@@ -838,7 +843,8 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
           <div class="ll-item"><span class="t-dot" style="background:var(--t3)"></span><span class="ll-badge" style="background:var(--t3);color:#000">T3</span><span class="ll-name">12:00–17:59</span></div>
           <div class="ll-item"><span class="t-dot" style="background:var(--t4)"></span><span class="ll-badge" style="background:var(--t4);color:#000">T4</span><span class="ll-name">18:00–23:59</span></div>
           <div class="ll-item"><span class="ll-badge" style="background:#1e2530;color:var(--tdim)">F</span><span class="ll-name">Franco</span></div>
-          <div class="ll-item"><span class="ll-badge" style="background:rgba(224,82,82,.15);color:var(--red)">&#9632;</span><span class="ll-name">Feriado</span></div>
+          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.2);color:#f5d020;font-weight:900">F</span><span class="ll-name">Franco — celda roja</span></div>
+          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.15);color:#f5d020">&#9632;</span><span class="ll-name">Feriado — número en amarillo</span></div>
         </div>
       </div>
       <div>
