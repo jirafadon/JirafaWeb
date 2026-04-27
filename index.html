@@ -708,53 +708,73 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
 </div>
 
+
 <!-- ════════════════════════════════════════
-     SALDO DE LICENCIAS (SAP SF)
+     SECCIÓN: USINA DIGITAL
 ════════════════════════════════════════ -->
-<div class="section s-saldo" id="sec-saldo" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-saldo')">
-    <span class="section-icon" style="color:#4a9eda">📋</span>
-    <span class="section-title">Saldo de Licencias</span>
-    <span class="section-badge" id="saldo-badge">—</span>
-    <span class="section-arrow" id="sec-saldo-arrow">&#9660;</span>
+<div class="section s-usina" id="sec-usina" style="display:none">
+  <div class="section-header" onclick="toggleSection('sec-usina')">
+    <span class="section-icon">🏭</span>
+    <span class="section-title">Usina Digital</span>
+    <span class="section-badge" id="usina-badge">SAP SF</span>
+    <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
   </div>
-  <div class="section-body" id="sec-saldo-body">
-    <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px">SALDO EN SAP SUCCESSFACTORS</div>
-      <a href="https://hcm19.sapsf.com/sf/timeoff?_s.crb=LfHC0XLr7mF90%2b4gm30KqSnrcBWuOJxCmDr8tXRt%2fYs%3d" target="_blank" rel="noopener" style="font-family:var(--font-mono);font-size:9px;color:#4a9eda;text-decoration:none;letter-spacing:1px;border:1px solid rgba(74,158,218,.3);padding:3px 8px;border-radius:4px">↗ VER EN SAP</a>
-    </div>
-    <div id="saldo-cards" style="display:flex;flex-direction:column;gap:8px"></div>
-    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:10px">ACTUALIZAR SALDO</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <label style="font-size:11px;color:var(--tdim);min-width:140px">Vacaciones (días)</label>
-          <input type="number" id="saldo-vac" min="0" max="60" placeholder="16" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+  <div class="section-body" id="sec-usina-body">
+    <!-- Link SAP -->
+    <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com"
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(74,158,218,.08);border:1px solid rgba(74,158,218,.25);border-radius:8px;text-decoration:none;margin-bottom:16px;transition:all .2s"
+       onmouseover="this.style.background='rgba(74,158,218,.14)'" onmouseout="this.style.background='rgba(74,158,218,.08)'">
+      <span style="font-size:20px">🏭</span>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:#4a9eda;letter-spacing:2px">INGRESAR A USINA DIGITAL</div>
+        <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">SAP SUCCESSFACTORS · CENTRAL PUERTO</div>
+      </div>
+      <span style="font-size:16px;color:#4a9eda;margin-left:auto">↗</span>
+    </a>
+
+    <!-- Saldo de licencias -->
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:12px">SALDO DE LICENCIAS</div>
+    <div id="usina-saldo-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+
+    <!-- Formulario de carga -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:12px">ACTUALIZAR SALDO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">VACACIONES (días)</label>
+          <input type="number" id="usina-vac" min="0" max="60" placeholder="ej: 16"
+            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <label style="font-size:11px;color:var(--tdim);min-width:140px">Perm. Esp. Guardia (días)</label>
-          <input type="number" id="saldo-peg" min="0" max="30" placeholder="6" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        <div>
+          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">DC (horas)</label>
+          <input type="number" id="usina-dc" min="0" max="999" placeholder="ej: 56"
+            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <label style="font-size:11px;color:var(--tdim);min-width:140px">PEG Adicional (días)</label>
-          <input type="number" id="saldo-pega" min="0" max="30" placeholder="4" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
+        <div>
+          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG (días)</label>
+          <input type="number" id="usina-peg" min="0" max="30" placeholder="ej: 6"
+            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <label style="font-size:11px;color:var(--tdim);min-width:140px">Desc. Compensatorio (hs)</label>
-          <input type="number" id="saldo-dc" min="0" max="500" placeholder="56" style="flex:1;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:13px;font-family:var(--font-mono)">
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:2px">
-          <label style="font-size:10px;color:var(--tdim);min-width:140px">Última actualización</label>
-          <span id="saldo-updated" style="font-size:10px;color:var(--adim);font-family:var(--font-mono)">—</span>
+        <div>
+          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG ADICIONAL (días)</label>
+          <input type="number" id="usina-pega" min="0" max="30" placeholder="ej: 4"
+            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
         </div>
       </div>
-      <button onclick="saveSaldo()" style="width:100%;margin-top:12px;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">💾 GUARDAR SALDO</button>
+      <button onclick="saveUsina()" style="width:100%;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s">
+        💾 GUARDAR
+      </button>
+      <div id="usina-updated" style="text-align:center;font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:8px"></div>
     </div>
-    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;line-height:1.6">
+    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center">
       Ingresá los datos desde SAP SF → Ver tipo de tiempo → A fecha de hoy
     </div>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════
+     SECCIÓN: HORARIO COMBI
 ════════════════════════════════════════ -->
 <div class="section s-combi">
   <div class="section-header" onclick="toggleSection('sec-combi')">
@@ -1639,6 +1659,14 @@ function updateUBar() {
     sb.textContent = ME.name.toUpperCase();
     if (title) title.textContent = 'Usuario';
     evp.style.display = ''; rp.style.display = '';
+    // Auto-colapsar sección de usuario si ya está identificado
+    const secBody = document.getElementById('sec-user-body');
+    const secArrow = document.getElementById('sec-user-arrow');
+    if (secBody) { secBody.classList.remove('open'); }
+    if (secArrow) secArrow.textContent = '▼';
+    // Mostrar Usina Digital
+    const usina = document.getElementById('sec-usina');
+    if (usina) usina.style.display = '';
     renderRecPanel();
     if (['A','B','C','D','E'].includes(ME.guardia)) {
       document.getElementById('sg2').value = ME.guardia;
@@ -1654,6 +1682,8 @@ function updateUBar() {
     dh.classList.remove('show');
     sb.textContent = 'SIN IDENTIFICAR';
     if (title) title.textContent = 'Identificación';
+    const usina = document.getElementById('sec-usina');
+    if (usina) usina.style.display = 'none';
     buildUserGrid();
   }
 }
@@ -1721,14 +1751,59 @@ async function saveEvent() {
     dcHours: type==='DC' ? dcHours : null,
     createdAt: now.toISOString(), createdAtStr: fmtTs(now), createdBy: ME.name
   };
+
+  // Calcular y guardar el descuento junto con el evento
+  const desc = calcDescuento(type, ME.guardia, from, to);
+  if (desc) ev.descuento = desc;
+
   EVENTS.push(ev);
   await saveOneEvent(ev);  // Firebase
+
+  // Aplicar descuento al saldo Usina si hay saldo cargado
+  if (desc) {
+    const snap = await getDocs(fbCol('usina-saldo'));
+    const docData = snap.docs.find(d => d.id === ME.id)?.data();
+    if (docData) {
+      let nuevo = { ...docData };
+      const n2 = new Date();
+      nuevo.updatedAt = n2.toISOString();
+      nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      if (desc.tipo === 'vac')  nuevo.vac  = Math.max(0, (parseFloat(nuevo.vac) ||0) - desc.valor);
+      else if (desc.tipo === 'dc')   nuevo.dc   = Math.max(0, (parseFloat(nuevo.dc)  ||0) - desc.valor);
+      else if (desc.tipo === 'peg')  nuevo.peg  = Math.max(0, (parseFloat(nuevo.peg) ||0) - desc.valor);
+      else if (desc.tipo === 'pega') nuevo.pega = Math.max(0, (parseFloat(nuevo.pega)||0) - desc.valor);
+      await fbSet('usina-saldo', ME.id, nuevo);
+      renderUsinaPanel();
+    }
+  }
+
   closeM('m-event'); renderEvP(); renderCal(); if (S) renderRT(RT);
 }
 async function deleteEvent(id) {
   if (!confirm('¿Eliminar esta licencia?')) return;
+  const ev = EVENTS.find(e => e.id === id);
   EVENTS = EVENTS.filter(e => e.id !== id);
   await deleteOneEvent(id);  // Firebase
+
+  // Revertir descuento si el evento tenía uno guardado
+  if (ev && ev.descuento && ev.userId === ME?.id) {
+    const snap = await getDocs(fbCol('usina-saldo'));
+    const docData = snap.docs.find(d => d.id === ME.id)?.data();
+    if (docData) {
+      let nuevo = { ...docData };
+      const n2 = new Date();
+      nuevo.updatedAt = n2.toISOString();
+      nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      const desc = ev.descuento;
+      if (desc.tipo === 'vac')       nuevo.vac  = (parseFloat(nuevo.vac) ||0) + desc.valor;
+      else if (desc.tipo === 'dc')   nuevo.dc   = (parseFloat(nuevo.dc)  ||0) + desc.valor;
+      else if (desc.tipo === 'peg')  nuevo.peg  = (parseFloat(nuevo.peg) ||0) + desc.valor;
+      else if (desc.tipo === 'pega') nuevo.pega = (parseFloat(nuevo.pega)||0) + desc.valor;
+      await fbSet('usina-saldo', ME.id, nuevo);
+      renderUsinaPanel();
+    }
+  }
+
   renderEvP(); renderCal(); if (S) renderRT(RT);
 }
 function renderEvP() {
@@ -2551,6 +2626,7 @@ Object.assign(window, {
   buscar, renderVacTable,
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
+  saveUsina, renderUsinaPanel,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2661,6 +2737,219 @@ function initCombi() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CÁLCULO DE DESCUENTO DE SALDO
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Retorna todos los días entre fromDate y toDate inclusive
+function getDaysInRange(from, to) {
+  const days = [];
+  let cur = new Date(from + 'T12:00:00');
+  const end = new Date(to + 'T12:00:00');
+  while (cur <= end) {
+    days.push(dk2(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return days;
+}
+
+// Detecta si un período pedido es una "semana completa de guardia"
+// = todos los días laborables entre dos francos consecutivos están incluidos
+// Condición: el día inmediatamente anterior al from es F, y el día posterior al to es F
+// Y el turno pedido es T2 o T3
+function isSemanCompleta(guardia, from, to) {
+  const fromD = new Date(from + 'T12:00:00');
+  const toD   = new Date(to   + 'T12:00:00');
+
+  // Día anterior al from
+  const prevD = new Date(fromD); prevD.setDate(prevD.getDate() - 1);
+  const prevStr = dk2(prevD);
+  const prevTurno = getTurno(guardia, prevStr);
+
+  // Día siguiente al to
+  const nextD = new Date(toD); nextD.setDate(nextD.getDate() + 1);
+  const nextStr = dk2(nextD);
+  const nextTurno = getTurno(guardia, nextStr);
+
+  // El período empieza justo después de un franco Y termina justo antes de un franco
+  const startsAfterFranco = prevTurno === 'F';
+  const endsBeforeFranco  = nextTurno === 'F';
+
+  if (!startsAfterFranco || !endsBeforeFranco) return false;
+
+  // Verificar que todos los días del período son T2 o T3
+  const days = getDaysInRange(from, to);
+  const allT2orT3 = days.every(d => {
+    const t = getTurno(guardia, d);
+    return t === '2' || t === 2 || t === 3 || t === '3';
+  });
+
+  return allT2orT3;
+}
+
+// Calcula cuánto descontar del saldo según tipo de licencia y período
+function calcDescuento(type, guardia, from, to) {
+  const days = getDaysInRange(from, to);
+  const totalDias = days.length;
+
+  if (type === 'V') {
+    // Vacaciones: días trabajados del período (excluir francos)
+    const diasTrabajados = days.filter(d => {
+      const t = getTurno(guardia, d);
+      return t !== 'F' && t !== null;
+    }).length;
+
+    // Regla ante-franco: si es semana completa de guardia en T2 o T3 → descuenta 1 menos
+    const antefranco = isSemanCompleta(guardia, from, to);
+    const descuento = antefranco ? diasTrabajados - 1 : diasTrabajados;
+
+    return {
+      tipo: 'vac',
+      valor: Math.max(0, descuento),
+      detalle: antefranco
+        ? `${diasTrabajados} días laborables − 1 ante-franco = ${descuento} días`
+        : `${diasTrabajados} días laborables`
+    };
+  }
+
+  if (type === 'DC') {
+    // Descanso Compensatorio: 6 horas por día pedido
+    const horas = totalDias * 6;
+    return {
+      tipo: 'dc',
+      valor: horas,
+      detalle: `${totalDias} día${totalDias>1?'s':''} × 6 hs = ${horas} hs`
+    };
+  }
+
+  if (type === 'PG') {
+    // Permiso Guardia (PEG): 1 día por día pedido
+    return {
+      tipo: 'peg',
+      valor: totalDias,
+      detalle: `${totalDias} día${totalDias>1?'s':''}`
+    };
+  }
+
+  if (type === 'PA') {
+    // Permiso Guardia Adicional (PEGA): igual que PEG, 1 día por día pedido
+    return {
+      tipo: 'pega',
+      valor: totalDias,
+      detalle: `${totalDias} día${totalDias>1?'s':''}`
+    };
+  }
+
+  // Para otros tipos (matrimonio, nacimiento, etc.) no se descuenta del saldo Usina
+  return null;
+}
+
+// Aplica el descuento al saldo guardado en Firebase
+async function aplicarDescuento(type, guardia, from, to) {
+  if (!ME) return;
+  const desc = calcDescuento(type, guardia, from, to);
+  if (!desc) return;
+
+  const snap = await getDocs(fbCol('usina-saldo'));
+  const docData = snap.docs.find(d => d.id === ME.id)?.data();
+  if (!docData) return;
+
+  let nuevo = { ...docData };
+  const now = new Date();
+  nuevo.updatedAt = now.toISOString();
+  nuevo.updatedStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  if (desc.tipo === 'vac')       nuevo.vac  = Math.max(0, (parseFloat(nuevo.vac) || 0) - desc.valor);
+  else if (desc.tipo === 'dc')   nuevo.dc   = Math.max(0, (parseFloat(nuevo.dc)  || 0) - desc.valor);
+  else if (desc.tipo === 'peg')  nuevo.peg  = Math.max(0, (parseFloat(nuevo.peg) || 0) - desc.valor);
+  else if (desc.tipo === 'pega') nuevo.pega = Math.max(0, (parseFloat(nuevo.pega)|| 0) - desc.valor);
+
+  await fbSet('usina-saldo', ME.id, nuevo);
+  renderUsinaPanel();
+  return desc;
+}
+
+// Revierte el descuento al borrar una licencia
+async function revertirDescuento(ev) {
+  if (!ME || ev.userId !== ME.id) return;
+  if (!ev.descuento) return;
+
+  const snap = await getDocs(fbCol('usina-saldo'));
+  const docData = snap.docs.find(d => d.id === ME.id)?.data();
+  if (!docData) return;
+
+  let nuevo = { ...docData };
+  const now = new Date();
+  nuevo.updatedAt = now.toISOString();
+  nuevo.updatedStr = now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  if (ev.descuento.tipo === 'vac') {
+    nuevo.vac = (parseFloat(nuevo.vac) || 0) + ev.descuento.valor;
+  } else if (ev.descuento.tipo === 'dc') {
+    nuevo.dc = (parseFloat(nuevo.dc) || 0) + ev.descuento.valor;
+  } else if (ev.descuento.tipo === 'peg') {
+    nuevo.peg = (parseFloat(nuevo.peg) || 0) + ev.descuento.valor;
+  }
+
+  await fbSet('usina-saldo', ME.id, nuevo);
+  renderUsinaPanel();
+}
+// ═══════════════════════════════════════════════════════════════════════════
+async function saveUsina() {
+  if (!ME) return;
+  const vac  = parseFloat(document.getElementById('usina-vac').value)  || 0;
+  const dc   = parseFloat(document.getElementById('usina-dc').value)   || 0;
+  const peg  = parseFloat(document.getElementById('usina-peg').value)  || 0;
+  const pega = parseFloat(document.getElementById('usina-pega').value) || 0;
+  const now  = new Date();
+  const data = { userId: ME.id, userName: ME.name, vac, dc, peg, pega,
+    updatedAt: now.toISOString(),
+    updatedStr: now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})
+  };
+  await fbSet('usina-saldo', ME.id, data);
+  renderUsinaPanel();
+}
+
+async function loadUsinaData() {
+  if (!ME) return;
+  const snap = await getDocs(fbCol('usina-saldo'));
+  const doc = snap.docs.find(d => d.id === ME.id);
+  if (!doc) return;
+  const d = doc.data();
+  document.getElementById('usina-vac').value  = d.vac  || '';
+  document.getElementById('usina-dc').value   = d.dc   || '';
+  document.getElementById('usina-peg').value  = d.peg  || '';
+  document.getElementById('usina-pega').value = d.pega || '';
+  document.getElementById('usina-updated').textContent = d.updatedStr ? '↻ ' + d.updatedStr : '';
+  renderUsinaSaldoCards(d);
+}
+
+function renderUsinaSaldoCards(d) {
+  const container = document.getElementById('usina-saldo-cards');
+  if (!container) return;
+  const items = [
+    { label:'VACACIONES', value: (d.vac||0) + ' días',  color:'#3dba78', key:'vac' },
+    { label:'DC',         value: (d.dc||0)  + ' hs',    color:'#5ba3d9', key:'dc'  },
+    { label:'PEG',        value: (d.peg||0) + ' días',  color:'#b07ee8', key:'peg' },
+    { label:'PEG ADIC.',  value: (d.pega||0)+ ' días',  color:'#ff8c42', key:'pega'},
+  ];
+  container.innerHTML = items.map(i => `
+    <div style="flex:1;min-width:120px;background:var(--panel);border:1px solid var(--border);border-left:3px solid ${i.color};border-radius:8px;padding:10px 12px">
+      <div style="font-size:9px;font-family:var(--font-mono);color:var(--adim);letter-spacing:2px;margin-bottom:4px">${i.label}</div>
+      <div style="font-size:22px;font-weight:700;color:${i.color}">${i.value}</div>
+    </div>`).join('');
+  // Mostrar última actualización
+  const upd = document.getElementById('usina-updated');
+  if (upd && d.updatedStr) upd.textContent = '↻ ' + d.updatedStr;
+}
+
+async function renderUsinaPanel() {
+  if (!ME) return;
+  const sec = document.getElementById('sec-usina');
+  if (sec) sec.style.display = '';
+  await loadUsinaData();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
@@ -2697,6 +2986,7 @@ function initCombi() {
     renderRecPanel();
     if (ME.guardia==='REL') renderRelPanel();
     if (ME.name===ADMIN_NAME) renderAuditPanel();
+    renderUsinaPanel();
   }
   _initDone = true;
   startRealtimeListeners();
