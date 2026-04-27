@@ -1082,6 +1082,9 @@ import {
   getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot,
   getDoc, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {
+  getMessaging, getToken, onMessage
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDt4Xjuo1H8kfBgpN0vyTPIlOwdyp5g7Dc",
@@ -1093,6 +1096,84 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+
+// ── FCM — Notificaciones push ────────────────────────────────────────────
+// Reemplazá este valor con tu VAPID key de Firebase Console
+// → Configuración ⚙️ → Cloud Messaging → Web Push certificates → Generate key pair
+const VAPID_KEY = 'BEFTXxO20rNUUe1p1vw_wlnM9Q30IYkHVOJwgH0J6Ju2egRmb8NNNqQq1_fEEU24irnRJiryd7upoux0_wAWCaI';
+
+// Usuarios que reciben notificaciones de nuevas licencias
+const NOTIFY_USERS = ['Jonatan', 'Lucas'];
+
+let messaging = null;
+try {
+  messaging = getMessaging(fbApp);
+} catch(e) {
+  console.log('FCM no disponible:', e.message);
+}
+
+async function initNotifications() {
+  if (!messaging || !ME || !NOTIFY_USERS.includes(ME.name)) return;
+  if (VAPID_KEY === 'REEMPLAZAR_CON_TU_VAPID_KEY') return;
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') { console.log('Notificaciones denegadas'); return; }
+
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: await navigator.serviceWorker.ready });
+    if (!token) return;
+
+    // Guardar token en Firebase asociado al usuario
+    await fbSet('fcm-tokens', ME.id, {
+      userId: ME.id,
+      userName: ME.name,
+      token,
+      updatedAt: new Date().toISOString()
+    });
+    console.log('✅ Notificaciones activadas para', ME.name);
+
+    // Escuchar notificaciones con la app abierta
+    onMessage(messaging, payload => {
+      const { title, body } = payload.notification || {};
+      showInAppNotification(title, body);
+    });
+
+  } catch(e) {
+    console.log('Error activando notificaciones:', e.message);
+  }
+}
+
+function showInAppNotification(title, body) {
+  const n = document.createElement('div');
+  n.style.cssText = `
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;
+    background:#1a2535;border:1px solid var(--amber);border-radius:10px;
+    padding:12px 18px;max-width:320px;width:90%;box-shadow:0 4px 24px rgba(0,0,0,.5);
+    animation:slideDown .3s ease;font-family:var(--font-ui)
+  `;
+  n.innerHTML = `
+    <div style="font-weight:700;color:var(--amber);font-size:13px;margin-bottom:3px">🔔 ${title||'Nueva licencia'}</div>
+    <div style="font-size:12px;color:var(--tbright)">${body||''}</div>
+  `;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 5000);
+}
+
+// Enviar notificación vía Firebase Functions (Cloud Function)
+// Como no tenemos servidor, usamos un workaround:
+// guardamos la licencia nueva en 'notifications-queue' y el SW la procesa
+async function queueNotification(ev) {
+  const licName = LIC[ev.type]?.name || ev.type;
+  await fbSet('notifications-queue', ev.id, {
+    evId: ev.id,
+    title: `📋 Nueva licencia — ${ev.userName}`,
+    body: `${licName} · ${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}`,
+    guardia: ev.guardia,
+    userName: ev.userName,
+    createdAt: new Date().toISOString(),
+    processed: false
+  });
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TIPOS DE LICENCIA
@@ -1620,6 +1701,8 @@ async function selectUser(u) {
   renderCal();
   renderVacTable();
   if (u.name === ADMIN_NAME) renderAuditPanel();
+  // Activar notificaciones push para Jonatan y Lucas
+  initNotifications();
 }
 
 async function logout() {
@@ -1778,6 +1861,7 @@ async function saveEvent() {
 
   EVENTS.push(ev);
   await saveOneEvent(ev);  // Firebase
+  await queueNotification(ev); // Notificación push
 
   // Aplicar descuento al saldo Usina si hay saldo cargado
   if (desc) {
@@ -2272,6 +2356,7 @@ async function dsSave(){
   if(desc) ev.descuento=desc;
 
   EVENTS.push(ev);await saveOneEvent(ev);
+  await queueNotification(ev); // Notificación push
 
   // Aplicar descuento al saldo Usina
   if(desc){
@@ -3045,6 +3130,7 @@ async function renderUsinaPanel() {
     if (ME.guardia==='REL') renderRelPanel();
     if (ME.name===ADMIN_NAME) renderAuditPanel();
     renderUsinaPanel();
+    initNotifications();
   }
   _initDone = true;
   startRealtimeListeners();
