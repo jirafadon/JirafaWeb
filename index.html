@@ -2258,8 +2258,39 @@ async function dsSave(){
   const now=new Date();
   let effectiveTo=dsEndDate;
   if(['A','B','C','D','E'].includes(dsGuardia)){effectiveTo=computeLicenseDates(dsGuardia,dsStartDate,dsEndDate).effectiveTo;}
+
+  // PEGA: validar múltiplo de 2
+  if(dsSelLic==='PA'){
+    const dias=getDaysInRange(dsStartDate,dsEndDate).length;
+    if(dias<2||dias%2!==0){alert(`⚠ El PEGA se toma de a 2 días. Período seleccionado: ${dias} día${dias>1?'s':''}.`);return;}
+  }
+
   const ev={id:'ev'+Date.now(),userId:ME.id,userName:ME.name,guardia:dsGuardia||ME.guardia,type:dsSelLic,startDate:dsStartDate,endDate:effectiveTo,note,dcHours:dsSelLic==='DC'?dsDCH:null,createdAt:now.toISOString(),createdAtStr:fmtTs(now),createdBy:ME.name};
-  EVENTS.push(ev);await saveOneEvent(ev);  // Firebase
+
+  // Calcular descuento y guardarlo en el evento
+  const desc=calcDescuento(dsSelLic,dsGuardia||ME.guardia,dsStartDate,dsEndDate);
+  if(desc) ev.descuento=desc;
+
+  EVENTS.push(ev);await saveOneEvent(ev);
+
+  // Aplicar descuento al saldo Usina
+  if(desc){
+    const snap=await getDocs(fbCol('usina-saldo'));
+    const docData=snap.docs.find(d=>d.id===ME.id)?.data();
+    if(docData){
+      let nuevo={...docData};
+      const n2=new Date();
+      nuevo.updatedAt=n2.toISOString();
+      nuevo.updatedStr=n2.toLocaleDateString('es-AR')+' '+n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      if(desc.tipo==='vac')       nuevo.vac  =Math.max(0,(parseFloat(nuevo.vac) ||0)-desc.valor);
+      else if(desc.tipo==='dc')   nuevo.dc   =Math.max(0,(parseFloat(nuevo.dc)  ||0)-desc.valor);
+      else if(desc.tipo==='peg')  nuevo.peg  =Math.max(0,(parseFloat(nuevo.peg) ||0)-desc.valor);
+      else if(desc.tipo==='pega') nuevo.pega =Math.max(0,(parseFloat(nuevo.pega)||0)-desc.valor);
+      await fbSet('usina-saldo',ME.id,nuevo);
+      renderUsinaPanel();
+    }
+  }
+
   document.getElementById('ds-picker').classList.add('off');dsClearHighlights();renderEvP();renderCal();if(S)renderRT(RT);
 }
 function dsClearHighlights(){
