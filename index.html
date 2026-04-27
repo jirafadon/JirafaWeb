@@ -934,6 +934,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <input type="number" id="ev-dc-hours" min="1" max="6" value="6" style="font-size:15px;padding:9px 12px;">
       <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:3px;letter-spacing:1px">Máx 6h/día · Mín 1h/día · No se aplica en días franco</div>
     </div>
+    <div id="pega-hint" style="display:none;font-family:var(--font-mono);font-size:10px;color:#ff8c42;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.25);border-radius:6px;padding:8px 12px;margin-bottom:4px">
+      ⚠ El PEGA se toma de a 2 días. Seleccioná un período de 2, 4, 6… días.
+    </div>
     <div class="mfg"><label>Nota (opcional)</label><textarea id="ev-note" placeholder="Observación, motivo..."></textarea></div>
     <div class="err-msg" id="ev-err"></div>
     <div class="mbtns">
@@ -1094,18 +1097,19 @@ const db = getFirestore(fbApp);
 // ═══════════════════════════════════════════════════════════════════════════
 // TIPOS DE LICENCIA
 const LIC = {
-  V:  { name: 'Vacaciones',          color: '#3dba78' },
-  DC: { name: 'Desc. Compensatorio', color: '#4a9eda' },
-  PG: { name: 'Permiso Guardia',     color: '#f5a623' },
-  MA: { name: 'Matrimonio',          color: '#b07ee8' },
-  NA: { name: 'Nacimiento',          color: '#5ab8a8' },
-  AD: { name: 'Adopción',            color: '#8a9ab5' },
-  MU: { name: 'Mudanza',             color: '#e09030' },
-  MH: { name: 'Matrimonio Hijos',    color: '#d4a0f0' },
-  LM: { name: 'Lic. Médica',         color: '#e05252' },
-  LS: { name: 'Lic. s/Sueldo',       color: '#f0a030' },
-  LP: { name: 'Lic. Parental',       color: '#c07ee8' },
-  DP: { name: 'Día Personal',        color: '#8a9ab5' },
+  V:  { name: 'Vacaciones',            color: '#3dba78' },
+  DC: { name: 'Desc. Compensatorio',   color: '#4a9eda' },
+  PG: { name: 'Perm. Guardia (PEG)',   color: '#f5a623' },
+  PA: { name: 'Perm. Guardia Adic. (PEGA)', color: '#ff8c42' },
+  MA: { name: 'Matrimonio',            color: '#b07ee8' },
+  NA: { name: 'Nacimiento',            color: '#5ab8a8' },
+  AD: { name: 'Adopción',              color: '#8a9ab5' },
+  MU: { name: 'Mudanza',               color: '#e09030' },
+  MH: { name: 'Matrimonio Hijos',      color: '#d4a0f0' },
+  LM: { name: 'Lic. Médica',           color: '#e05252' },
+  LS: { name: 'Lic. s/Sueldo',         color: '#f0a030' },
+  LP: { name: 'Lic. Parental',         color: '#c07ee8' },
+  DP: { name: 'Día Personal',          color: '#8a9ab5' },
 };
 
 const G_COLORS = { A: '#f5a623', B: '#3dba78', C: '#4a9eda', D: '#b07ee8', E: '#e05252', OP: '#5ab8a8', REL: '#8a9ab5' };
@@ -1153,6 +1157,8 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
         btn.classList.add('sel'); btn.style.background = v.color + '22'; btn.style.borderColor = v.color;
         if (gid === 'lic-type-grid') {
           document.getElementById('dc-hours-row').style.display = code === 'DC' ? '' : 'none';
+          const hint = document.getElementById('pega-hint');
+          if (hint) hint.style.display = code === 'PA' ? '' : 'none';
         }
       });
       g.appendChild(btn);
@@ -1703,6 +1709,7 @@ function openAddEvent() {
   document.getElementById('ev-note').value  = '';
   document.getElementById('ev-dc-hours').value = 6;
   document.getElementById('dc-hours-row').style.display = 'none';
+  const ph = document.getElementById('pega-hint'); if(ph) ph.style.display='none';
   document.getElementById('ev-err').classList.remove('show');
   document.getElementById('m-event').classList.remove('off');
 }
@@ -1740,6 +1747,19 @@ async function saveEvent() {
   if (!type) { err.textContent = '⚠ Seleccioná el tipo de licencia.'; err.classList.add('show'); return; }
   if (!from || !to) { err.textContent = '⚠ Completá las fechas.'; err.classList.add('show'); return; }
   if (from > to) { err.textContent = '⚠ La fecha inicio debe ser antes que la de fin.'; err.classList.add('show'); return; }
+
+  // PEGA: mínimo 2 días
+  if (type === 'PA') {
+    const dias = getDaysInRange(from, to).length;
+    if (dias < 2) {
+      err.textContent = '⚠ El PEGA se toma de a 2 días mínimo.';
+      err.classList.add('show'); return;
+    }
+    if (dias % 2 !== 0) {
+      err.textContent = `⚠ El PEGA se toma de a 2 días. Ajustá el período (${dias} día${dias>1?'s':''} seleccionado${dias>1?'s':''}).`;
+      err.classList.add('show'); return;
+    }
+  }
   const now = new Date();
   let effectiveTo = to;
   if (['A','B','C','D','E'].includes(ME.guardia)) {
@@ -1834,6 +1854,13 @@ function renderEvList() {
     dts.textContent = ev.startDate===ev.endDate ? formatDate(ev.startDate) : formatDate(ev.startDate)+' → '+formatDate(ev.endDate);
     if (ev.type==='DC'&&ev.dcHours) dts.textContent += '  ·  '+ev.dcHours+'h/día';
     info.appendChild(dts);
+    // Mostrar detalle del descuento aplicado al saldo
+    if (ev.descuento && ev.userId === ME?.id) {
+      const dd = el('div','','');
+      dd.style.cssText = 'font-size:9px;font-family:var(--font-mono);color:var(--adim);margin-top:3px;letter-spacing:.5px';
+      dd.textContent = '↓ ' + ev.descuento.detalle + ' descontado' + (ev.descuento.tipo==='dc'?'s':'') + ' del saldo';
+      info.appendChild(dd);
+    }
     if (ev.note) { const nt = el('div','ev-note', ev.note); info.appendChild(nt); }
     const ts = el('div','ev-ts',''); ts.innerHTML = '⏱ '+( ev.createdAtStr||fmtTs(new Date(ev.createdAt)))+' · <strong>'+ev.createdBy+'</strong>'; info.appendChild(ts);
     item.appendChild(info);
