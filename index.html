@@ -308,10 +308,10 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .tscr::-webkit-scrollbar-track { background: var(--cell-bg); }
 .tscr::-webkit-scrollbar-thumb { background: var(--border); }
 table.gt { border-collapse: collapse; min-width: max-content; }
-table.gt th { padding: 4px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 9px; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 40px; }
+table.gt th { padding: 6px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 9px; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 46px; border-radius: 4px; }
 table.gt th.gn { min-width: 62px; width: 62px; position: sticky; left: 0; z-index: 5; border-right: 1px solid #2a3545; }
 table.gt th .dd { font-size: 7px; color: var(--tdim); }
-table.gt th .dn { font-size: 10px; font-weight: 700; color: var(--tbright); }
+table.gt th .dn { font-size: 12px; font-weight: 800; color: var(--tbright); }
 table.gt th .fd2 { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin: 1px auto 0; }
 table.gt th.sc .dn { color: var(--amber); } table.gt th.sc { border-color: var(--amber) !important; background: rgba(245,166,35,.06) !important; }
 table.gt th.th-today { border-color: var(--green) !important; background: rgba(61,186,120,.06) !important; }
@@ -320,12 +320,20 @@ table.gt th.th-today .dn { color: var(--green); }
 table.gt td.gn { font-size: 9px; color: var(--tdim); letter-spacing: .5px; padding: 3px 6px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
 table.gt tr.gs td.gn { color: var(--amber); border-left: 2px solid var(--amber); }
 table.gt tr.srow td.gn { color: var(--blue); border-left: 2px solid var(--blue); }
-table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 40px; height: 44px; position: relative; vertical-align: middle; transition: background .1s; }
+table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 46px; height: 46px; position: relative; vertical-align: middle;
+  border-radius: 5px;
+  transition: all .15s ease;
+}
+table.gt td:not(.gn):hover { filter: brightness(1.35); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.4); }
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
-.cn { font-family: var(--font-mono); font-size: 13px; font-weight: 700; line-height: 1; }
+.cn { font-family: var(--font-mono); font-size: 14px; font-weight: 900; line-height: 1; letter-spacing: -.5px; }
 .t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
-.tf { background: rgba(220,38,38,.18) !important; }
-.tf .cn { color: #ff2d2d; font-size: 15px; font-weight: 900; letter-spacing: 0; }
+.t1 { background: linear-gradient(145deg,rgba(91,163,217,.18) 0%,rgba(91,163,217,.06) 100%) !important; border-color: rgba(91,163,217,.2) !important; }
+.t2 { background: linear-gradient(145deg,rgba(61,186,120,.18) 0%,rgba(61,186,120,.06) 100%) !important; border-color: rgba(61,186,120,.2) !important; }
+.t3 { background: linear-gradient(145deg,rgba(245,166,35,.18) 0%,rgba(245,166,35,.06) 100%) !important; border-color: rgba(245,166,35,.2) !important; }
+.t4 { background: linear-gradient(145deg,rgba(176,126,232,.18) 0%,rgba(176,126,232,.06) 100%) !important; border-color: rgba(176,126,232,.2) !important; }
+.tf { background: linear-gradient(145deg,rgba(220,38,38,.22) 0%,rgba(220,38,38,.08) 100%) !important; border-color: rgba(220,38,38,.25) !important; }
+.tf .cn { color: #ff4444; font-size: 15px; font-weight: 900; letter-spacing: 0; text-shadow: 0 0 8px rgba(255,50,50,.4); }
 body.light .tf { background: rgba(220,38,38,.12) !important; }
 body.light .tf .cn { color: #cc0000; }
 table.gt td.cs .cn { color: rgba(245,166,35,.5); }
@@ -511,6 +519,39 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .rel-panel-title { font-family: var(--font-mono); font-size: 10px; color: #8a9ab5; letter-spacing: 3px; }
 .rel-body { display: none; padding: 14px; border-top: 1px solid var(--border); }
 .rel-body.open { display: block; }
+
+/* ── Temas de celdas seleccionables desde admin ─────────────────────────── */
+/* CRISTAL (default) — ya están los gradientes base arriba */
+
+/* RELIEVE */
+[data-cell-theme="relieve"] table.gt td.t1 { background: linear-gradient(180deg,#1a3a5c 0%,#0d1a28 60%) !important; border-color:#2a4060 !important; }
+[data-cell-theme="relieve"] table.gt td.t2 { background: linear-gradient(180deg,#1a3d2e 0%,#0d1f16 60%) !important; border-color:#1e4030 !important; }
+[data-cell-theme="relieve"] table.gt td.t3 { background: linear-gradient(180deg,#3d2e00 0%,#1f1700 60%) !important; border-color:#4a3800 !important; }
+[data-cell-theme="relieve"] table.gt td.t4 { background: linear-gradient(180deg,#2e1a4a 0%,#1a1228 60%) !important; border-color:#3a2060 !important; }
+[data-cell-theme="relieve"] table.gt td.tf  { background: linear-gradient(180deg,#3d1010 0%,#1f0808 60%) !important; border-color:#501010 !important; }
+[data-cell-theme="relieve"] table.gt td:not(.gn) { box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 3px 6px rgba(0,0,0,0.5); }
+[data-cell-theme="relieve"] table.gt td:not(.gn):hover { transform:translateY(1px); box-shadow:inset 0 2px 4px rgba(0,0,0,.6); filter:brightness(1.1); }
+
+/* NEON */
+[data-cell-theme="neon"] table.gt td.t1 { background:#07090c !important; border-color:#5ba3d9 !important; box-shadow:0 0 8px rgba(91,163,217,.3), inset 0 0 8px rgba(91,163,217,.05); }
+[data-cell-theme="neon"] table.gt td.t2 { background:#07090c !important; border-color:#3dba78 !important; box-shadow:0 0 8px rgba(61,186,120,.3), inset 0 0 8px rgba(61,186,120,.05); }
+[data-cell-theme="neon"] table.gt td.t3 { background:#07090c !important; border-color:#f5a623 !important; box-shadow:0 0 8px rgba(245,166,35,.3), inset 0 0 8px rgba(245,166,35,.05); }
+[data-cell-theme="neon"] table.gt td.t4 { background:#07090c !important; border-color:#b07ee8 !important; box-shadow:0 0 8px rgba(176,126,232,.3), inset 0 0 8px rgba(176,126,232,.05); }
+[data-cell-theme="neon"] table.gt td.tf  { background:#07090c !important; border-color:#e05252 !important; box-shadow:0 0 8px rgba(220,82,82,.3), inset 0 0 8px rgba(220,82,82,.05); }
+[data-cell-theme="neon"] .t1 .cn { text-shadow:0 0 10px rgba(91,163,217,.8); }
+[data-cell-theme="neon"] .t2 .cn { text-shadow:0 0 10px rgba(61,186,120,.8); }
+[data-cell-theme="neon"] .t3 .cn { text-shadow:0 0 10px rgba(245,166,35,.8); }
+[data-cell-theme="neon"] .t4 .cn { text-shadow:0 0 10px rgba(176,126,232,.8); }
+[data-cell-theme="neon"] .tf .cn  { text-shadow:0 0 10px rgba(220,82,82,.8); }
+[data-cell-theme="neon"] table.gt td:not(.gn):hover { filter:brightness(1.5); box-shadow:0 0 18px currentColor; transform:translateY(-1px); }
+
+/* MINIMAL */
+[data-cell-theme="minimal"] table.gt td.t1 { background:rgba(91,163,217,.09) !important; border-color:rgba(91,163,217,.15) !important; }
+[data-cell-theme="minimal"] table.gt td.t2 { background:rgba(61,186,120,.09) !important; border-color:rgba(61,186,120,.15) !important; }
+[data-cell-theme="minimal"] table.gt td.t3 { background:rgba(245,166,35,.09) !important; border-color:rgba(245,166,35,.15) !important; }
+[data-cell-theme="minimal"] table.gt td.t4 { background:rgba(176,126,232,.09) !important; border-color:rgba(176,126,232,.15) !important; }
+[data-cell-theme="minimal"] table.gt td.tf  { background:rgba(220,38,38,.1) !important; border-color:rgba(220,38,38,.18) !important; }
+[data-cell-theme="minimal"] table.gt td:not(.gn):hover { transform:none; box-shadow:none; filter:brightness(1.2); }
 </style>
 </head>
 <body>
@@ -884,9 +925,10 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   <div class="section-body" id="sec-audit-body">
     <!-- Tabs de administración -->
     <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:80px">👥 ACCESOS</button>
-      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:80px">📋 LICENCIAS</button>
-      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:80px">⭐ RELEVANTE</button>
+      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:70px">👥 ACCESOS</button>
+      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:70px">📋 LICENCIAS</button>
+      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:70px">⭐ RELEVANTE</button>
+      <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab" style="flex:1;min-width:70px">🎨 APARIENCIA</button>
     </div>
     <!-- Tab: Accesos -->
     <div id="admin-accesos">
@@ -899,6 +941,10 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <!-- Tab: Relevante (REL_SCHEDULE de Lucas) -->
     <div id="admin-relevante" style="display:none">
       <div id="admin-rel-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Apariencia del diagrama -->
+    <div id="admin-apariencia" style="display:none">
+      <div id="admin-appear-content" style="padding:4px 0"></div>
     </div>
   </div>
 </div>
@@ -1133,20 +1179,61 @@ function initNotifications() {
 }
 
 function showInAppNotification(title, body) {
+  // Overlay de fondo
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9998;
+    background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    animation:fadeIn .25s ease;
+  `;
+
   const n = document.createElement('div');
   n.style.cssText = `
-    position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;
-    background:#1a2535;border:1px solid var(--amber);border-radius:10px;
-    padding:12px 18px;max-width:320px;width:90%;box-shadow:0 4px 24px rgba(0,0,0,.5);
-    animation:slideDown .3s ease;font-family:var(--font-ui);cursor:pointer
+    background:#0f1520;
+    border:1px solid #f5a623;
+    border-radius:16px;
+    padding:22px 24px 18px;
+    max-width:320px;width:88%;
+    box-shadow:0 8px 40px rgba(0,0,0,.8), 0 0 0 1px rgba(245,166,35,.15);
+    font-family:var(--font-ui);
+    animation:popIn .3s cubic-bezier(.34,1.56,.64,1);
   `;
+
+  // Tipo de licencia extraido del body (ej: "Vacaciones · 29 ABR")
+  const parts = body ? body.split(' · ') : [];
+  const licType = parts[0] || '';
+  const dates   = parts.slice(1).join(' · ') || '';
+
   n.innerHTML = `
-    <div style="font-weight:700;color:var(--amber);font-size:13px;margin-bottom:3px">🔔 ${title||'Nueva licencia'}</div>
-    <div style="font-size:12px;color:var(--tbright)">${body||''}</div>
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
+      <div style="font-size:28px;line-height:1;flex-shrink:0">🔔</div>
+      <div>
+        <div style="font-size:10px;letter-spacing:2px;color:#f5a62388;text-transform:uppercase;margin-bottom:4px">NUEVA LICENCIA</div>
+        <div style="font-size:16px;font-weight:800;color:#f5d37a;line-height:1.2">${(title||'').replace('📋 Nueva licencia — ','')}</div>
+      </div>
+    </div>
+    ${licType ? `
+    <div style="background:#1a2535;border:1px solid #2a3545;border-radius:10px;padding:10px 14px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:#e8eaf0;margin-bottom:3px">${licType}</div>
+      ${dates ? `<div style="font-size:12px;color:#8a9ab5">📅 ${dates}</div>` : ''}
+    </div>` : ''}
+    <button onclick="this.closest('.notif-overlay').remove()" style="
+      width:100%;padding:10px;
+      background:rgba(245,166,35,0.12);
+      border:1px solid rgba(245,166,35,0.35);
+      border-radius:8px;
+      color:#f5a623;font-size:12px;font-weight:700;letter-spacing:1px;
+      cursor:pointer;font-family:var(--font-ui)
+    ">ENTENDIDO</button>
   `;
-  n.onclick = () => n.remove();
-  document.body.appendChild(n);
-  setTimeout(() => { if (n.parentNode) n.remove(); }, 7000);
+
+  overlay.classList.add('notif-overlay');
+  overlay.appendChild(n);
+  // Click fuera cierra
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  setTimeout(() => { if (overlay.parentNode) overlay.remove(); }, 10000);
 }
 
 // Escribe la notificación en Firestore → el listener de cada usuario conectado
@@ -2789,7 +2876,7 @@ Object.assign(window, {
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
   saveUsina, renderUsinaPanel,
-  showAdminTab, renderAdminLicencias, renderAdminRelevante,
+  showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3058,6 +3145,110 @@ async function revertirDescuento(ev) {
 }
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Admin tab switching ───────────────────────────────────────────────────
+function renderAdminApariencia() {
+  const div = document.getElementById('admin-appear-content');
+
+  // Tema actual guardado (o default cristal)
+  const cur = localStorage.getItem('diag-cell-theme') || 'cristal';
+
+  const themes = [
+    {
+      id: 'cristal',
+      name: 'Cristal Oscuro',
+      desc: 'Gradientes suaves, bordes de color, hover luminoso',
+      preview: [
+        { bg: 'linear-gradient(145deg,rgba(91,163,217,.18),rgba(91,163,217,.06))', border: 'rgba(91,163,217,.25)', color: '#5ba3d9', t: '1' },
+        { bg: 'linear-gradient(145deg,rgba(61,186,120,.18),rgba(61,186,120,.06))', border: 'rgba(61,186,120,.25)', color: '#3dba78', t: '2' },
+        { bg: 'linear-gradient(145deg,rgba(245,166,35,.18),rgba(245,166,35,.06))', border: 'rgba(245,166,35,.25)', color: '#f5a623', t: '3' },
+        { bg: 'linear-gradient(145deg,rgba(220,38,38,.22),rgba(220,38,38,.08))', border: 'rgba(220,38,38,.3)', color: '#ff4444', t: 'F' },
+      ]
+    },
+    {
+      id: 'relieve',
+      name: 'Industrial Relieve',
+      desc: 'Efecto 3D, luz cenital, sombra profunda',
+      preview: [
+        { bg: 'linear-gradient(180deg,#1a3a5c,#0d1a28)', border: '#2a3545', color: '#5ba3d9', t: '1' },
+        { bg: 'linear-gradient(180deg,#1a3d2e,#0d1f16)', border: '#2a3545', color: '#3dba78', t: '2' },
+        { bg: 'linear-gradient(180deg,#3d2e00,#1f1700)', border: '#2a3545', color: '#f5a623', t: '3' },
+        { bg: 'linear-gradient(180deg,#3d1010,#1f0808)', border: '#2a3545', color: '#e05252', t: 'F' },
+      ]
+    },
+    {
+      id: 'neon',
+      name: 'Neón Grid',
+      desc: 'Bordes brillantes, efecto glow, alto contraste',
+      preview: [
+        { bg: '#07090c', border: '#5ba3d9', color: '#5ba3d9', t: '1', glow: '#5ba3d9' },
+        { bg: '#07090c', border: '#3dba78', color: '#3dba78', t: '2', glow: '#3dba78' },
+        { bg: '#07090c', border: '#f5a623', color: '#f5a623', t: '3', glow: '#f5a623' },
+        { bg: '#07090c', border: '#e05252', color: '#e05252', t: 'F', glow: '#e05252' },
+      ]
+    },
+    {
+      id: 'minimal',
+      name: 'Minimal Plano',
+      desc: 'Sin efectos, máxima legibilidad, muy limpio',
+      preview: [
+        { bg: 'rgba(91,163,217,.1)', border: 'rgba(91,163,217,.15)', color: '#5ba3d9', t: '1' },
+        { bg: 'rgba(61,186,120,.1)', border: 'rgba(61,186,120,.15)', color: '#3dba78', t: '2' },
+        { bg: 'rgba(245,166,35,.1)', border: 'rgba(245,166,35,.15)', color: '#f5a623', t: '3' },
+        { bg: 'rgba(220,38,38,.12)', border: 'rgba(220,38,38,.2)', color: '#e05252', t: 'F' },
+      ]
+    },
+  ];
+
+  let html = `<div style="margin-bottom:14px;font-size:11px;color:var(--tdim)">
+    Elegí el estilo visual de las celdas del diagrama. Se aplica para todos los usuarios.
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">`;
+
+  themes.forEach(th => {
+    const isActive = cur === th.id;
+    html += `<div onclick="applyCellTheme('${th.id}')" style="
+      background:var(--panel);border:2px solid ${isActive?'var(--amber)':'var(--border)'};
+      border-radius:10px;padding:14px;cursor:pointer;
+      box-shadow:${isActive?'0 0 16px rgba(245,166,35,.15)':'none'};
+      transition:all .2s;
+    ">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <span style="font-weight:700;color:${isActive?'var(--amber)':'var(--tbright)'};font-size:13px">${th.name}</span>
+          ${isActive?'<span style="margin-left:8px;font-size:9px;background:var(--amber);color:#000;border-radius:3px;padding:1px 6px;font-weight:700;letter-spacing:1px">ACTIVO</span>':''}
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--tdim);margin-bottom:10px">${th.desc}</div>
+      <div style="display:flex;gap:6px">
+        ${th.preview.map(p=>`
+          <div style="
+            flex:1;height:40px;border-radius:6px;
+            background:${p.bg};border:1px solid ${p.border};
+            display:flex;align-items:center;justify-content:center;
+            ${p.glow?`box-shadow:0 0 8px ${p.glow}44;`:''}
+            font-family:monospace;font-size:14px;font-weight:900;
+            color:${p.color};
+            ${p.glow?`text-shadow:0 0 8px ${p.glow}88;`:''}
+          ">${p.t}</div>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+function applyCellTheme(themeId) {
+  localStorage.setItem('diag-cell-theme', themeId);
+  applyStoredCellTheme();
+  renderAdminApariencia(); // refrescar para mostrar activo
+}
+
+function applyStoredCellTheme() {
+  const t = localStorage.getItem('diag-cell-theme') || 'cristal';
+  // Quitar clases anteriores
+  document.documentElement.setAttribute('data-cell-theme', t);
+}
+
 function showAdminTab(tab) {
   ['accesos','licencias','relevante'].forEach(t => {
     document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
@@ -3066,6 +3257,7 @@ function showAdminTab(tab) {
   });
   if (tab === 'licencias') renderAdminLicencias();
   if (tab === 'relevante') renderAdminRelevante();
+  if (tab === 'apariencia') renderAdminApariencia();
 }
 
 // ── Tab: Todas las licencias ──────────────────────────────────────────────
@@ -3259,6 +3451,7 @@ async function renderUsinaPanel() {
   }
   _initDone = true;
   startRealtimeListeners();
+  applyStoredCellTheme(); // aplicar tema visual guardado
 
   // ── 6. Actualizar feriados desde API en segundo plano ─────────────────
   //    Si ya están en sessionStorage, esto es instantáneo y re-renderiza con datos reales
