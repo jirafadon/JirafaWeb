@@ -650,7 +650,46 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 <!-- ════════════════════════════════════════
-     SECCIÓN 5: RECARGOS
+     SECCIÓN 5: USINA DIGITAL
+════════════════════════════════════════ -->
+<div class="section s-usina" id="sec-usina" style="display:none">
+  <div class="section-header" onclick="toggleSection('sec-usina')">
+    <span class="section-icon">🏭</span>
+    <span class="section-title">Usina Digital</span>
+    <span class="section-badge" id="usina-badge">SAP SF</span>
+    <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-usina-body">
+    <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com"
+       target="_blank" rel="noopener"
+       style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(74,158,218,.08);border:1px solid rgba(74,158,218,.25);border-radius:8px;text-decoration:none;margin-bottom:16px;transition:all .2s"
+       onmouseover="this.style.background='rgba(74,158,218,.14)'" onmouseout="this.style.background='rgba(74,158,218,.08)'">
+      <span style="font-size:20px">🏭</span>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:#4a9eda;letter-spacing:2px">INGRESAR A USINA DIGITAL</div>
+        <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">SAP SUCCESSFACTORS · CENTRAL PUERTO</div>
+      </div>
+      <span style="font-size:16px;color:#4a9eda;margin-left:auto">↗</span>
+    </a>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:12px">SALDO DE LICENCIAS</div>
+    <div id="usina-saldo-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:12px">ACTUALIZAR SALDO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">VACACIONES (días)</label><input type="number" id="usina-vac" min="0" max="60" placeholder="ej: 16" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">DC (horas)</label><input type="number" id="usina-dc" min="0" max="999" placeholder="ej: 56" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG (días)</label><input type="number" id="usina-peg" min="0" max="30" placeholder="ej: 6" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
+        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG ADICIONAL (días)</label><input type="number" id="usina-pega" min="0" max="30" placeholder="ej: 4" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
+      </div>
+      <button onclick="saveUsina()" style="width:100%;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">💾 GUARDAR</button>
+      <div id="usina-updated" style="text-align:center;font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:8px"></div>
+    </div>
+    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center">Ingresá los datos desde SAP SF → Ver tipo de tiempo → A fecha de hoy</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     SECCIÓN 6: RECARGOS
 ════════════════════════════════════════ -->
 <div class="section s-rec" id="rec-panel" style="display:none">
   <div class="section-header" onclick="toggleSection('sec-rec')">
@@ -708,70 +747,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
 </div>
 
-
-<!-- ════════════════════════════════════════
-     SECCIÓN: USINA DIGITAL
-════════════════════════════════════════ -->
-<div class="section s-usina" id="sec-usina" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-usina')">
-    <span class="section-icon">🏭</span>
-    <span class="section-title">Usina Digital</span>
-    <span class="section-badge" id="usina-badge">SAP SF</span>
-    <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-usina-body">
-    <!-- Link SAP -->
-    <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com"
-       target="_blank" rel="noopener"
-       style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(74,158,218,.08);border:1px solid rgba(74,158,218,.25);border-radius:8px;text-decoration:none;margin-bottom:16px;transition:all .2s"
-       onmouseover="this.style.background='rgba(74,158,218,.14)'" onmouseout="this.style.background='rgba(74,158,218,.08)'">
-      <span style="font-size:20px">🏭</span>
-      <div>
-        <div style="font-family:var(--font-mono);font-size:12px;font-weight:700;color:#4a9eda;letter-spacing:2px">INGRESAR A USINA DIGITAL</div>
-        <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">SAP SUCCESSFACTORS · CENTRAL PUERTO</div>
-      </div>
-      <span style="font-size:16px;color:#4a9eda;margin-left:auto">↗</span>
-    </a>
-
-    <!-- Saldo de licencias -->
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:12px">SALDO DE LICENCIAS</div>
-    <div id="usina-saldo-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
-
-    <!-- Formulario de carga -->
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:12px">ACTUALIZAR SALDO</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div>
-          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">VACACIONES (días)</label>
-          <input type="number" id="usina-vac" min="0" max="60" placeholder="ej: 16"
-            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">DC (horas)</label>
-          <input type="number" id="usina-dc" min="0" max="999" placeholder="ej: 56"
-            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG (días)</label>
-          <input type="number" id="usina-peg" min="0" max="30" placeholder="ej: 6"
-            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
-        </div>
-        <div>
-          <label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG ADICIONAL (días)</label>
-          <input type="number" id="usina-pega" min="0" max="30" placeholder="ej: 4"
-            style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box">
-        </div>
-      </div>
-      <button onclick="saveUsina()" style="width:100%;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s">
-        💾 GUARDAR
-      </button>
-      <div id="usina-updated" style="text-align:center;font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:8px"></div>
-    </div>
-    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center">
-      Ingresá los datos desde SAP SF → Ver tipo de tiempo → A fecha de hoy
-    </div>
-  </div>
-</div>
 
 <!-- ════════════════════════════════════════
      SECCIÓN: HORARIO COMBI
@@ -891,17 +866,34 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 <!-- ════════════════════════════════════════
-     SECCIÓN 8: AUDITORÍA (solo Jonatan)
+     PANEL ADMINISTRADOR (solo Jonatan)
 ════════════════════════════════════════ -->
 <div class="section s-audit" id="sec-audit" style="display:none">
   <div class="section-header" onclick="toggleSection('sec-audit')">
-    <span class="section-icon" style="color:var(--amber)">&#9670;</span>
-    <span class="section-title">Auditoría de accesos</span>
+    <span class="section-icon" style="color:var(--amber)">⚙️</span>
+    <span class="section-title">Administrador</span>
     <span class="section-badge" id="audit-badge">—</span>
     <span class="section-arrow" id="sec-audit-arrow">&#9660;</span>
   </div>
   <div class="section-body" id="sec-audit-body">
-    <div id="audit-content" style="padding:4px 0"></div>
+    <!-- Tabs de administración -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:80px">👥 ACCESOS</button>
+      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:80px">📋 LICENCIAS</button>
+      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:80px">⭐ RELEVANTE</button>
+    </div>
+    <!-- Tab: Accesos -->
+    <div id="admin-accesos">
+      <div id="audit-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Todas las licencias -->
+    <div id="admin-licencias" style="display:none">
+      <div id="admin-lic-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Relevante (REL_SCHEDULE de Lucas) -->
+    <div id="admin-relevante" style="display:none">
+      <div id="admin-rel-content" style="padding:4px 0"></div>
+    </div>
   </div>
 </div>
 
@@ -2513,74 +2505,56 @@ function renderRelFranco(){
   const y=now.getFullYear(),m=now.getMonth()+1;
   const todayStr=dk(y,m,now.getDate());
 
-  // Hora de inicio de cada turno (en horas)
   const TURNO_START = { 1:0, 2:6, 3:12, 4:18 };
-  // Hora de fin de cada turno
   const TURNO_END   = { 1:6, 2:12, 3:18, 4:24 };
 
-  // Obtener todos los días del mes hasta hoy con su schedule
   const monthDays = getMonthDays(y,m).filter(d=>d<=todayStr);
-
-  // Construir lista de días con turno asignado (trabajado o F)
   const schedule = monthDays.map(d=>({ date:d, sched: REL_SCHEDULE[d] }));
 
-  let workedCount = 0;
-  let francoFullDays = 0;
-  let totalFrancoHours = 0;
+  // DÍAS FRANCO = simplemente los días marcados con F en el diagrama
+  let francoFullDays = schedule.filter(s => s.sched === 'F').length;
 
-  // Recorrer bloques: buscar grupos de F entre días trabajados
-  // Para cada día F, contar 24h. Para los bordes, sumar horas parciales.
+  // DÍAS TRABAJADOS = días con turno numérico asignado
+  let workedCount = schedule.filter(s => {
+    const t = parseInt(s.sched);
+    return !isNaN(t);
+  }).length;
+
+  // HORAS FRANCO = días F × 24 + horas parciales del día trabajado anterior y posterior
+  let totalFrancoHours = 0;
   for (let i = 0; i < schedule.length; i++) {
-    const { date, sched } = schedule[i];
-    if (sched === undefined || sched === null) continue; // sin asignar
+    const { sched } = schedule[i];
+    if (sched === undefined || sched === null) continue;
 
     const turno = parseInt(sched);
     if (!isNaN(turno)) {
-      workedCount++;
-      // Buscar el bloque de F que sigue a este día trabajado
-      // Horas desde fin del turno hasta medianoche = 24 - TURNO_END[turno]
-      // (si T3 termina a las 24 = inicio del día siguiente, no hay horas extra ese día)
-      // Horas después de terminar turno en este día:
-      const hoursAfter = 24 - TURNO_END[turno]; // horas libres en este día laboral
-
-      // Contar días F consecutivos después
+      const hoursAfter = 24 - TURNO_END[turno];
       let j = i + 1;
       let fDays = 0;
       while (j < schedule.length && schedule[j].sched === 'F') { fDays++; j++; }
 
       if (fDays > 0) {
-        // Hay días F después — sumar horas parciales del día trabajado
-        totalFrancoHours += hoursAfter;
-        francoFullDays += fDays;
-        totalFrancoHours += fDays * 24;
+        totalFrancoHours += hoursAfter;          // horas libres del día trabajado
+        totalFrancoHours += fDays * 24;          // días F completos en horas
 
-        // Horas antes de empezar el siguiente día trabajado (si existe)
-        if (j < schedule.length && schedule[j].sched !== undefined && schedule[j].sched !== null) {
+        if (j < schedule.length) {
           const nextTurno = parseInt(schedule[j].sched);
           if (!isNaN(nextTurno)) {
-            // Horas desde medianoche hasta inicio del siguiente turno
-            const hoursBefore = TURNO_START[nextTurno];
-            totalFrancoHours += hoursBefore;
+            totalFrancoHours += TURNO_START[nextTurno]; // horas antes del próximo turno
           }
-        } else if (j >= schedule.length) {
-          // El bloque F llega hasta hoy (último día del período)
-          // Contar horas hasta ahora
-          const nowHour = now.getHours() + now.getMinutes()/60;
-          totalFrancoHours += nowHour;
+        } else {
+          // bloque F llega hasta hoy — sumar horas transcurridas
+          totalFrancoHours += now.getHours() + now.getMinutes()/60;
         }
-      } else if (hoursAfter > 0 && i === schedule.length - 1) {
-        // Último día trabajado hoy — contar horas transcurridas desde fin del turno
+      } else if (i === schedule.length - 1) {
+        // Último día trabajado hoy — horas desde fin del turno hasta ahora
         const endH = TURNO_END[turno];
         const nowH = now.getHours() + now.getMinutes()/60;
         if (nowH > endH) totalFrancoHours += nowH - endH;
       }
-    } else if (sched === 'F') {
-      francoFullDays++;
-      // Los días F sueltos sin contexto de días trabajados ya se cuentan en el bloque
     }
   }
 
-  // Redondear a 1 decimal
   const hDisplay = Number.isInteger(totalFrancoHours)
     ? totalFrancoHours + 'h'
     : totalFrancoHours.toFixed(1) + 'h';
@@ -2593,7 +2567,7 @@ function renderRelFranco(){
     </div>
     <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">
       ${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}
-      <span style="color:var(--adim);margin-left:6px">· incluye horas parciales</span>
+      <span style="color:var(--adim);margin-left:6px">· hs incluye parciales</span>
     </div>`;
 }
 function renderRelCoverageList(){
@@ -2770,6 +2744,7 @@ Object.assign(window, {
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
   saveUsina, renderUsinaPanel,
+  showAdminTab, renderAdminLicencias, renderAdminRelevante,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3037,6 +3012,106 @@ async function revertirDescuento(ev) {
   renderUsinaPanel();
 }
 // ═══════════════════════════════════════════════════════════════════════════
+// ── Admin tab switching ───────────────────────────────────────────────────
+function showAdminTab(tab) {
+  ['accesos','licencias','relevante'].forEach(t => {
+    document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
+    const btn = document.getElementById('atab-'+t);
+    if (btn) btn.classList.toggle('on', t===tab);
+  });
+  if (tab === 'licencias') renderAdminLicencias();
+  if (tab === 'relevante') renderAdminRelevante();
+}
+
+// ── Tab: Todas las licencias ──────────────────────────────────────────────
+function renderAdminLicencias() {
+  const div = document.getElementById('admin-lic-content');
+  if (!div) return;
+  const sorted = [...EVENTS].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
+  if (sorted.length === 0) { div.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:8px 0">Sin licencias registradas.</div>'; return; }
+  const byUser = {};
+  sorted.forEach(ev => { const u = ev.userName||'?'; if (!byUser[u]) byUser[u]=[]; byUser[u].push(ev); });
+  let html = '';
+  PRESET_USERS.forEach(p => {
+    const evs = byUser[p.name] || [];
+    if (!evs.length) return;
+    const col = G_COLORS[p.guardia]||'#8a9ab5';
+    html += `<div style="margin-bottom:14px"><div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} licencia${evs.length>1?'s':''}</div>`;
+    evs.forEach(ev => {
+      const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+      const desc = ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '';
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
+        <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
+        <div style="flex:1"><div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div><div style="font-size:9px;color:var(--tdim)">${li.name}${desc}</div></div>
+        <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono)">${ev.createdAtStr||''}</span>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  div.innerHTML = html;
+}
+
+// ── Tab: Panel REL de Lucas ───────────────────────────────────────────────
+function renderAdminRelevante() {
+  const div = document.getElementById('admin-rel-content');
+  if (!div) return;
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth()+1;
+  const todayStr = dk(y,m,now.getDate());
+  const monthDays = getMonthDays(y,m);
+  const TURNO_START={1:0,2:6,3:12,4:18}, TURNO_END={1:6,2:12,3:18,4:24};
+  const schedule = monthDays.map(d=>({date:d,sched:REL_SCHEDULE[d]}));
+  const francoCount = schedule.filter(s=>s.sched==='F').length;
+  const workedCount = schedule.filter(s=>!isNaN(parseInt(s.sched))).length;
+  let francoHours=0;
+  for(let i=0;i<schedule.length;i++){
+    const{sched}=schedule[i]; if(!sched) continue;
+    const turno=parseInt(sched);
+    if(!isNaN(turno)){
+      const hoursAfter=24-TURNO_END[turno]; let j=i+1,fDays=0;
+      while(j<schedule.length&&schedule[j].sched==='F'){fDays++;j++;}
+      if(fDays>0){
+        francoHours+=hoursAfter+fDays*24;
+        if(j<schedule.length){const nt=parseInt(schedule[j].sched);if(!isNaN(nt))francoHours+=TURNO_START[nt];}
+        else francoHours+=now.getHours()+now.getMinutes()/60;
+      }
+    }
+  }
+  // Calendari mini
+  let calHtml=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px">`;
+  ['D','L','M','M','J','V','S'].forEach(d=>{ calHtml+=`<div style="text-align:center;font-size:8px;font-family:var(--font-mono);color:var(--adim);padding:2px">${d}</div>`; });
+  const firstDay=new Date(y,m-1,1).getDay();
+  for(let i=0;i<firstDay;i++) calHtml+='<div></div>';
+  monthDays.forEach(date=>{
+    const d=pd(date).d, sched=REL_SCHEDULE[date], isToday=date===todayStr, isFuture=date>todayStr;
+    let bg='var(--panel)',color='var(--tdim)',text=sched!==undefined?String(sched):'·';
+    if(sched==='F'){bg='rgba(220,38,38,.25)';color='#ff2d2d';}
+    else if(!isNaN(parseInt(sched))){const cols={1:'var(--t1)',2:'var(--t2)',3:'var(--t3)',4:'var(--t4)'};color=cols[parseInt(sched)]||'var(--tdim)';}
+    if(isFuture){bg='transparent';color='var(--adim)';}
+    calHtml+=`<div style="text-align:center;padding:3px 1px;border-radius:4px;background:${bg};border:${isToday?'1px solid var(--amber)':'1px solid transparent'}"><div style="font-size:8px;color:var(--adim)">${d}</div><div style="font-size:10px;font-weight:700;color:${color}">${text}</div></div>`;
+  });
+  calHtml+='</div>';
+  // Licencias de Lucas
+  const lucasUser=USERS.find(u=>u.name==='Lucas');
+  const relEvs=EVENTS.filter(e=>e.userId===lucasUser?.id).sort((a,b)=>b.startDate.localeCompare(a.startDate));
+  const hDisp=Number.isInteger(francoHours)?francoHours+'h':francoHours.toFixed(1)+'h';
+  const evHtml=relEvs.length>0?relEvs.map(ev=>{
+    const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px"><span style="font-size:10px;font-weight:700;color:${li.color}">${ev.type}</span><div style="flex:1"><div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div><div style="font-size:9px;color:var(--tdim)">${li.name}</div></div></div>`;
+  }).join(''):'<div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">Sin licencias.</div>';
+
+  div.innerHTML=`
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">LUCAS · RELEVANTE · ${MES_L[m].toUpperCase()} ${y}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+      <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
+      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoCount}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
+      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${hDisp}</div><div class="rec-stat-lbl">HS FRANCO</div></div>
+    </div>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">DIAGRAMA DEL MES</div>
+    ${calHtml}
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">LICENCIAS DE LUCAS</div>
+    ${evHtml}`;
+}
+
 async function saveUsina() {
   if (!ME) return;
   const vac  = parseFloat(document.getElementById('usina-vac').value)  || 0;
