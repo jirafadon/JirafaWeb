@@ -1094,62 +1094,46 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
 // ── Notificaciones — Browser Notification API + Firestore realtime ───────
-// No requiere Service Worker ni Cloud Functions. Funciona con la app abierta
-// en cualquier pestaña. Al cargar, el listener detecta docs nuevos en
-// 'notifications-queue' y dispara la notificación nativa + in-app.
+// Usa timestamp de arranque para ignorar docs viejos. Sin race conditions.
 
-// Usuarios que reciben notificaciones de nuevas licencias
 const NOTIFY_USERS = ['Jonatan', 'Lucas'];
-
-// ID del último doc visto para no re-notificar docs viejos al iniciar
-let _notifSeenIds = new Set();
 let _notifListenerStarted = false;
 
 async function initNotifications() {
   if (!ME || !NOTIFY_USERS.includes(ME.name)) return;
+  if (_notifListenerStarted) return;
+  _notifListenerStarted = true;
 
-  // Pedir permiso de notificaciones nativas del browser (solo 1 vez)
+  // Pedir permiso si todavia no esta dado
   if (Notification.permission === 'default') {
     try { await Notification.requestPermission(); } catch(e) {}
   }
 
-  if (_notifListenerStarted) return;
-  _notifListenerStarted = true;
+  // Marca de tiempo ANTES de iniciar el listener.
+  // Solo notificamos docs con createdAt posterior a este momento.
+  const startedAt = new Date().toISOString();
 
-  // Pre-cargar los IDs existentes para no disparar notifs de licencias viejas
-  try {
-    const snap = await getDocs(fbCol('notifications-queue'));
-    snap.forEach(d => _notifSeenIds.add(d.id));
-  } catch(e) {}
-
-  // Listener en tiempo real: reacciona en el momento en que otro usuario
-  // escribe un doc nuevo en 'notifications-queue'
   onSnapshot(fbCol('notifications-queue'), snap => {
     snap.docChanges().forEach(change => {
       if (change.type !== 'added') return;
-      const id = change.doc.id;
-      if (_notifSeenIds.has(id)) return; // ya conocido (carga inicial)
-      _notifSeenIds.add(id);
-
       const d = change.doc.data();
-      // No notificar al propio autor de la licencia
+      // Ignorar docs que ya existian cuando se abrio la pagina
+      if (!d.createdAt || d.createdAt <= startedAt) return;
+      // No notificar al propio autor
       if (d.userName === ME?.name) return;
 
-      showInAppNotification(d.title, d.body);
+      const title = d.title || '\uD83D\uDCCB Nueva licencia';
+      const body  = d.body  || '';
 
-      // Notificación nativa del browser (aparece aunque la pestaña esté al fondo)
+      showInAppNotification(title, body);
+
       if (Notification.permission === 'granted') {
-        try {
-          new Notification(d.title || '📋 Nueva licencia', {
-            body: d.body || '',
-            icon: 'https://cdn-icons-png.flaticon.com/512/1483/1483336.png'
-          });
-        } catch(e) {}
+        try { new Notification(title, { body, icon: '/icon-192.png' }); } catch(e) {}
       }
     });
   });
 
-  console.log('✅ Notificaciones activadas para', ME.name);
+  console.log('Notificaciones listas para', ME.name);
 }
 
 function showInAppNotification(title, body) {
