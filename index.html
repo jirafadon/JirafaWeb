@@ -1093,47 +1093,43 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 
-// ── Notificaciones — Browser Notification API + Firestore realtime ───────
-// Usa timestamp de arranque para ignorar docs viejos. Sin race conditions.
-
+// ── Notificaciones — Firestore realtime ─────────────────────────────────
 const NOTIFY_USERS = ['Jonatan', 'Lucas'];
-let _notifListenerStarted = false;
+let _notifUnsub = null;
 
-async function initNotifications() {
+// Llama a esta funcion UNA vez cuando ME ya esta seteado
+function initNotifications() {
+  // Cancelar listener anterior si habia
+  if (_notifUnsub) { _notifUnsub(); _notifUnsub = null; }
+
   if (!ME || !NOTIFY_USERS.includes(ME.name)) return;
-  if (_notifListenerStarted) return;
-  _notifListenerStarted = true;
 
-  // Pedir permiso si todavia no esta dado
+  // Pedir permiso nativo (no bloqueante)
   if (Notification.permission === 'default') {
-    try { await Notification.requestPermission(); } catch(e) {}
+    Notification.requestPermission().catch(() => {});
   }
 
-  // Marca de tiempo ANTES de iniciar el listener.
-  // Solo notificamos docs con createdAt posterior a este momento.
+  // Timestamp de ahora: ignoramos todo doc creado antes de este momento
   const startedAt = new Date().toISOString();
 
-  onSnapshot(fbCol('notifications-queue'), snap => {
+  _notifUnsub = onSnapshot(fbCol('notifications-queue'), snap => {
     snap.docChanges().forEach(change => {
       if (change.type !== 'added') return;
       const d = change.doc.data();
-      // Ignorar docs que ya existian cuando se abrio la pagina
-      if (!d.createdAt || d.createdAt <= startedAt) return;
-      // No notificar al propio autor
-      if (d.userName === ME?.name) return;
+      if (!d.createdAt || d.createdAt <= startedAt) return; // doc viejo
+      if (d.userName === ME?.name) return;                   // propio autor
 
-      const title = d.title || '\uD83D\uDCCB Nueva licencia';
+      const title = d.title || 'Nueva licencia';
       const body  = d.body  || '';
 
       showInAppNotification(title, body);
-
       if (Notification.permission === 'granted') {
-        try { new Notification(title, { body, icon: '/icon-192.png' }); } catch(e) {}
+        try { new Notification(title, { body, icon: '/icon-192.png' }); } catch(_) {}
       }
     });
   });
 
-  console.log('Notificaciones listas para', ME.name);
+  console.log('[notif] activas para', ME.name, '— desde', startedAt);
 }
 
 function showInAppNotification(title, body) {
@@ -1557,13 +1553,34 @@ async function ensurePresetUsers() {
 // ═══════════════════════════════════════════════════════════════════════════
 async function logAccess(userName) {
   const now = new Date();
+
+  // Obtener IP y geo via API publica (sin costo, sin clave)
+  let ip = '', city = '', country = '', region = '';
+  try {
+    const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      const g = await r.json();
+      ip      = g.ip      || '';
+      city    = g.city    || '';
+      region  = g.region  || '';
+      country = g.country_name || '';
+    }
+  } catch(_) {}
+
   const entry = {
     id: 'log_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
     userName,
     deviceId: DEVICE_ID,
-    ts: now.toISOString(),
-    date: now.toLocaleDateString('es-AR'),
-    time: now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }),
+    ts:      now.toISOString(),
+    date:    now.toLocaleDateString('es-AR'),
+    time:    now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' }),
+    ip,
+    city,
+    region,
+    country,
+    ua: navigator.userAgent,
+    platform: navigator.platform || '',
+    lang: navigator.language || '',
   };
   await fbSet('access-log', entry.id, entry);
 }
@@ -1602,45 +1619,72 @@ async function renderAuditPanel() {
 
   document.getElementById('audit-badge').textContent = logs.length + ' accesos';
 
+  // Resumir user-agent a algo legible
+  function parseUA(ua='') {
+    if (!ua) return '?';
+    if (/iPhone|iPad/.test(ua))   return '📱 iOS';
+    if (/Android/.test(ua))       return '📱 Android';
+    if (/Windows/.test(ua))       return '🖥 Windows';
+    if (/Mac/.test(ua))           return '🖥 Mac';
+    if (/Linux/.test(ua))         return '🖥 Linux';
+    return '🌐 Web';
+  }
+
+  function geoStr(l) {
+    const parts = [l.city, l.region, l.country].filter(Boolean);
+    return parts.length ? parts.join(', ') : (l.ip || '—');
+  }
+
   const div = document.getElementById('audit-content');
 
-  // ── Tarjetas por usuario con logs individuales ────────────────────────
-  let html = '<div style="display:flex;flex-direction:column;gap:14px">';
+  // ── Resumen global ───────────────────────────────────────────────────────
+  const last24h = logs.filter(l => (Date.now() - new Date(l.ts)) < 86400000).length;
+  const uniqueUsers = new Set(logs.map(l=>l.userName)).size;
+  let summaryHtml = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:var(--amber)">${logs.length}</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Total accesos</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:var(--green)">${last24h}</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Últimas 24hs</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:22px;font-weight:700;color:var(--blue,#4a9eda)">${uniqueUsers}</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Usuarios</div>
+    </div>
+  </div>`;
+
+  // ── Tarjetas por usuario (ultimas 5 conexiones) ───────────────────────────
+  let html = summaryHtml + '<div style="display:flex;flex-direction:column;gap:14px">';
 
   PRESET_USERS.forEach(p => {
     const u = USERS.find(x => x.name === p.name);
     const c = counts[p.name] || 0;
     const col = G_COLORS[p.guardia] || '#8a9ab5';
     const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
-    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 10);
+    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 5); // <-- ultimas 5
 
-    // Dispositivos vinculados
-    let devicesHtml = '';
-    if (ids.length > 0) {
-      devicesHtml = ids.map(did => {
-        const isMe = did === DEVICE_ID;
-        return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
-          ···${did.slice(-6)} ${isMe?'(este)':''}
-          <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
-        </span>`;
-      }).join(' ');
-    } else {
-      devicesHtml = `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
-    }
+    let devicesHtml = ids.length
+      ? ids.map(did => {
+          const isMe = did === DEVICE_ID;
+          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
+            ···${did.slice(-6)} ${isMe?'(este)':''}
+            <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
+          </span>`;
+        }).join(' ')
+      : `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
 
-    // Últimos accesos del usuario
-    let logsHtml = '';
-    if (userLogs.length > 0) {
-      logsHtml = userLogs.map(l =>
-        `<div style="display:flex;gap:8px;font-size:10px;padding:3px 0;border-bottom:1px solid var(--border)">
-          <span style="color:var(--tbright)">${l.date}</span>
-          <span style="color:var(--tdim)">${l.time}</span>
-          <span style="color:var(--adim);margin-left:auto;font-family:var(--font-mono)">···${l.deviceId?.slice(-6)||'—'}</span>
-        </div>`
-      ).join('');
-    } else {
-      logsHtml = `<div style="font-size:10px;color:var(--tdim);padding:4px 0">Sin accesos registrados</div>`;
-    }
+    let logsHtml = userLogs.length
+      ? userLogs.map(l => `
+          <div style="display:grid;grid-template-columns:auto auto 1fr auto;gap:6px;align-items:center;font-size:10px;padding:5px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--tbright)">${l.date}</span>
+            <span style="color:var(--tdim)">${l.time}</span>
+            <span style="color:var(--adim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${geoStr(l)}">${geoStr(l)}</span>
+            <span style="color:var(--tdim);white-space:nowrap">${parseUA(l.ua)}</span>
+          </div>`)
+        .join('')
+      : `<div style="font-size:10px;color:var(--tdim);padding:4px 0">Sin accesos registrados</div>`;
 
     html += `<div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid ${col};border-radius:8px;padding:12px 14px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -1654,6 +1698,7 @@ async function renderAuditPanel() {
         </div>
       </div>
       <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Últimas 5 conexiones</div>
       <div>${logsHtml}</div>
     </div>`;
   });
