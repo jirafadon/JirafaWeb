@@ -3250,7 +3250,7 @@ function applyStoredCellTheme() {
 }
 
 function showAdminTab(tab) {
-  ['accesos','licencias','relevante'].forEach(t => {
+  ['accesos','licencias','relevante','apariencia'].forEach(t => {
     document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('atab-'+t);
     if (btn) btn.classList.toggle('on', t===tab);
