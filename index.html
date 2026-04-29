@@ -552,6 +552,68 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 [data-cell-theme="minimal"] table.gt td.t4 { background:rgba(176,126,232,.09) !important; border-color:rgba(176,126,232,.15) !important; }
 [data-cell-theme="minimal"] table.gt td.tf  { background:rgba(220,38,38,.1) !important; border-color:rgba(220,38,38,.18) !important; }
 [data-cell-theme="minimal"] table.gt td:not(.gn):hover { transform:none; box-shadow:none; filter:brightness(1.2); }
+
+/* ── Popup licencia (estilo tarjeta) ──────────────────────────────────── */
+.lic-popup-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn .2s ease;
+}
+.lic-popup-overlay.off { display: none; }
+.lic-popup-card {
+  background: #0f1520;
+  border-radius: 18px;
+  padding: 22px 20px 18px;
+  width: min(340px, 92vw);
+  animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
+  position: relative;
+}
+.lic-popup-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+}
+.lic-popup-icon { font-size: 32px; line-height: 1; flex-shrink: 0; }
+.lic-popup-type {
+  font-size: 20px; font-weight: 900; letter-spacing: 1px; line-height: 1.1;
+}
+.lic-popup-user {
+  font-size: 12px; color: #8a9ab5; margin-top: 3px;
+}
+.lic-popup-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
+}
+.lic-popup-cell {
+  background: #1a2535; border-radius: 10px; padding: 10px 12px;
+}
+.lic-popup-cell-label {
+  font-size: 9px; letter-spacing: 2px; color: #8a9ab5;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.lic-popup-cell-value {
+  font-size: 15px; font-weight: 800; color: #e8eaf0;
+}
+.lic-popup-close {
+  width: 100%; padding: 13px;
+  border-radius: 10px; border: none;
+  font-size: 14px; font-weight: 800; letter-spacing: 2px;
+  cursor: pointer; font-family: var(--font-ui);
+  transition: filter .15s;
+}
+.lic-popup-close:hover { filter: brightness(1.15); }
+/* multi-licencia: lista antes de la grilla */
+.lic-popup-list { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+.lic-popup-list-item {
+  display: flex; align-items: center; gap: 10px;
+  background: #1a2535; border-radius: 8px; padding: 9px 12px;
+  cursor: pointer; border: 1px solid transparent; transition: border-color .15s;
+}
+.lic-popup-list-item:hover { border-color: rgba(255,255,255,.15); }
+.lic-popup-list-badge {
+  font-size: 11px; font-weight: 900; font-family: var(--font-mono);
+  color: #000; padding: 3px 7px; border-radius: 5px; flex-shrink: 0;
+}
+.lic-popup-list-name { font-size: 13px; font-weight: 700; }
+.lic-popup-list-dates { font-size: 11px; color: #8a9ab5; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -1071,6 +1133,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 <!-- Cell action sheet -->
+<div class="lic-popup-overlay off" id="lic-popup" onclick="if(event.target===this)closeLicPopup()">
+  <div class="lic-popup-card" id="lic-popup-card"></div>
+</div>
 <div class="cell-actions off" id="cell-actions">
   <div class="ca-sheet" id="ca-sheet">
     <div class="ca-date" id="ca-date">—</div>
@@ -1253,19 +1318,19 @@ async function queueNotification(ev) {
 // ═══════════════════════════════════════════════════════════════════════════
 // TIPOS DE LICENCIA
 const LIC = {
-  V:  { name: 'Vacaciones',            color: '#3dba78' },
-  DC: { name: 'Desc. Compensatorio',   color: '#4a9eda' },
-  PG: { name: 'Perm. Guardia (PEG)',   color: '#f5a623' },
-  PA: { name: 'Perm. Guardia Adic. (PEGA)', color: '#ff8c42' },
-  MA: { name: 'Matrimonio',            color: '#b07ee8' },
-  NA: { name: 'Nacimiento',            color: '#5ab8a8' },
-  AD: { name: 'Adopción',              color: '#8a9ab5' },
-  MU: { name: 'Mudanza',               color: '#e09030' },
-  MH: { name: 'Matrimonio Hijos',      color: '#d4a0f0' },
-  LM: { name: 'Lic. Médica',           color: '#e05252' },
-  LS: { name: 'Lic. s/Sueldo',         color: '#f0a030' },
-  LP: { name: 'Lic. Parental',         color: '#c07ee8' },
-  DP: { name: 'Día Personal',          color: '#8a9ab5' },
+  V:  { name: 'Vacaciones',            color: '#3dba78', icon: '🌿' },
+  DC: { name: 'Desc. Compensatorio',   color: '#4a9eda', icon: '🔄' },
+  PG: { name: 'Perm. Guardia (PEG)',   color: '#f5a623', icon: '🔑' },
+  PA: { name: 'Perm. Guardia Adic. (PEGA)', color: '#ff8c42', icon: '🔑' },
+  MA: { name: 'Matrimonio',            color: '#b07ee8', icon: '💍' },
+  NA: { name: 'Nacimiento',            color: '#5ab8a8', icon: '👶' },
+  AD: { name: 'Adopción',              color: '#8a9ab5', icon: '🤝' },
+  MU: { name: 'Mudanza',               color: '#e09030', icon: '📦' },
+  MH: { name: 'Matrimonio Hijos',      color: '#d4a0f0', icon: '💒' },
+  LM: { name: 'Lic. Médica',           color: '#e05252', icon: '🏥' },
+  LS: { name: 'Lic. s/Sueldo',         color: '#f0a030', icon: '📄' },
+  LP: { name: 'Lic. Parental',         color: '#c07ee8', icon: '👨‍👩‍👧' },
+  DP: { name: 'Día Personal',          color: '#8a9ab5', icon: '🗓️' },
 };
 
 const G_COLORS = { A: '#f5a623', B: '#3dba78', C: '#4a9eda', D: '#b07ee8', E: '#e05252', OP: '#5ab8a8', REL: '#8a9ab5' };
@@ -2510,29 +2575,105 @@ function dsClearHighlights(){
 // ═══════════════════════════════════════════════════════════════════════════
 // CELL ACTIONS
 // ═══════════════════════════════════════════════════════════════════════════
+// ── Popup de detalle de licencia (tarjeta visual) ─────────────────────────
+function closeLicPopup() {
+  document.getElementById('lic-popup').classList.add('off');
+}
+
+function showLicDetail(ev) {
+  const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5', icon: '📋' };
+  const color = li.color || '#8a9ab5';
+  const icon = li.icon || '📋';
+  const isSameDay = ev.startDate === ev.endDate;
+
+  // Calcular días
+  let dias = 1;
+  if (!isSameDay) {
+    const a = new Date(ev.startDate + 'T12:00:00');
+    const b = new Date(ev.endDate   + 'T12:00:00');
+    dias = Math.round((b - a) / 86400000) + 1;
+  }
+
+  const turnoStr = ev.turno ? `T${ev.turno}` : (ev.guardia || '—');
+
+  document.getElementById('lic-popup-card').innerHTML = `
+    <div class="lic-popup-header">
+      <div class="lic-popup-icon">${icon}</div>
+      <div>
+        <div class="lic-popup-type" style="color:${color}">${(li.name||ev.type).toUpperCase()}</div>
+        <div class="lic-popup-user">${ev.userName} · Guardia ${ev.guardia}</div>
+      </div>
+    </div>
+    <div class="lic-popup-grid">
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Desde</div>
+        <div class="lic-popup-cell-value">${formatDate(ev.startDate).toUpperCase()}</div>
+      </div>
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Hasta</div>
+        <div class="lic-popup-cell-value">${formatDate(ev.endDate).toUpperCase()}</div>
+      </div>
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Turno</div>
+        <div class="lic-popup-cell-value">${turnoStr}</div>
+      </div>
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Días</div>
+        <div class="lic-popup-cell-value">${dias}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      ${ev.userId === ME?.id
+        ? `<button class="lic-popup-close" style="flex:1;background:rgba(220,38,38,.15);color:#e05252;border:1px solid rgba(220,38,38,.3)"
+            onclick="closeLicPopup();deleteEvent('${ev.id}')">✕ ELIMINAR</button>`
+        : ''}
+      <button class="lic-popup-close" style="flex:2;background:${color}22;color:${color};border:1px solid ${color}55"
+        onclick="closeLicPopup()">CERRAR</button>
+    </div>
+  `;
+  document.getElementById('lic-popup').classList.remove('off');
+}
+
+function openLicPopupForDay(dayEvs) {
+  // Si hay una sola licencia, mostrar directamente
+  if (dayEvs.length === 1) { showLicDetail(dayEvs[0]); return; }
+
+  // Varias licencias: mostrar lista para elegir
+  let listHtml = '<div class="lic-popup-list">';
+  dayEvs.forEach((ev, i) => {
+    const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
+    listHtml += `
+      <div class="lic-popup-list-item" onclick="showLicDetail(window._licPopupEvs[${i}])">
+        <span class="lic-popup-list-badge" style="background:${li.color}">${ev.type}</span>
+        <div>
+          <div class="lic-popup-list-name" style="color:${li.color}">${li.name}</div>
+          <div class="lic-popup-list-dates">${ev.userName} · ${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
+        </div>
+      </div>`;
+  });
+  listHtml += '</div>';
+  listHtml += `<button class="lic-popup-close" style="background:rgba(255,255,255,.06);color:#8a9ab5;border:1px solid #2a3545" onclick="closeLicPopup()">CERRAR</button>`;
+
+  window._licPopupEvs = dayEvs;
+  document.getElementById('lic-popup-card').innerHTML =
+    `<div class="lic-popup-header" style="margin-bottom:14px">
+       <div class="lic-popup-icon">📋</div>
+       <div><div class="lic-popup-type" style="color:#8a9ab5;font-size:15px">${dayEvs.length} LICENCIAS ESTE DÍA</div></div>
+     </div>` + listHtml;
+  document.getElementById('lic-popup').classList.remove('off');
+}
+
 function openCellActions(date,guardia,turno,dayEvs){
   const panel=document.getElementById('cell-actions');
   const turnoLabel=turno==='F'?'Franco':turno?`T${turno}`:'·';
   document.getElementById('ca-date').textContent=`${formatDate(date).toUpperCase()}  ·  Guardia ${guardia}  ·  ${turnoLabel}`;
   const acts=document.getElementById('ca-actions');acts.innerHTML='';
+  // Si hay licencias, mostrar popup visual en lugar del panel plano
+  if(dayEvs.length>0){ openLicPopupForDay(dayEvs); return; }
+
   const secLic=el('div','ca-section','');
   secLic.appendChild(el('div','ca-sec-title','LICENCIAS'));
-  if(dayEvs.length>0){
-    dayEvs.forEach(ev=>{
-      const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-      const row=el('div','ca-lic-row','');
-      const badge=el('span','ca-lic-badge',ev.type);badge.style.background=li.color;
-      const info=el('div','ca-lic-info','');
-      const nm=el('span','ca-lic-name',li.name);nm.style.color=li.color;
-      const usr=el('span','ca-lic-user',` — ${ev.userName}`);
-      info.appendChild(nm);info.appendChild(usr);
-      row.appendChild(badge);row.appendChild(info);
-      if(ev.userId===ME.id){const del=el('button','ca-lic-del','✕');del.onclick=e=>{e.stopPropagation();closeCellActions();deleteEvent(ev.id);};row.appendChild(del);}
-      secLic.appendChild(row);
-    });
-  } else {
-    secLic.appendChild(el('div','ca-lic-empty','Sin licencias este día'));
-  }
+  secLic.appendChild(el('div','ca-lic-empty','Sin licencias este día'));
   acts.appendChild(secLic);
   acts.appendChild(el('div','ca-divider',''));
   const btnRow=el('div','ca-btn-row','');
@@ -2871,7 +3012,7 @@ Object.assign(window, {
   openRecPicker, closeRecPicker, saveRecargo, deleteRecargo, recNavMonth,
   toggleRelPanel, openAddRelCoverage, saveRelCoverage,
   openRelPicker, relPickerCancel,
-  openCellActions, closeCellActions,
+  openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup,
   buscar, renderVacTable,
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
