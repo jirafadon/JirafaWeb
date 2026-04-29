@@ -604,11 +604,12 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   .lic-popup-cell-value { font-size: 11px; }
 }
 .lic-popup-close {
-  width: 100%; padding: 13px;
+  width: 100%; padding: 12px 8px;
   border-radius: 10px; border: none;
-  font-size: 14px; font-weight: 800; letter-spacing: 2px;
+  font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
   cursor: pointer; font-family: var(--font-ui);
-  transition: filter .15s;
+  transition: all .15s; white-space: nowrap;
+  text-overflow: ellipsis; overflow: hidden;
 }
 .lic-popup-close:hover { filter: brightness(1.15); }
 /* multi-licencia: lista antes de la grilla */
@@ -2702,14 +2703,16 @@ function showLicDetail(ev) {
       </div>
     </div>
     ${ev.note ? `<div style="font-size:11px;color:var(--tdim);font-family:var(--font-mono);margin-bottom:12px;padding:8px 10px;background:var(--cell-bg);border-radius:6px">💬 ${ev.note}</div>` : ''}
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px">
       ${isMine ? `
-        <button class="lic-popup-close" style="flex:1;min-width:80px;background:rgba(220,38,38,.12);color:#e05252;border:1px solid rgba(220,38,38,.25)"
-          onclick="closeLicPopup();deleteEvent('${ev.id}')">✕ ELIMINAR</button>
-        <button class="lic-popup-close" id="lic-change-btn" style="flex:1;min-width:80px;background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.3)"
-          onclick="toggleLicChangePanel('${ev.id}')">✏️ CAMBIAR</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="lic-popup-close" style="background:rgba(220,38,38,.12);color:#e05252;border:1px solid rgba(220,38,38,.3)"
+            onclick="closeLicPopup();deleteEvent('${ev.id}')">✕ ELIMINAR</button>
+          <button class="lic-popup-close" id="lic-change-btn" style="background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.35)"
+            onclick="toggleLicChangePanel('${ev.id}')">✏️ CAMBIAR</button>
+        </div>
       ` : ''}
-      <button class="lic-popup-close" style="flex:2;min-width:80px;background:${color}18;color:${color};border:1px solid ${color}44"
+      <button class="lic-popup-close" style="background:${color}18;color:${color};border:1px solid ${color}44;letter-spacing:3px"
         onclick="closeLicPopup()">CERRAR</button>
     </div>
     <!-- Panel de cambio de tipo — colapsado por defecto -->
@@ -3658,14 +3661,14 @@ function renderUsinaSaldoCards(d) {
       style="background:var(--panel);border:1px solid var(--border);
              border-top:3px solid ${i.color};
              border-radius:10px;padding:14px 14px 12px;cursor:pointer;transition:all .18s;position:relative;
-             display:flex;flex-direction:column;gap:4px"
+             display:flex;flex-direction:column;gap:0;align-items:flex-start"
       onmouseover="this.style.background='${i.color}10';this.style.borderTopColor='${i.color}';this.style.borderRightColor='${i.color}44';this.style.borderBottomColor='${i.color}44';this.style.borderLeftColor='${i.color}44'"
       onmouseout="this.style.background='var(--panel)';this.style.borderTopColor='${i.color}';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)';this.style.borderLeftColor='var(--border)'">
-      <div style="font-size:8px;font-family:var(--font-mono);color:${i.color};letter-spacing:2px;opacity:.8">${i.label}</div>
-      <div style="font-size:28px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1;font-family:var(--font-mono)">
+      <div style="font-size:8px;font-family:var(--font-mono);color:${i.color};letter-spacing:2px;opacity:.75;margin-bottom:6px">${i.label}</div>
+      <div style="font-size:32px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1;font-family:var(--font-mono);letter-spacing:-1px">
         ${hasData ? val : '—'}
       </div>
-      <div style="font-size:9px;color:var(--adim);font-family:var(--font-mono)">${hasData ? i.unit : 'sin datos'}</div>
+      <div style="font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:5px">${hasData ? i.unit : 'sin datos'}</div>
     </div>`}).join('');
 
   const upd = document.getElementById('usina-updated');
