@@ -569,7 +569,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   padding: 22px 20px 18px;
-  width: min(340px, 92vw);
+  width: min(360px, 94vw);
   animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
   position: relative;
   box-shadow: 0 24px 60px rgba(0,0,0,0.7);
@@ -588,16 +588,20 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
 }
 .lic-popup-cell {
-  background: #1a2535; border-radius: 10px; padding: 12px 14px;
-  min-height: 60px; display: flex; flex-direction: column; justify-content: center;
+  background: #1a2535; border-radius: 10px; padding: 13px 12px 12px;
+  display: flex; flex-direction: column; justify-content: center; gap: 5px;
 }
 .lic-popup-cell-label {
-  font-size: 8px; letter-spacing: 2px; color: #8a9ab5;
-  text-transform: uppercase; margin-bottom: 5px; font-family: var(--font-mono);
+  font-size: 8px; letter-spacing: 1.5px; color: #8a9ab5;
+  text-transform: uppercase; font-family: var(--font-mono); white-space: nowrap;
 }
 .lic-popup-cell-value {
-  font-size: 13px; font-weight: 800; color: #e8eaf0; line-height: 1.2;
-  word-break: break-word; overflow-wrap: break-word;
+  font-size: 14px; font-weight: 800; color: #e8eaf0; line-height: 1.15;
+  white-space: nowrap;
+}
+/* Si el contenido no cabe, escalar hacia abajo automáticamente */
+@container (max-width: 280px) {
+  .lic-popup-cell-value { font-size: 11px; }
 }
 .lic-popup-close {
   width: 100%; padding: 13px;
@@ -3020,8 +3024,18 @@ document.addEventListener('touchend',()=>{dsDragging=false;});
 // ═══════════════════════════════════════════════════════════════════════════
 // ROTACIÓN DE VACACIONES
 // Datos exactos de la foto: filas por período, columnas por quincena
-// Apellidos: Rivera, Kuray, Ortiz, Salamone, Calivares, Cimiotta, Boleda
+// Apellidos → Nombres reales
 // ═══════════════════════════════════════════════════════════════════════════
+const VAC_NOMBRE = {
+  'Rivera':    'Lisandro',
+  'Kuray':     'Sergio',
+  'Salamone':  'Matías',
+  'Calivares': 'Gastón',
+  'Boleda':    'Lucas',
+  'Ortiz':     'Rodrigo',
+  'Cimiotta':  'Jonatan',
+};
+// ───────────────────────────────────────────────────────────────────────────
 const VAC_DATA = [
   { period: '2021 (verano del 22)', cols: ['Rivera','Kuray','Ortiz','Salamone','Calivares','Cimiotta','Boleda'] },
   { period: '2022 (verano del 23)', cols: ['Cimiotta','Boleda','Rivera','Kuray','Ortiz','Salamone','Calivares'] },
@@ -3046,12 +3060,14 @@ function getCurrentVacPeriod() {
   return `${y - (m >= 4 ? 0 : 1)} (verano del ${String(seasonYear).slice(-2)})`;
 }
 
-// Busca el apellido del usuario identificado en la tabla
+// Busca el apellido del usuario identificado en el mapa VAC_NOMBRE
 function getUserLastName() {
   if (!ME) return null;
-  // Intenta extraer el apellido del nombre registrado (última palabra)
-  const parts = ME.name.trim().split(/\s+/);
-  return parts[parts.length - 1];
+  // Buscar por nombre de usuario en el mapa invertido
+  const entry = Object.entries(VAC_NOMBRE).find(([apellido, nombre]) =>
+    nombre.toLowerCase() === ME.name.toLowerCase()
+  );
+  return entry ? entry[0] : null; // retorna el apellido para comparar
 }
 
 function renderVacTable() {
@@ -3074,9 +3090,11 @@ function renderVacTable() {
 
     row.cols.forEach(name => {
       const td = document.createElement('td');
-      td.textContent = name;
-      // Highlight if matches user's last name
-      if (userLastName && name.toLowerCase() === userLastName.toLowerCase()) {
+      const displayName = VAC_NOMBRE[name] || name; // mostrar nombre real
+      td.textContent = displayName;
+      td.title = name; // apellido como tooltip
+      // Highlight si es el usuario logueado
+      if (userLastName && name === userLastName) {
         td.classList.add('vac-highlight');
       }
       tr.appendChild(td);
@@ -3637,11 +3655,12 @@ function renderUsinaSaldoCards(d) {
     const hasData = val !== null && val !== 0;
     return `
     <div onclick="openUsinaEdit('${i.key}','${i.label}','${i.unit}',${val||0})"
-      style="background:var(--panel);border:1px solid var(--border);border-left:3px solid ${i.color};
+      style="background:var(--panel);border:1px solid var(--border);
+             border-top:3px solid ${i.color};
              border-radius:10px;padding:14px 14px 12px;cursor:pointer;transition:all .18s;position:relative;
              display:flex;flex-direction:column;gap:4px"
-      onmouseover="this.style.background='${i.color}0d';this.style.borderColor='${i.color}55'"
-      onmouseout="this.style.background='var(--panel)';this.style.borderLeftColor='${i.color}';this.style.borderTopColor='var(--border)';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)'">
+      onmouseover="this.style.background='${i.color}10';this.style.borderTopColor='${i.color}';this.style.borderRightColor='${i.color}44';this.style.borderBottomColor='${i.color}44';this.style.borderLeftColor='${i.color}44'"
+      onmouseout="this.style.background='var(--panel)';this.style.borderTopColor='${i.color}';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)';this.style.borderLeftColor='var(--border)'">
       <div style="font-size:8px;font-family:var(--font-mono);color:${i.color};letter-spacing:2px;opacity:.8">${i.label}</div>
       <div style="font-size:28px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1;font-family:var(--font-mono)">
         ${hasData ? val : '—'}
