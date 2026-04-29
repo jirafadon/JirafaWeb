@@ -769,6 +769,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
   </div>
   <div class="section-body" id="sec-usina-body">
+    <!-- Link SAP -->
     <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com"
        target="_blank" rel="noopener"
        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(74,158,218,.08);border:1px solid rgba(74,158,218,.25);border-radius:8px;text-decoration:none;margin-bottom:16px;transition:all .2s"
@@ -780,20 +781,23 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       </div>
       <span style="font-size:16px;color:#4a9eda;margin-left:auto">↗</span>
     </a>
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px;margin-bottom:12px">SALDO DE LICENCIAS</div>
-    <div id="usina-saldo-cards" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px"></div>
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:12px">ACTUALIZAR SALDO</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">VACACIONES (días)</label><input type="number" id="usina-vac" min="0" max="60" placeholder="ej: 16" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
-        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">DC (horas)</label><input type="number" id="usina-dc" min="0" max="999" placeholder="ej: 56" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
-        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG (días)</label><input type="number" id="usina-peg" min="0" max="30" placeholder="ej: 6" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
-        <div><label style="font-size:10px;color:var(--tdim);display:block;margin-bottom:4px;font-family:var(--font-mono)">PEG ADICIONAL (días)</label><input type="number" id="usina-pega" min="0" max="30" placeholder="ej: 4" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-size:14px;font-family:var(--font-mono);box-sizing:border-box"></div>
-      </div>
-      <button onclick="saveUsina()" style="width:100%;padding:11px;background:rgba(74,158,218,.12);border:1px solid rgba(74,158,218,.3);color:#4a9eda;border-radius:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer">💾 GUARDAR</button>
-      <div id="usina-updated" style="text-align:center;font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:8px"></div>
+
+    <!-- Saldos: siempre visibles. Tocar uno para editar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:3px">SALDO DE LICENCIAS</div>
+      <div id="usina-updated" style="font-size:9px;color:var(--adim);font-family:var(--font-mono)"></div>
     </div>
-    <div style="margin-top:10px;font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center">Ingresá los datos desde SAP SF → Ver tipo de tiempo → A fecha de hoy</div>
+    <div id="usina-saldo-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px"></div>
+    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-top:8px;margin-bottom:4px">Tocá un saldo para actualizarlo</div>
+
+    <!-- Hint -->
+    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-top:4px;margin-bottom:2px">Tocá un saldo para actualizarlo</div>
+
+    <!-- Inputs ocultos necesarios para compatibilidad con saveUsina() -->
+    <input type="hidden" id="usina-vac">
+    <input type="hidden" id="usina-dc">
+    <input type="hidden" id="usina-peg">
+    <input type="hidden" id="usina-pega">
   </div>
 </div>
 
@@ -2435,7 +2439,14 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
         if (dsDragging) return;
         const date = td.dataset.date, g = td.dataset.g;
         const turno = getTurno(g, date);
-        openCellActions(date, g, turno, getEvsByDateAndG(date, g));
+        const dayEvs = getEvsByDateAndG(date, g);
+        const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g && ME && r.userId===ME.id);
+        // Celda con recargo propio y sin licencia → popup recargo
+        if (dayRecs.length > 0 && dayEvs.length === 0) {
+          openRecPopup(dayRecs[0], turno);
+          return;
+        }
+        openCellActions(date, g, turno, dayEvs);
       });
     });
   }
@@ -2459,7 +2470,18 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     scr.addEventListener('touchstart',e=>{const td=e.target.closest(`td[data-date][data-g="${userG}"]`);if(!td)return;e.preventDefault();dsClearHighlights();dsDragging=true;dsStartDate=td.dataset.date;dsEndDate=td.dataset.date;dsGuardia=userG;td.classList.add('ds-start');},{passive:false});
     scr.addEventListener('mousemove',e=>{if(!dsDragging)return;updateRange(getTdAt(e.clientX,e.clientY));});
     scr.addEventListener('touchmove',e=>{if(!dsDragging)return;e.preventDefault();const t=e.touches[0];updateRange(getTdAt(t.clientX,t.clientY));},{passive:false});
-    const finishDrag=()=>{if(!dsDragging)return;dsDragging=false;if(dsStartDate)dsOpen(dsStartDate,dsEndDate||dsStartDate,userG);};
+    const finishDrag=()=>{
+      if(!dsDragging)return;dsDragging=false;
+      const startD=dsStartDate, endD=dsEndDate||dsStartDate;
+      // Tap simple (sin arrastre): si hay licencias propias, mostrar popup
+      if(startD && startD===endD){
+        const tapEvs=getEvsByDateAndG(startD,userG);
+        const tapRecs=RECARGOS.filter(r=>r.date===startD&&r.guardia===userG&&ME&&r.userId===ME.id);
+        if(tapEvs.length>0){ dsClearHighlights(); openLicPopupForDay(tapEvs); return; }
+        if(tapRecs.length>0){ dsClearHighlights(); openRecPopup(tapRecs[0],getTurno(userG,startD)); return; }
+      }
+      if(startD) dsOpen(startD,endD,userG);
+    };
     scr.addEventListener('mouseup',finishDrag); scr.addEventListener('touchend',finishDrag);
   }
 
@@ -2575,26 +2597,72 @@ function dsClearHighlights(){
 // ═══════════════════════════════════════════════════════════════════════════
 // CELL ACTIONS
 // ═══════════════════════════════════════════════════════════════════════════
+// ── Popup de detalle de recargo ──────────────────────────────────────────
+function openRecPopup(rec, turno) {
+  const color = rec.sobreFranco ? '#e05252' : '#ff6b35';
+  const icon  = rec.sobreFranco ? '🔴' : '⬆️';
+  const label = rec.sobreFranco ? 'RECARGO SOBRE FRANCO' : 'RECARGO DÍA TRABAJADO';
+  const turnoStr = rec.turno ? `T${rec.turno}` : (turno || '—');
+
+  document.getElementById('lic-popup-card').innerHTML = `
+    <div class="lic-popup-header">
+      <div class="lic-popup-icon">${icon}</div>
+      <div>
+        <div class="lic-popup-type" style="color:${color}">${label}</div>
+        <div class="lic-popup-user">${rec.userName} · Guardia ${rec.guardia}</div>
+      </div>
+    </div>
+    <div class="lic-popup-grid">
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Fecha</div>
+        <div class="lic-popup-cell-value" style="font-size:13px">${formatDate(rec.date).toUpperCase()}</div>
+      </div>
+      <div class="lic-popup-cell">
+        <div class="lic-popup-cell-label">Turno</div>
+        <div class="lic-popup-cell-value">${turnoStr}</div>
+      </div>
+      <div class="lic-popup-cell" style="grid-column:span 2">
+        <div class="lic-popup-cell-label">Tipo</div>
+        <div class="lic-popup-cell-value" style="font-size:13px;color:${color}">${label}</div>
+      </div>
+    </div>
+    ${rec.note ? `<div style="font-size:11px;color:var(--tdim);font-family:var(--font-mono);margin-bottom:12px;padding:8px 10px;background:var(--cell-bg);border-radius:6px">💬 ${rec.note}</div>` : ''}
+    <div style="display:flex;gap:8px">
+      <button class="lic-popup-close" style="flex:1;background:rgba(220,38,38,.12);color:#e05252;border:1px solid rgba(220,38,38,.25)"
+        onclick="closeLicPopup();deleteRecargo('${rec.id}')">✕ ELIMINAR</button>
+      <button class="lic-popup-close" style="flex:2;background:${color}18;color:${color};border:1px solid ${color}44"
+        onclick="closeLicPopup()">CERRAR</button>
+    </div>
+  `;
+  document.getElementById('lic-popup').classList.remove('off');
+}
+
 // ── Popup de detalle de licencia (tarjeta visual) ─────────────────────────
 function closeLicPopup() {
   document.getElementById('lic-popup').classList.add('off');
+}
+function closeUsinaPopup() {
+  document.getElementById('usina-popup').classList.add('off');
 }
 
 function showLicDetail(ev) {
   const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5', icon: '📋' };
   const color = li.color || '#8a9ab5';
   const icon = li.icon || '📋';
-  const isSameDay = ev.startDate === ev.endDate;
+  const isMine = ME && ev.userId === ME.id;
 
-  // Calcular días
   let dias = 1;
-  if (!isSameDay) {
+  if (ev.startDate !== ev.endDate) {
     const a = new Date(ev.startDate + 'T12:00:00');
     const b = new Date(ev.endDate   + 'T12:00:00');
     dias = Math.round((b - a) / 86400000) + 1;
   }
-
   const turnoStr = ev.turno ? `T${ev.turno}` : (ev.guardia || '—');
+
+  // Selector de tipo para cambiar licencia (solo propias)
+  const licOptions = Object.entries(LIC).map(([code, l]) =>
+    `<option value="${code}" ${code===ev.type?'selected':''}>${code} — ${l.name}</option>`
+  ).join('');
 
   document.getElementById('lic-popup-card').innerHTML = `
     <div class="lic-popup-header">
@@ -2622,16 +2690,45 @@ function showLicDetail(ev) {
         <div class="lic-popup-cell-value">${dias}</div>
       </div>
     </div>
-    <div style="display:flex;gap:8px">
-      ${ev.userId === ME?.id
-        ? `<button class="lic-popup-close" style="flex:1;background:rgba(220,38,38,.15);color:#e05252;border:1px solid rgba(220,38,38,.3)"
-            onclick="closeLicPopup();deleteEvent('${ev.id}')">✕ ELIMINAR</button>`
-        : ''}
-      <button class="lic-popup-close" style="flex:2;background:${color}22;color:${color};border:1px solid ${color}55"
+    ${ev.note ? `<div style="font-size:11px;color:var(--tdim);font-family:var(--font-mono);margin-bottom:12px;padding:8px 10px;background:var(--cell-bg);border-radius:6px">💬 ${ev.note}</div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${isMine ? `
+        <button class="lic-popup-close" style="flex:1;min-width:80px;background:rgba(220,38,38,.12);color:#e05252;border:1px solid rgba(220,38,38,.25)"
+          onclick="closeLicPopup();deleteEvent('${ev.id}')">✕ ELIMINAR</button>
+        <button class="lic-popup-close" id="lic-change-btn" style="flex:1;min-width:80px;background:rgba(245,166,35,.12);color:#f5a623;border:1px solid rgba(245,166,35,.3)"
+          onclick="toggleLicChangePanel('${ev.id}')">✏️ CAMBIAR</button>
+      ` : ''}
+      <button class="lic-popup-close" style="flex:2;min-width:80px;background:${color}18;color:${color};border:1px solid ${color}44"
         onclick="closeLicPopup()">CERRAR</button>
     </div>
+    <!-- Panel de cambio de tipo — colapsado por defecto -->
+    <div id="lic-change-panel" style="display:none;margin-top:10px;background:#1a2535;border-radius:10px;padding:12px">
+      <div style="font-size:9px;letter-spacing:2px;color:var(--adim);font-family:var(--font-mono);margin-bottom:8px">CAMBIAR TIPO DE LICENCIA</div>
+      <select id="lic-change-type" style="width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--tbright);font-size:13px;font-family:var(--font-mono);margin-bottom:8px">
+        ${licOptions}
+      </select>
+      <button onclick="changeLicType('${ev.id}')" style="width:100%;padding:10px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);border-radius:8px;color:#f5a623;font-size:12px;font-weight:700;font-family:var(--font-ui);cursor:pointer;letter-spacing:1px">✔ APLICAR</button>
+    </div>
   `;
+  window._currentLicEv = ev;
   document.getElementById('lic-popup').classList.remove('off');
+}
+
+function toggleLicChangePanel(evId) {
+  const p = document.getElementById('lic-change-panel');
+  if (!p) return;
+  p.style.display = p.style.display === 'none' ? '' : 'none';
+}
+
+async function changeLicType(evId) {
+  const newType = document.getElementById('lic-change-type')?.value;
+  if (!newType) return;
+  const ev = EVENTS.find(e => e.id === evId);
+  if (!ev) return;
+  ev.type = newType;
+  await fbSet('events', evId, ev);
+  closeLicPopup();
+  renderEvP(); renderCal(); if (window.S) renderRT(window.RT);
 }
 
 function openLicPopupForDay(dayEvs) {
@@ -3012,7 +3109,7 @@ Object.assign(window, {
   openRecPicker, closeRecPicker, saveRecargo, deleteRecargo, recNavMonth,
   toggleRelPanel, openAddRelCoverage, saveRelCoverage,
   openRelPicker, relPickerCancel,
-  openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup,
+  openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup, changeLicType, toggleLicChangePanel, openRecPopup, openUsinaEdit, saveUsinaField, closeUsinaPopup,
   buscar, renderVacTable,
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
@@ -3523,19 +3620,65 @@ function renderUsinaSaldoCards(d) {
   const container = document.getElementById('usina-saldo-cards');
   if (!container) return;
   const items = [
-    { label:'VACACIONES', value: (d.vac||0) + ' días',  color:'#3dba78', key:'vac' },
-    { label:'DC',         value: (d.dc||0)  + ' hs',    color:'#5ba3d9', key:'dc'  },
-    { label:'PEG',        value: (d.peg||0) + ' días',  color:'#b07ee8', key:'peg' },
-    { label:'PEG ADIC.',  value: (d.pega||0)+ ' días',  color:'#ff8c42', key:'pega'},
+    { label:'VACACIONES', unit:'días', color:'#3dba78', key:'vac',  icon:'🌿' },
+    { label:'DC',         unit:'hs',   color:'#5ba3d9', key:'dc',   icon:'🔄' },
+    { label:'PEG',        unit:'días', color:'#b07ee8', key:'peg',  icon:'🔑' },
+    { label:'PEG ADIC.',  unit:'días', color:'#ff8c42', key:'pega', icon:'🔑' },
   ];
-  container.innerHTML = items.map(i => `
-    <div style="flex:1;min-width:120px;background:var(--panel);border:1px solid var(--border);border-left:3px solid ${i.color};border-radius:8px;padding:10px 12px">
-      <div style="font-size:9px;font-family:var(--font-mono);color:var(--adim);letter-spacing:2px;margin-bottom:4px">${i.label}</div>
-      <div style="font-size:22px;font-weight:700;color:${i.color}">${i.value}</div>
-    </div>`).join('');
-  // Mostrar última actualización
+  container.innerHTML = items.map(i => {
+    const val = d[i.key] ?? null;
+    const hasData = val !== null && val !== 0;
+    return `
+    <div onclick="openUsinaEdit('${i.key}','${i.label}','${i.unit}',${val||0})"
+      style="background:var(--panel);border:1px solid var(--border);border-top:3px solid ${i.color};
+             border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;position:relative"
+      onmouseover="this.style.borderColor='${i.color}'" onmouseout="this.style.borderTopColor='${i.color}';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)';this.style.borderLeftColor='var(--border)'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:9px;font-family:var(--font-mono);color:var(--adim);letter-spacing:1.5px">${i.label}</div>
+        <span style="font-size:11px;opacity:.5">✏️</span>
+      </div>
+      <div style="font-size:26px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1">
+        ${hasData ? val : '—'}
+      </div>
+      <div style="font-size:10px;color:var(--adim);margin-top:2px">${hasData ? i.unit : 'sin datos'}</div>
+    </div>`}).join('');
+
   const upd = document.getElementById('usina-updated');
   if (upd && d.updatedStr) upd.textContent = '↻ ' + d.updatedStr;
+}
+
+function openUsinaEdit(key, label, unit, currentVal) {
+  document.getElementById('usina-edit-key').value = key;
+  document.getElementById('usina-popup-label').textContent = `${label.toUpperCase()} (${unit})`;
+  document.getElementById('usina-edit-value').value = currentVal || '';
+  document.getElementById('usina-edit-value').placeholder = `ej: ${key==='dc'?'56':'16'}`;
+  document.getElementById('usina-popup').classList.remove('off');
+  setTimeout(()=>document.getElementById('usina-edit-value').focus(), 100);
+}
+
+async function saveUsinaField() {
+  if (!ME) return;
+  const key = document.getElementById('usina-edit-key').value;
+  const val = parseFloat(document.getElementById('usina-edit-value').value) || 0;
+  // Leer datos actuales de Firestore, actualizar solo el campo tocado
+  const snap = await getDocs(fbCol('usina-saldo'));
+  const existing = snap.docs.find(d => d.id === ME.id)?.data() || {};
+  const now = new Date();
+  const data = {
+    ...existing,
+    userId: ME.id, userName: ME.name,
+    [key]: val,
+    updatedAt: now.toISOString(),
+    updatedStr: now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})
+  };
+  // Sync hidden inputs for compatibility
+  ['vac','dc','peg','pega'].forEach(k => {
+    const el2 = document.getElementById('usina-' + k);
+    if (el2) el2.value = data[k] || 0;
+  });
+  await fbSet('usina-saldo', ME.id, data);
+  closeUsinaPopup();
+  renderUsinaSaldoCards(data);
 }
 
 async function renderUsinaPanel() {
@@ -3608,5 +3751,31 @@ async function renderUsinaPanel() {
   }
 })();
 </script>
+<!-- ── Popup edición Usina Digital ───────────────────────── -->
+<div class="lic-popup-overlay off" id="usina-popup" onclick="if(event.target===this)closeUsinaPopup()">
+  <div class="lic-popup-card" style="max-width:300px">
+    <div class="lic-popup-header" style="margin-bottom:14px">
+      <div class="lic-popup-icon">🏭</div>
+      <div>
+        <div class="lic-popup-type" style="color:#4a9eda;font-size:15px" id="usina-popup-label">ACTUALIZAR</div>
+        <div class="lic-popup-user">Ingresá el valor de SAP SF</div>
+      </div>
+    </div>
+    <input type="hidden" id="usina-edit-key">
+    <input type="number" id="usina-edit-value" min="0" max="999" placeholder="0"
+      style="width:100%;padding:14px;background:#1a2535;border:1px solid #2a3545;border-radius:10px;
+             color:#e8eaf0;font-size:28px;font-family:var(--font-mono);font-weight:800;
+             box-sizing:border-box;margin-bottom:8px;text-align:center">
+    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-bottom:14px">
+      SAP SF → Ver tipo de tiempo → A fecha de hoy
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="lic-popup-close" style="flex:1;background:rgba(255,255,255,.04);color:var(--tdim);border:1px solid #2a3545"
+        onclick="closeUsinaPopup()">CANCELAR</button>
+      <button class="lic-popup-close" style="flex:2;background:rgba(74,158,218,.15);color:#4a9eda;border:1px solid rgba(74,158,218,.4)"
+        onclick="saveUsinaField()">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
