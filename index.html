@@ -9,14 +9,17 @@
 <meta name="apple-mobile-web-app-title" content="Diagrama DG">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
 <style>
 /* ══════════════════════════════════════════════
    VARIABLES Y RESET
 ══════════════════════════════════════════════ */
 :root {
-  --font-ui: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
-  --font-mono: ui-monospace, 'Courier New', monospace;
+  --font-ui: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'Courier New', monospace;
   --bg: #0a0c0f;
   --panel: #111418;
   --border: #1e2530;
@@ -562,12 +565,14 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 }
 .lic-popup-overlay.off { display: none; }
 .lic-popup-card {
-  background: #0f1520;
+  background: #0d111c;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   padding: 22px 20px 18px;
   width: min(340px, 92vw);
   animation: popIn .3s cubic-bezier(.34,1.56,.64,1);
   position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.7);
 }
 .lic-popup-header {
   display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
@@ -583,14 +588,16 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px;
 }
 .lic-popup-cell {
-  background: #1a2535; border-radius: 10px; padding: 10px 12px;
+  background: #1a2535; border-radius: 10px; padding: 12px 14px;
+  min-height: 60px; display: flex; flex-direction: column; justify-content: center;
 }
 .lic-popup-cell-label {
-  font-size: 9px; letter-spacing: 2px; color: #8a9ab5;
-  text-transform: uppercase; margin-bottom: 4px;
+  font-size: 8px; letter-spacing: 2px; color: #8a9ab5;
+  text-transform: uppercase; margin-bottom: 5px; font-family: var(--font-mono);
 }
 .lic-popup-cell-value {
-  font-size: 15px; font-weight: 800; color: #e8eaf0;
+  font-size: 13px; font-weight: 800; color: #e8eaf0; line-height: 1.2;
+  word-break: break-word; overflow-wrap: break-word;
 }
 .lic-popup-close {
   width: 100%; padding: 13px;
@@ -788,10 +795,10 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <div id="usina-updated" style="font-size:9px;color:var(--adim);font-family:var(--font-mono)"></div>
     </div>
     <div id="usina-saldo-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px"></div>
-    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-top:8px;margin-bottom:4px">Tocá un saldo para actualizarlo</div>
+
 
     <!-- Hint -->
-    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-top:4px;margin-bottom:2px">Tocá un saldo para actualizarlo</div>
+    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-top:8px;opacity:.6">✎ tocá para editar</div>
 
     <!-- Inputs ocultos necesarios para compatibilidad con saveUsina() -->
     <input type="hidden" id="usina-vac">
@@ -3630,17 +3637,16 @@ function renderUsinaSaldoCards(d) {
     const hasData = val !== null && val !== 0;
     return `
     <div onclick="openUsinaEdit('${i.key}','${i.label}','${i.unit}',${val||0})"
-      style="background:var(--panel);border:1px solid var(--border);border-top:3px solid ${i.color};
-             border-radius:10px;padding:12px;cursor:pointer;transition:all .15s;position:relative"
-      onmouseover="this.style.borderColor='${i.color}'" onmouseout="this.style.borderTopColor='${i.color}';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)';this.style.borderLeftColor='var(--border)'">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div style="font-size:9px;font-family:var(--font-mono);color:var(--adim);letter-spacing:1.5px">${i.label}</div>
-        <span style="font-size:11px;opacity:.5">✏️</span>
-      </div>
-      <div style="font-size:26px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1">
+      style="background:var(--panel);border:1px solid var(--border);border-left:3px solid ${i.color};
+             border-radius:10px;padding:14px 14px 12px;cursor:pointer;transition:all .18s;position:relative;
+             display:flex;flex-direction:column;gap:4px"
+      onmouseover="this.style.background='${i.color}0d';this.style.borderColor='${i.color}55'"
+      onmouseout="this.style.background='var(--panel)';this.style.borderLeftColor='${i.color}';this.style.borderTopColor='var(--border)';this.style.borderRightColor='var(--border)';this.style.borderBottomColor='var(--border)'">
+      <div style="font-size:8px;font-family:var(--font-mono);color:${i.color};letter-spacing:2px;opacity:.8">${i.label}</div>
+      <div style="font-size:28px;font-weight:800;color:${hasData?i.color:'var(--tdim)'};line-height:1;font-family:var(--font-mono)">
         ${hasData ? val : '—'}
       </div>
-      <div style="font-size:10px;color:var(--adim);margin-top:2px">${hasData ? i.unit : 'sin datos'}</div>
+      <div style="font-size:9px;color:var(--adim);font-family:var(--font-mono)">${hasData ? i.unit : 'sin datos'}</div>
     </div>`}).join('');
 
   const upd = document.getElementById('usina-updated');
