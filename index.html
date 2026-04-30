@@ -626,10 +626,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 }
 .lic-popup-list-name { font-size: 13px; font-weight: 700; }
 .lic-popup-list-dates { font-size: 11px; color: #8a9ab5; margin-top: 2px; }
-
-/* ── Indicadores Central Puerto ─────────────────────────────────────── */
-.s-indicadores { border-left-color: #4a9eda; }
-@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 </style>
 </head>
 <body>
@@ -876,45 +872,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
 </div>
 
-
-<!-- ════════════════════════════════════════
-     SECCIÓN: INDICADORES CENTRAL PUERTO
-════════════════════════════════════════ -->
-<div class="section s-indicadores">
-  <div class="section-header" onclick="toggleSection('sec-indicadores')">
-    <span class="section-icon">⚡</span>
-    <span class="section-title">Indicadores Central Puerto</span>
-    <span class="section-badge" id="indicadores-badge"></span>
-    <span class="section-arrow" id="sec-indicadores-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-indicadores-body" style="display:none;padding:0;overflow:hidden">
-    <div id="indicadores-frame-wrap" style="position:relative;width:100%;background:#1a2535;border-radius:0 0 10px 10px;overflow:hidden">
-      <!-- Estado: cargando -->
-      <div id="indicadores-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 16px;gap:12px">
-        <div style="font-size:28px">⚡</div>
-        <div style="font-size:12px;color:var(--tdim);font-family:var(--font-mono);letter-spacing:1px">CARGANDO INDICADORES...</div>
-      </div>
-      <iframe
-        id="indicadores-iframe"
-        src=""
-        style="width:100%;height:600px;border:none;display:none;background:#0d1017"
-        scrolling="yes"
-        onload="onIndicadoresLoad()"
-        onerror="onIndicadoresError()"
-      ></iframe>
-      <!-- Error fallback -->
-      <div id="indicadores-error" style="display:none;padding:24px 16px;text-align:center">
-        <div style="font-size:28px;margin-bottom:10px">🔒</div>
-        <div style="font-size:13px;color:var(--tbright);font-weight:700;margin-bottom:6px">No se puede mostrar en iframe</div>
-        <div style="font-size:11px;color:var(--tdim);margin-bottom:16px">El sitio bloquea la inserción por seguridad.<br>Abrilo directamente con el botón de abajo.</div>
-        <a href="https://indicadores.centralpuerto.com" target="_blank" rel="noopener"
-          style="display:inline-block;padding:11px 24px;background:rgba(74,158,218,.15);border:1px solid rgba(74,158,218,.4);border-radius:8px;color:#4a9eda;font-size:12px;font-weight:700;font-family:var(--font-mono);text-decoration:none;letter-spacing:1px">
-          ↗ ABRIR INDICADORES
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ════════════════════════════════════════
      SECCIÓN: HORARIO COMBI
@@ -1449,67 +1406,6 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
 // ═══════════════════════════════════════════════════════════════════════════
 // COLLAPSIBLE SECTIONS
 // ═══════════════════════════════════════════════════════════════════════════
-// ── Indicadores Central Puerto ────────────────────────────────────────────
-let _indicadoresLoaded = false;
-
-function loadIndicadores() {
-  if (_indicadoresLoaded) return;
-  _indicadoresLoaded = true;
-  const iframe = document.getElementById('indicadores-iframe');
-  const loading = document.getElementById('indicadores-loading');
-  const error   = document.getElementById('indicadores-error');
-  if (!iframe) return;
-  // URL con credenciales en query (algunos sitios legacy las aceptan)
-  // Si no funciona por X-Frame-Options, mostramos el fallback con botón
-  iframe.src = 'https://indicadores.centralpuerto.com';
-  // Timeout: si en 8s no cargó, mostrar fallback
-  const timer = setTimeout(() => {
-    if (iframe.style.display === 'none') {
-      loading.style.display = 'none';
-      error.style.display = '';
-    }
-  }, 8000);
-  iframe._loadTimer = timer;
-}
-
-function onIndicadoresLoad() {
-  const iframe  = document.getElementById('indicadores-iframe');
-  const loading = document.getElementById('indicadores-loading');
-  const error   = document.getElementById('indicadores-error');
-  if (!iframe) return;
-  clearTimeout(iframe._loadTimer);
-  try {
-    // Intentar acceder al contenido — si lanza error es cross-origin bloqueado
-    const test = iframe.contentDocument || iframe.contentWindow.document;
-    if (!test || !test.body || test.body.innerHTML === '') throw new Error('blocked');
-    loading.style.display = 'none';
-    error.style.display   = 'none';
-    iframe.style.display  = '';
-    // Intentar auto-login si la página tiene form de login
-    try {
-      const doc = iframe.contentDocument;
-      const userField = doc.querySelector('input[name*="user"],input[name*="User"],input[type="text"]');
-      const passField = doc.querySelector('input[name*="pass"],input[name*="Pass"],input[type="password"]');
-      if (userField && passField) {
-        userField.value = 'indicadores';
-        passField.value = 'indicadores';
-        const btn = doc.querySelector('input[type="submit"],button[type="submit"],button');
-        if (btn) btn.click();
-      }
-    } catch(_) {}
-  } catch(e) {
-    // X-Frame-Options bloqueó el iframe
-    loading.style.display = 'none';
-    error.style.display   = '';
-    iframe.style.display  = 'none';
-  }
-}
-
-function onIndicadoresError() {
-  document.getElementById('indicadores-loading').style.display = 'none';
-  document.getElementById('indicadores-error').style.display   = '';
-}
-
 function toggleSection(id) {
   const body = document.getElementById(id + '-body');
   const arrow = document.getElementById(id + '-arrow');
@@ -1663,17 +1559,7 @@ async function loadData() {
   USERS = []; usersSnap.forEach(d => USERS.push(d.data()));
   EVENTS = []; evSnap.forEach(d => EVENTS.push(d.data()));
   REL_SCHEDULE = rsDoc.exists() ? (rsDoc.data().schedule || {}) : {};
-  RECARGOS = [];
-  recSnap.forEach(d => {
-    const r = d.data();
-    if (r.guardia && r.date && r.turno) {
-      const gPropia = r.guardiaPropia ||
-        (PRESET_USERS.find(p => p.name === r.userName) || {}).guardia ||
-        r.guardia;
-      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, gPropia);
-    }
-    RECARGOS.push(r);
-  });
+  RECARGOS = []; recSnap.forEach(d => RECARGOS.push(d.data()));
   REL_COVERAGES = []; relSnap.forEach(d => REL_COVERAGES.push(d.data()));
 
   if (savedMeId) {
@@ -1699,19 +1585,7 @@ function startRealtimeListeners() {
   });
 
   onSnapshot(fbCol('recargos'), snap => {
-    RECARGOS = [];
-    snap.forEach(d => {
-      const r = d.data();
-      // Recalcular sobreFranco con la logica actualizada (corrige registros viejos)
-      if (r.guardia && r.date && r.turno) {
-        // Si no tiene guardiaPropia (recargo viejo), reconstruirla desde PRESET_USERS
-        const gPropia = r.guardiaPropia ||
-          (PRESET_USERS.find(p => p.name === r.userName) || {}).guardia ||
-          r.guardia;
-        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, gPropia);
-      }
-      RECARGOS.push(r);
-    });
+    RECARGOS = []; snap.forEach(d => RECARGOS.push(d.data()));
     if (!_initDone) return;
     if (ME) renderRecPanel();
     renderCal();
@@ -2935,43 +2809,16 @@ function closeCellActions(){document.getElementById('cell-actions').classList.ad
 let recMonth=new Date().getMonth()+1,recYear=new Date().getFullYear();
 let recPickerDate=null,recPickerG=null;
 
-function isEsSobreFranco(guardia, date, turno, guardiaPropia) {
-  // guardiaPropia: la guardia del trabajador (para calcular su semana).
-  // Si no se pasa, se usa 'guardia' (compatibilidad hacia atras).
-  const gRef = guardiaPropia || guardia;
-  if (!['A','B','C','D','E'].includes(gRef)) return false;
-  if (!turno || turno === 'F') return false;
-  const t = parseInt(turno);
-  if (isNaN(t)) return false;
-
-  function addDay(ds, n) {
-    const d = new Date(ds + 'T12:00:00');
-    d.setDate(d.getDate() + n);
-    return dk(d.getFullYear(), d.getMonth()+1, d.getDate());
-  }
-
-  // Usar el schedule PROPIO del trabajador para saber si es dia 1 o dia 6
-  const prevTurno      = getTurno(gRef, addDay(date, -1));
-  const nextTurno      = getTurno(gRef, addDay(date,  1));
-  const scheduledTurno = getTurno(gRef, date);
-  const sched          = parseInt(scheduledTurno);
-
-  // DIA 1 de su semana (prev = F): ANTE-FRANCO
-  // Fue a trabajar antes de que terminara su franco.
-  // SF si el turno del recargo es MENOR al turno programado propio.
-  if (prevTurno === 'F') {
-    return !isNaN(sched) && t < sched;
-  }
-
-  // DIA 6 de su semana (next = F): SOBRE-FRANCO
-  // Se quedó más allá de su turno, entrando en horas de franco.
-  // SF si el turno del recargo es MAYOR al turno programado propio.
-  if (nextTurno === 'F') {
-    return !isNaN(sched) && t > sched;
-  }
-
-  // Dias 2 al 5: recargo comun, nunca SF.
-  return false;
+function isEsSobreFranco(guardia,date,turno){
+  if(!['A','B','C','D','E'].includes(guardia))return false;
+  if(!turno||turno==='F')return false;
+  const scheduledTurno=getTurno(guardia,date);
+  if(scheduledTurno==='F')return false;
+  const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);
+  const prevDay=dk(d.getFullYear(),d.getMonth()+1,d.getDate());
+  const prevTurno=getTurno(guardia,prevDay);
+  if(prevTurno!=='F')return false;
+  return parseInt(turno)<parseInt(scheduledTurno);
 }
 function openRecPicker(date,guardia,turno,sobreFranco){
   recPickerDate=date;recPickerG=guardia;
@@ -2991,9 +2838,8 @@ async function saveRecargo(){
   const note=document.getElementById('rec-note').value.trim();
   const err=document.getElementById('rec-err');
   if(!guardia||!turno){err.textContent='⚠ Seleccioná guardia y turno.';err.classList.add('show');return;}
-  const guardiaPropia = ME?.guardia || guardia; // guardia propia del trabajador
-  const sobreFranco=isEsSobreFranco(guardia,recPickerDate,parseInt(turno),guardiaPropia);
-  const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,guardiaPropia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
+  const sobreFranco=isEsSobreFranco(guardia,recPickerDate,turno);
+  const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
   RECARGOS.push(rec);await saveOneRecargo(rec);closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
 }
 async function deleteRecargo(id){
@@ -3023,7 +2869,7 @@ function renderRecPanel(){
     info.appendChild(el('div','rec-item-date',`${formatDate(r.date)}  ·  T${r.turno}  ·  ${r.userName}`));
     info.appendChild(el('div','rec-item-main',`Guardia ${r.guardia}`));
     const tag=el('span','rec-item-tag '+(r.sobreFranco?'franco':'normal'),'');
-    tag.textContent=r.sobreFranco?'🔴 Sobre franco':'⬆ Recargo';
+    tag.textContent=r.sobreFranco?'🔴 Sobre franco':'⬆ Día trabajado';
     info.appendChild(tag);
     if(r.note){const n=el('div','',r.note);n.style.cssText='font-size:13px;color:var(--tdim);margin-top:4px;';info.appendChild(n);}
     item.appendChild(info);
@@ -3291,7 +3137,7 @@ Object.assign(window, {
   openRecPicker, closeRecPicker, saveRecargo, deleteRecargo, recNavMonth,
   toggleRelPanel, openAddRelCoverage, saveRelCoverage,
   openRelPicker, relPickerCancel,
-  openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup, changeLicType, toggleLicChangePanel, openRecPopup, openUsinaEdit, saveUsinaField, closeUsinaPopup, loadIndicadores, reloadIndicadores,
+  openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup, changeLicType, toggleLicChangePanel, openRecPopup, openUsinaEdit, saveUsinaField, closeUsinaPopup,
   buscar, renderVacTable,
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
