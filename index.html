@@ -1563,7 +1563,10 @@ async function loadData() {
   recSnap.forEach(d => {
     const r = d.data();
     if (r.guardia && r.date && r.turno) {
-      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, r.guardiaPropia);
+      const gPropia = r.guardiaPropia ||
+        (PRESET_USERS.find(p => p.name === r.userName) || {}).guardia ||
+        r.guardia;
+      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, gPropia);
     }
     RECARGOS.push(r);
   });
@@ -1597,7 +1600,11 @@ function startRealtimeListeners() {
       const r = d.data();
       // Recalcular sobreFranco con la logica actualizada (corrige registros viejos)
       if (r.guardia && r.date && r.turno) {
-        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, r.guardiaPropia);
+        // Si no tiene guardiaPropia (recargo viejo), reconstruirla desde PRESET_USERS
+        const gPropia = r.guardiaPropia ||
+          (PRESET_USERS.find(p => p.name === r.userName) || {}).guardia ||
+          r.guardia;
+        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, gPropia);
       }
       RECARGOS.push(r);
     });
@@ -2912,7 +2919,7 @@ function renderRecPanel(){
     info.appendChild(el('div','rec-item-date',`${formatDate(r.date)}  ·  T${r.turno}  ·  ${r.userName}`));
     info.appendChild(el('div','rec-item-main',`Guardia ${r.guardia}`));
     const tag=el('span','rec-item-tag '+(r.sobreFranco?'franco':'normal'),'');
-    tag.textContent=r.sobreFranco?'🔴 Sobre franco':'⬆ Día trabajado';
+    tag.textContent=r.sobreFranco?'🔴 Sobre franco':'⬆ Recargo';
     info.appendChild(tag);
     if(r.note){const n=el('div','',r.note);n.style.cssText='font-size:13px;color:var(--tdim);margin-top:4px;';info.appendChild(n);}
     item.appendChild(info);
