@@ -1559,7 +1559,14 @@ async function loadData() {
   USERS = []; usersSnap.forEach(d => USERS.push(d.data()));
   EVENTS = []; evSnap.forEach(d => EVENTS.push(d.data()));
   REL_SCHEDULE = rsDoc.exists() ? (rsDoc.data().schedule || {}) : {};
-  RECARGOS = []; recSnap.forEach(d => RECARGOS.push(d.data()));
+  RECARGOS = [];
+  recSnap.forEach(d => {
+    const r = d.data();
+    if (r.guardia && r.date && r.turno) {
+      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno);
+    }
+    RECARGOS.push(r);
+  });
   REL_COVERAGES = []; relSnap.forEach(d => REL_COVERAGES.push(d.data()));
 
   if (savedMeId) {
@@ -1585,7 +1592,15 @@ function startRealtimeListeners() {
   });
 
   onSnapshot(fbCol('recargos'), snap => {
-    RECARGOS = []; snap.forEach(d => RECARGOS.push(d.data()));
+    RECARGOS = [];
+    snap.forEach(d => {
+      const r = d.data();
+      // Recalcular sobreFranco con la logica actualizada (corrige registros viejos)
+      if (r.guardia && r.date && r.turno) {
+        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno);
+      }
+      RECARGOS.push(r);
+    });
     if (!_initDone) return;
     if (ME) renderRecPanel();
     renderCal();
@@ -2809,16 +2824,31 @@ function closeCellActions(){document.getElementById('cell-actions').classList.ad
 let recMonth=new Date().getMonth()+1,recYear=new Date().getFullYear();
 let recPickerDate=null,recPickerG=null;
 
-function isEsSobreFranco(guardia,date,turno){
-  if(!['A','B','C','D','E'].includes(guardia))return false;
-  if(!turno||turno==='F')return false;
-  const scheduledTurno=getTurno(guardia,date);
-  if(scheduledTurno==='F')return false;
-  const d=new Date(date+'T12:00:00');d.setDate(d.getDate()-1);
-  const prevDay=dk(d.getFullYear(),d.getMonth()+1,d.getDate());
-  const prevTurno=getTurno(guardia,prevDay);
-  if(prevTurno!=='F')return false;
-  return parseInt(turno)<parseInt(scheduledTurno);
+function isEsSobreFranco(guardia, date, turno) {
+  // Solo aplica a guardias rotativas
+  if (!['A','B','C','D','E'].includes(guardia)) return false;
+  if (!turno || turno === 'F') return false;
+  const t = parseInt(turno);
+  if (isNaN(t)) return false;
+
+  function addDay(ds, n) {
+    const d = new Date(ds + 'T12:00:00');
+    d.setDate(d.getDate() + n);
+    return dk(d.getFullYear(), d.getMonth()+1, d.getDate());
+  }
+
+  const prevDay = addDay(date, -1);
+  const nextDay = addDay(date,  1);
+  const prevTurno = getTurno(guardia, prevDay);
+  const nextTurno = getTurno(guardia, nextDay);
+
+  // CASO 1: primer dia despues del franco — viene directo del descanso
+  if (prevTurno === 'F') return true;
+
+  // CASO 2: ultimo dia antes del franco — se queda al cierre y el franco empieza al dia siguiente
+  if (nextTurno === 'F') return true;
+
+  return false;
 }
 function openRecPicker(date,guardia,turno,sobreFranco){
   recPickerDate=date;recPickerG=guardia;
