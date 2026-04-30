@@ -2839,14 +2839,34 @@ function isEsSobreFranco(guardia, date, turno) {
 
   const prevDay = addDay(date, -1);
   const nextDay = addDay(date,  1);
-  const prevTurno = getTurno(guardia, prevDay);
-  const nextTurno = getTurno(guardia, nextDay);
+  const prevTurno     = getTurno(guardia, prevDay);
+  const nextTurno     = getTurno(guardia, nextDay);
+  const scheduledTurno = getTurno(guardia, date);
+  const sched = parseInt(scheduledTurno);
 
-  // CASO 1: primer dia despues del franco — viene directo del descanso
+  // CASO 1 — POST-FRANCO: primer dia de trabajo despues del franco.
+  // El franco termino en el primer minuto de este turno → SF.
   if (prevTurno === 'F') return true;
 
-  // CASO 2: ultimo dia antes del franco — se queda al cierre y el franco empieza al dia siguiente
+  // CASO 2 — ANTE-FRANCO: ultimo dia de trabajo antes del franco.
+  // El franco empieza al ultimo minuto de este dia.
+  // Sub-caso A: recargo en su turno habitual (se queda hasta el inicio del franco) → SF
+  // Sub-caso B: recargo en un turno ANTERIOR al propio (ya está en horas de franco
+  //             porque el franco comenzó al final del turno anterior al suyo) → SF
+  // Solo aplica en el ULTIMO dia de trabajo (nextTurno === 'F'), no en dias intermedios.
   if (nextTurno === 'F') return true;
+
+  // Sub-caso B extendido: ultimo dia de semana laboral (2 dias antes del franco)
+  // cuando el bloque de franco es de 2 dias. En ese caso nextTurno no es F todavia
+  // pero el recargo es en un turno anterior al programado → las horas ya son de franco.
+  // Verificar si pasado mañana es franco (bloque F de 2 dias).
+  const dayAfterNext = addDay(date, 2);
+  const turnoD2 = getTurno(guardia, dayAfterNext);
+  if (nextTurno !== 'F' && turnoD2 === 'F' && !isNaN(sched) && t < sched) {
+    // Es el penultimo dia antes de un bloque de 2 francos,
+    // y el recargo es en un turno anterior → horas que corresponden al periodo de franco
+    return true;
+  }
 
   return false;
 }
