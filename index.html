@@ -1563,7 +1563,7 @@ async function loadData() {
   recSnap.forEach(d => {
     const r = d.data();
     if (r.guardia && r.date && r.turno) {
-      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno);
+      r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, r.guardiaPropia);
     }
     RECARGOS.push(r);
   });
@@ -1597,7 +1597,7 @@ function startRealtimeListeners() {
       const r = d.data();
       // Recalcular sobreFranco con la logica actualizada (corrige registros viejos)
       if (r.guardia && r.date && r.turno) {
-        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno);
+        r.sobreFranco = isEsSobreFranco(r.guardia, r.date, r.turno, r.guardiaPropia);
       }
       RECARGOS.push(r);
     });
@@ -2824,8 +2824,11 @@ function closeCellActions(){document.getElementById('cell-actions').classList.ad
 let recMonth=new Date().getMonth()+1,recYear=new Date().getFullYear();
 let recPickerDate=null,recPickerG=null;
 
-function isEsSobreFranco(guardia, date, turno) {
-  if (!['A','B','C','D','E'].includes(guardia)) return false;
+function isEsSobreFranco(guardia, date, turno, guardiaPropia) {
+  // guardiaPropia: la guardia del trabajador (para calcular su semana).
+  // Si no se pasa, se usa 'guardia' (compatibilidad hacia atras).
+  const gRef = guardiaPropia || guardia;
+  if (!['A','B','C','D','E'].includes(gRef)) return false;
   if (!turno || turno === 'F') return false;
   const t = parseInt(turno);
   if (isNaN(t)) return false;
@@ -2836,26 +2839,27 @@ function isEsSobreFranco(guardia, date, turno) {
     return dk(d.getFullYear(), d.getMonth()+1, d.getDate());
   }
 
-  const prevTurno      = getTurno(guardia, addDay(date, -1));
-  const nextTurno      = getTurno(guardia, addDay(date,  1));
-  const scheduledTurno = getTurno(guardia, date);
+  // Usar el schedule PROPIO del trabajador para saber si es dia 1 o dia 6
+  const prevTurno      = getTurno(gRef, addDay(date, -1));
+  const nextTurno      = getTurno(gRef, addDay(date,  1));
+  const scheduledTurno = getTurno(gRef, date);
   const sched          = parseInt(scheduledTurno);
 
-  // DIA 1 de semana laboral: el dia anterior es franco
-  // ANTE-FRANCO: fue antes de que terminara su franco
-  // → SF solo si el turno del recargo es MENOR al turno programado
+  // DIA 1 de su semana (prev = F): ANTE-FRANCO
+  // Fue a trabajar antes de que terminara su franco.
+  // SF si el turno del recargo es MENOR al turno programado propio.
   if (prevTurno === 'F') {
     return !isNaN(sched) && t < sched;
   }
 
-  // DIA 6 de semana laboral: el dia siguiente es franco
-  // SOBRE-FRANCO: se quedó más allá de su turno, entrando en horas de franco
-  // → SF solo si el turno del recargo es MAYOR al turno programado
+  // DIA 6 de su semana (next = F): SOBRE-FRANCO
+  // Se quedó más allá de su turno, entrando en horas de franco.
+  // SF si el turno del recargo es MAYOR al turno programado propio.
   if (nextTurno === 'F') {
     return !isNaN(sched) && t > sched;
   }
 
-  // Dias 2 al 5: recargo comun, nunca SF
+  // Dias 2 al 5: recargo comun, nunca SF.
   return false;
 }
 function openRecPicker(date,guardia,turno,sobreFranco){
@@ -2876,8 +2880,9 @@ async function saveRecargo(){
   const note=document.getElementById('rec-note').value.trim();
   const err=document.getElementById('rec-err');
   if(!guardia||!turno){err.textContent='⚠ Seleccioná guardia y turno.';err.classList.add('show');return;}
-  const sobreFranco=isEsSobreFranco(guardia,recPickerDate,turno);
-  const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
+  const guardiaPropia = ME?.guardia || guardia; // guardia propia del trabajador
+  const sobreFranco=isEsSobreFranco(guardia,recPickerDate,parseInt(turno),guardiaPropia);
+  const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,guardiaPropia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
   RECARGOS.push(rec);await saveOneRecargo(rec);closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
 }
 async function deleteRecargo(id){
