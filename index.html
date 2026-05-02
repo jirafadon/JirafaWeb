@@ -1022,17 +1022,22 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
   <div class="section-body" id="sec-audit-body">
     <!-- Tabs de administración -->
-    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:70px">👥 ACCESOS</button>
-      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:70px">📋 LICENCIAS</button>
-      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:70px">⭐ RELEVANTE</button>
-      <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab" style="flex:1;min-width:70px">🎨 APARIENCIA</button>
+    <div style="display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap">
+      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:60px;font-size:10px">👥 ACCESOS</button>
+      <button onclick="showAdminTab('editar')" id="atab-editar" class="tab" style="flex:1;min-width:60px;font-size:10px;border-color:rgba(245,166,35,.5);color:var(--amber)">✏️ EDITAR</button>
+      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:60px;font-size:10px">📋 VER LIC.</button>
+      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:60px;font-size:10px">⭐ REL.</button>
+      <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab" style="flex:1;min-width:60px;font-size:10px">🎨 TEMA</button>
     </div>
     <!-- Tab: Accesos -->
     <div id="admin-accesos">
       <div id="audit-content" style="padding:4px 0"></div>
     </div>
-    <!-- Tab: Todas las licencias -->
+    <!-- Tab: EDITAR — modo administrador completo -->
+    <div id="admin-editar" style="display:none">
+      <div id="admin-edit-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Todas las licencias (solo lectura) -->
     <div id="admin-licencias" style="display:none">
       <div id="admin-lic-content" style="padding:4px 0"></div>
     </div>
@@ -1399,7 +1404,7 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
 
 // ─── Build license type grid in modals ───
 (function(){
-  ['lic-type-grid'].forEach(gid => {
+  ['lic-type-grid', 'adm-lic-type-grid'].forEach(gid => {
     const g = document.getElementById(gid);
     if (!g) return;
     Object.entries(LIC).forEach(([code, v]) => {
@@ -1408,7 +1413,7 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
       const ln = document.createElement('span'); ln.className = 'lt-name'; ln.textContent = v.name;
       btn.appendChild(lc); btn.appendChild(ln);
       btn.addEventListener('click', () => {
-        document.querySelectorAll('#lic-type-grid .lt-btn').forEach(b => {
+        document.querySelectorAll('#' + gid + ' .lt-btn').forEach(b => {
           b.classList.remove('sel'); b.style.background = ''; b.style.borderColor = '';
         });
         btn.classList.add('sel'); btn.style.background = v.color + '22'; btn.style.borderColor = v.color;
@@ -1416,6 +1421,10 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
           document.getElementById('dc-hours-row').style.display = code === 'DC' ? '' : 'none';
           const hint = document.getElementById('pega-hint');
           if (hint) hint.style.display = code === 'PA' ? '' : 'none';
+        }
+        if (gid === 'adm-lic-type-grid') {
+          const dcRow = document.getElementById('adm-dc-row');
+          if (dcRow) dcRow.style.display = code === 'DC' ? '' : 'none';
         }
       });
       g.appendChild(btn);
@@ -3214,7 +3223,9 @@ Object.assign(window, {
   renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
   saveUsina, renderUsinaPanel,
-  showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
+  showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, renderAdminEditar, applyCellTheme, applyStoredCellTheme,
+  adminSelectUser, adminOpenNewLicense, adminCloseLicModal, adminSaveLicense, adminDeleteLicense,
+  adminOpenUsina, adminCloseUsina, adminSaveUsina,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3588,14 +3599,339 @@ function applyStoredCellTheme() {
 }
 
 function showAdminTab(tab) {
-  ['accesos','licencias','relevante','apariencia'].forEach(t => {
-    document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
+  ['accesos','editar','licencias','relevante','apariencia'].forEach(t => {
+    const el2 = document.getElementById('admin-'+t);
+    if (el2) el2.style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('atab-'+t);
     if (btn) btn.classList.toggle('on', t===tab);
   });
-  if (tab === 'licencias') renderAdminLicencias();
-  if (tab === 'relevante') renderAdminRelevante();
+  if (tab === 'editar')     renderAdminEditar();
+  if (tab === 'licencias')  renderAdminLicencias();
+  if (tab === 'relevante')  renderAdminRelevante();
   if (tab === 'apariencia') renderAdminApariencia();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN EDIT TAB — control total para Jonatan
+// ═══════════════════════════════════════════════════════════════════════════
+let _adminSelUser = null; // usuario seleccionado en modo edición
+
+function renderAdminEditar() {
+  const div = document.getElementById('admin-edit-content');
+  if (!div) return;
+
+  const userListHtml = PRESET_USERS.map(p => {
+    const u = USERS.find(x => x.name === p.name);
+    const col = G_COLORS[p.guardia] || '#8a9ab5';
+    const evCount = EVENTS.filter(e => e.userName === p.name).length;
+    const isSelected = _adminSelUser && _adminSelUser.name === p.name;
+    return `<div onclick="adminSelectUser('${p.name}')" style="
+        display:flex;align-items:center;gap:10px;
+        padding:10px 12px;border-radius:8px;cursor:pointer;
+        background:${isSelected ? col+'22' : 'var(--cell-bg)'};
+        border:2px solid ${isSelected ? col : 'var(--border)'};
+        transition:all .15s;margin-bottom:6px">
+      <div style="width:32px;height:32px;border-radius:50%;background:${col};
+                  display:flex;align-items:center;justify-content:center;
+                  font-weight:900;font-size:14px;color:#000;flex-shrink:0">${p.name.charAt(0)}</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:13px;color:${isSelected?col:'var(--tbright)'};">${p.name}</div>
+        <div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">${G_LABEL[p.guardia]||p.guardia} · ${evCount} lic.</div>
+      </div>
+      ${isSelected ? '<div style="color:'+col+';font-size:18px">›</div>' : ''}
+    </div>`;
+  }).join('');
+
+  let userDetailHtml = '';
+  if (_adminSelUser) {
+    const u = _adminSelUser;
+    const col = G_COLORS[u.guardia] || '#8a9ab5';
+    const evs = EVENTS.filter(e => e.userName === u.name).sort((a,b) => b.startDate.localeCompare(a.startDate));
+
+    const evRows = evs.length ? evs.map(ev => {
+      const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
+      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;
+          background:var(--cell-bg);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:5px">
+        <span style="font-size:11px;font-weight:800;color:${li.color};min-width:28px">${ev.type}</span>
+        <div style="flex:1">
+          <div style="font-size:12px;color:var(--tbright);font-weight:600">${li.name}</div>
+          <div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">
+            ${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}
+            ${ev.note ? ' · 💬 '+ev.note : ''}
+          </div>
+          <div style="font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:2px">
+            Registrado por ${ev.createdBy||'?'} · ${ev.createdAtStr||''}
+          </div>
+        </div>
+        <button onclick="adminDeleteLicense('${ev.id}')" title="Eliminar esta licencia"
+          style="background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);
+                 color:#e05252;border-radius:6px;padding:5px 9px;cursor:pointer;
+                 font-size:12px;flex-shrink:0">✕</button>
+      </div>`;
+    }).join('') :
+      '<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:8px 0">Sin licencias registradas.</div>';
+
+    userDetailHtml = `
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <div style="width:28px;height:28px;border-radius:50%;background:${col};
+                      display:flex;align-items:center;justify-content:center;
+                      font-weight:900;font-size:13px;color:#000">${u.name.charAt(0)}</div>
+          <span style="font-weight:700;font-size:15px;color:${col}">${u.name}</span>
+          <span style="font-size:10px;color:var(--tdim)">${G_LABEL[u.guardia]||u.guardia}</span>
+          <div style="flex:1"></div>
+          <button onclick="adminOpenNewLicense()" style="
+              background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.5);
+              color:var(--amber);border-radius:8px;padding:7px 14px;
+              font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-ui)">
+            + NUEVA LICENCIA
+          </button>
+        </div>
+
+        <!-- Saldo Usina Digital -->
+        <div style="background:var(--cell-bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px">
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:10px">
+            🏭 SALDO USINA DIGITAL
+          </div>
+          <div id="admin-usina-preview-${u.name}" style="margin-bottom:10px"></div>
+          <button onclick="adminOpenUsina('${u.name}')" style="
+              width:100%;padding:8px;background:rgba(74,158,218,.12);
+              border:1px solid rgba(74,158,218,.35);color:#4a9eda;
+              border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-ui)">
+            ✏️ EDITAR SALDO USINA
+          </button>
+        </div>
+
+        <!-- Licencias -->
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">
+          LICENCIAS DE ${u.name.toUpperCase()} (${evs.length})
+        </div>
+        ${evRows}
+      </div>`;
+
+    // Load usina data async for the selected user
+    setTimeout(() => adminLoadUsinaPreview(u), 50);
+  }
+
+  div.innerHTML = `
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:10px;
+                padding:8px 12px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:8px">
+      ⚡ MODO EDICIÓN — Seleccioná un usuario para modificar sus datos
+    </div>
+    ${userListHtml}
+    ${userDetailHtml}
+  `;
+}
+
+function adminSelectUser(name) {
+  const u = USERS.find(x => x.name === name);
+  if (!u) return;
+  _adminSelUser = u;
+  renderAdminEditar();
+}
+
+async function adminLoadUsinaPreview(u) {
+  const container = document.getElementById('admin-usina-preview-' + u.name);
+  if (!container) return;
+  try {
+    const snap = await getDocs(fbCol('usina-saldo'));
+    const doc2 = snap.docs.find(d => d.id === u.id);
+    if (!doc2) {
+      container.innerHTML = '<div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">Sin saldo registrado.</div>';
+      return;
+    }
+    const d = doc2.data();
+    const items = [
+      { label:'VAC', val:d.vac,  unit:'días', color:'#3dba78' },
+      { label:'DC',  val:d.dc,   unit:'hs',   color:'#4a9eda' },
+      { label:'PEG', val:d.peg,  unit:'días', color:'#b07ee8' },
+      { label:'PEGA',val:d.pega, unit:'días', color:'#ff8c42' },
+    ];
+    container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">` +
+      items.map(i => `
+        <div style="text-align:center;padding:8px 4px;background:var(--panel);border-radius:6px;border:1px solid var(--border)">
+          <div style="font-size:18px;font-weight:800;color:${i.val?i.color:'var(--tdim)'};">${i.val||'—'}</div>
+          <div style="font-size:8px;color:var(--adim);font-family:var(--font-mono)">${i.label}</div>
+        </div>`).join('') + '</div>' +
+      `<div style="font-size:9px;color:var(--adim);font-family:var(--font-mono);margin-top:5px">↻ ${d.updatedStr||'—'}</div>`;
+  } catch(e) {
+    if (container) container.innerHTML = '<div style="font-size:10px;color:var(--tdim)">Error al cargar.</div>';
+  }
+}
+
+// Abrir modal nueva licencia para el usuario seleccionado
+function adminOpenNewLicense() {
+  if (!_adminSelUser) return;
+  const u = _adminSelUser;
+  document.getElementById('adm-lic-username').textContent = u.name + ' · ' + (G_LABEL[u.guardia]||u.guardia);
+  document.getElementById('adm-lic-from').value = '';
+  document.getElementById('adm-lic-to').value = '';
+  document.getElementById('adm-lic-note').value = '';
+  document.getElementById('adm-lic-err').style.display = 'none';
+  // Build type grid if empty (modal HTML comes after script tag)
+  const grid = document.getElementById('adm-lic-type-grid');
+  if (grid && grid.children.length === 0) {
+    Object.entries(LIC).forEach(([code, v]) => {
+      const btn = document.createElement('div'); btn.className = 'lt-btn'; btn.dataset.code = code;
+      const lc = document.createElement('span'); lc.className = 'lt-code'; lc.style.background = v.color; lc.textContent = code;
+      const ln = document.createElement('span'); ln.className = 'lt-name'; ln.textContent = v.name;
+      btn.appendChild(lc); btn.appendChild(ln);
+      btn.addEventListener('click', () => {
+        grid.querySelectorAll('.lt-btn').forEach(b => { b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; });
+        btn.classList.add('sel'); btn.style.background = v.color + '22'; btn.style.borderColor = v.color;
+        const dcRow = document.getElementById('adm-dc-row');
+        if (dcRow) dcRow.style.display = code === 'DC' ? '' : 'none';
+      });
+      grid.appendChild(btn);
+    });
+  }
+  // Reset type selection
+  document.querySelectorAll('#adm-lic-type-grid .lt-btn').forEach(b => {
+    b.classList.remove('sel'); b.style.background=''; b.style.borderColor='';
+  });
+  document.getElementById('adm-dc-row').style.display = 'none';
+  document.getElementById('adm-lic-modal').classList.remove('off');
+}
+function adminCloseLicModal() {
+  document.getElementById('adm-lic-modal').classList.add('off');
+}
+
+async function adminSaveLicense() {
+  if (!_adminSelUser || !ME) return;
+  const u = _adminSelUser;
+  const selBtn = document.querySelector('#adm-lic-type-grid .lt-btn.sel');
+  const type = selBtn ? selBtn.dataset.code : null;
+  const from = document.getElementById('adm-lic-from').value;
+  const to   = document.getElementById('adm-lic-to').value;
+  const note = document.getElementById('adm-lic-note').value.trim();
+  const dcHours = parseInt(document.getElementById('adm-dc-hours').value) || 6;
+  const err  = document.getElementById('adm-lic-err');
+
+  if (!type) { err.textContent='⚠ Seleccioná el tipo de licencia.'; err.style.display=''; return; }
+  if (!from||!to) { err.textContent='⚠ Completá las fechas.'; err.style.display=''; return; }
+  if (from > to) { err.textContent='⚠ La fecha inicio debe ser anterior a la de fin.'; err.style.display=''; return; }
+  if (type === 'PA') {
+    const dias = getDaysInRange(from, to).length;
+    if (dias < 2 || dias % 2 !== 0) {
+      err.textContent='⚠ El PEGA se toma de a 2 días.'; err.style.display=''; return;
+    }
+  }
+
+  err.style.display = 'none';
+  const now = new Date();
+  let effectiveTo = to;
+  if (['A','B','C','D','E'].includes(u.guardia)) {
+    effectiveTo = computeLicenseDates(u.guardia, from, to).effectiveTo;
+  }
+
+  const ev = {
+    id: 'ev'+Date.now(), userId: u.id, userName: u.name, guardia: u.guardia,
+    type, startDate: from, endDate: effectiveTo, note,
+    dcHours: type==='DC' ? dcHours : null,
+    createdAt: now.toISOString(), createdAtStr: fmtTs(now),
+    createdBy: ME.name + ' (admin)'
+  };
+
+  const desc = calcDescuento(type, u.guardia, from, to);
+  if (desc) ev.descuento = desc;
+
+  EVENTS.push(ev);
+  await saveOneEvent(ev);
+  await queueNotification(ev);
+
+  // Aplicar descuento al saldo Usina del usuario destino (si tiene saldo cargado)
+  if (desc) {
+    const snap = await getDocs(fbCol('usina-saldo'));
+    const docData = snap.docs.find(d => d.id === u.id)?.data();
+    if (docData) {
+      let nuevo = { ...docData };
+      const n2 = new Date();
+      nuevo.updatedAt = n2.toISOString();
+      nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+      if (desc.tipo === 'vac')       nuevo.vac  = Math.max(0, (parseFloat(nuevo.vac) ||0) - desc.valor);
+      else if (desc.tipo === 'dc')   nuevo.dc   = Math.max(0, (parseFloat(nuevo.dc)  ||0) - desc.valor);
+      else if (desc.tipo === 'peg')  nuevo.peg  = Math.max(0, (parseFloat(nuevo.peg) ||0) - desc.valor);
+      else if (desc.tipo === 'pega') nuevo.pega = Math.max(0, (parseFloat(nuevo.pega)||0) - desc.valor);
+      await fbSet('usina-saldo', u.id, nuevo);
+    }
+  }
+
+  adminCloseLicModal();
+  renderEvP(); renderCal(); if (S) renderRT(RT);
+  renderAdminEditar(); // refresh the edit panel
+}
+
+async function adminDeleteLicense(evId) {
+  if (!confirm('¿Eliminar esta licencia? Esta acción no se puede deshacer.')) return;
+  const ev = EVENTS.find(e => e.id === evId);
+  EVENTS = EVENTS.filter(e => e.id !== evId);
+  await deleteOneEvent(evId);
+
+  // Revertir descuento en el usuario destino
+  if (ev && ev.descuento) {
+    const targetUser = USERS.find(u => u.id === ev.userId);
+    if (targetUser) {
+      const snap = await getDocs(fbCol('usina-saldo'));
+      const docData = snap.docs.find(d => d.id === targetUser.id)?.data();
+      if (docData) {
+        let nuevo = { ...docData };
+        const n2 = new Date();
+        nuevo.updatedAt = n2.toISOString();
+        nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+        const desc = ev.descuento;
+        if (desc.tipo === 'vac')       nuevo.vac  = (parseFloat(nuevo.vac) ||0) + desc.valor;
+        else if (desc.tipo === 'dc')   nuevo.dc   = (parseFloat(nuevo.dc)  ||0) + desc.valor;
+        else if (desc.tipo === 'peg')  nuevo.peg  = (parseFloat(nuevo.peg) ||0) + desc.valor;
+        else if (desc.tipo === 'pega') nuevo.pega = (parseFloat(nuevo.pega)||0) + desc.valor;
+        await fbSet('usina-saldo', targetUser.id, nuevo);
+      }
+    }
+  }
+
+  renderEvP(); renderCal(); if (S) renderRT(RT);
+  renderAdminEditar();
+}
+
+// ── Admin: Editar saldo Usina de otro usuario ─────────────────────────────
+let _adminUsinaUser = null;
+
+async function adminOpenUsina(userName) {
+  const u = USERS.find(x => x.name === userName);
+  if (!u) return;
+  _adminUsinaUser = u;
+  document.getElementById('adm-usina-username').textContent = u.name + ' · ' + (G_LABEL[u.guardia]||u.guardia);
+  // Load current values
+  const snap = await getDocs(fbCol('usina-saldo'));
+  const doc2 = snap.docs.find(d => d.id === u.id);
+  const d = doc2 ? doc2.data() : {};
+  document.getElementById('adm-usina-vac').value  = d.vac  || '';
+  document.getElementById('adm-usina-dc').value   = d.dc   || '';
+  document.getElementById('adm-usina-peg').value  = d.peg  || '';
+  document.getElementById('adm-usina-pega').value = d.pega || '';
+  document.getElementById('adm-usina-modal').classList.remove('off');
+}
+function adminCloseUsina() {
+  document.getElementById('adm-usina-modal').classList.add('off');
+}
+async function adminSaveUsina() {
+  if (!_adminUsinaUser || !ME) return;
+  const u = _adminUsinaUser;
+  const vac  = parseFloat(document.getElementById('adm-usina-vac').value)  || 0;
+  const dc   = parseFloat(document.getElementById('adm-usina-dc').value)   || 0;
+  const peg  = parseFloat(document.getElementById('adm-usina-peg').value)  || 0;
+  const pega = parseFloat(document.getElementById('adm-usina-pega').value) || 0;
+  const now  = new Date();
+  const data = {
+    userId: u.id, userName: u.name, vac, dc, peg, pega,
+    updatedAt: now.toISOString(),
+    updatedStr: now.toLocaleDateString('es-AR') + ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}),
+    updatedBy: ME.name + ' (admin)'
+  };
+  await fbSet('usina-saldo', u.id, data);
+  adminCloseUsina();
+  renderAdminEditar();
+  // Si el usuario actual es el afectado, también actualizar su panel
+  if (ME.id === u.id) renderUsinaPanel();
 }
 
 // ── Tab: Todas las licencias ──────────────────────────────────────────────
@@ -3606,19 +3942,36 @@ function renderAdminLicencias() {
   if (sorted.length === 0) { div.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:8px 0">Sin licencias registradas.</div>'; return; }
   const byUser = {};
   sorted.forEach(ev => { const u = ev.userName||'?'; if (!byUser[u]) byUser[u]=[]; byUser[u].push(ev); });
-  let html = '';
+  let html = `<div style="font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:1px;margin-bottom:10px;
+      padding:7px 10px;background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:6px">
+    ✏️ Podés eliminar cualquier licencia con el botón ✕
+  </div>`;
   PRESET_USERS.forEach(p => {
     const evs = byUser[p.name] || [];
     if (!evs.length) return;
     const col = G_COLORS[p.guardia]||'#8a9ab5';
-    html += `<div style="margin-bottom:14px"><div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} licencia${evs.length>1?'s':''}</div>`;
+    html += `<div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;font-weight:700">
+          ${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} lic.
+        </div>
+        <button onclick="adminSelectUser('${p.name}');showAdminTab('editar')"
+          style="font-size:9px;font-family:var(--font-mono);background:${col}18;border:1px solid ${col}44;color:${col};
+                 border-radius:4px;padding:2px 7px;cursor:pointer">+ NUEVA</button>
+      </div>`;
     evs.forEach(ev => {
       const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
       const desc = ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '';
-      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
         <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
-        <div style="flex:1"><div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div><div style="font-size:9px;color:var(--tdim)">${li.name}${desc}</div></div>
-        <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono)">${ev.createdAtStr||''}</span>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
+          <div style="font-size:9px;color:var(--tdim)">${li.name}${desc}</div>
+          <div style="font-size:8px;color:var(--adim);font-family:var(--font-mono)">${ev.createdAtStr||''} · ${ev.createdBy||'?'}</div>
+        </div>
+        <button onclick="adminDeleteLicense('${ev.id}')"
+          style="background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);color:#e05252;
+                 border-radius:5px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0">✕</button>
       </div>`;
     });
     html += '</div>';
@@ -3874,6 +4227,122 @@ async function renderUsinaPanel() {
         onclick="closeUsinaPopup()">CANCELAR</button>
       <button class="lic-popup-close" style="flex:2;background:rgba(74,158,218,.15);color:#4a9eda;border:1px solid rgba(74,158,218,.4)"
         onclick="saveUsinaField()">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL ADMIN: Nueva licencia para otro usuario
+════════════════════════════════════════════════════════════ -->
+<div class="lic-popup-overlay off" id="adm-lic-modal" onclick="if(event.target===this)adminCloseLicModal()">
+  <div class="lic-popup-card" style="max-width:400px;max-height:92vh;overflow-y:auto;padding:20px 18px 16px">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:26px;line-height:1">✏️</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:2px;text-transform:uppercase;font-family:var(--font-mono)">ADMIN · NUEVA LICENCIA</div>
+        <div style="font-size:13px;font-weight:600;color:var(--tbright);margin-top:2px" id="adm-lic-username">—</div>
+      </div>
+    </div>
+
+    <!-- Tipo de licencia -->
+    <div style="margin-bottom:12px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:7px">TIPO DE LICENCIA</div>
+      <div id="adm-lic-type-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:190px;overflow-y:auto;padding-right:2px"></div>
+    </div>
+
+    <!-- DC hours row (oculto por default) -->
+    <div id="adm-dc-row" style="display:none;margin-bottom:10px;background:rgba(74,158,218,.06);border:1px solid rgba(74,158,218,.2);border-radius:8px;padding:10px 12px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:#4a9eda;letter-spacing:2px;margin-bottom:5px">HORAS DC / DÍA (máx 6)</div>
+      <input type="number" id="adm-dc-hours" min="1" max="6" value="6" style="width:100%;padding:7px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;color:var(--tbright);font-family:var(--font-mono);font-size:14px">
+    </div>
+
+    <!-- Fechas -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:5px">DESDE</div>
+        <input type="date" id="adm-lic-from" min="2025-01-01" max="2030-12-31"
+          style="width:100%;padding:8px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:7px;color:var(--tbright);font-family:var(--font-mono);font-size:12px">
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:5px">HASTA</div>
+        <input type="date" id="adm-lic-to" min="2025-01-01" max="2030-12-31"
+          style="width:100%;padding:8px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:7px;color:var(--tbright);font-family:var(--font-mono);font-size:12px">
+      </div>
+    </div>
+
+    <!-- Nota -->
+    <div style="margin-bottom:12px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:5px">NOTA (OPCIONAL)</div>
+      <textarea id="adm-lic-note" placeholder="Motivo, observación..." style="width:100%;padding:8px 10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:7px;color:var(--tbright);font-family:var(--font-mono);font-size:12px;resize:vertical;min-height:44px"></textarea>
+    </div>
+
+    <!-- Aviso admin -->
+    <div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:10px;color:var(--adim);font-family:var(--font-mono);line-height:1.5">
+      ⚠ Esta acción queda registrada con tu nombre como administrador.
+    </div>
+
+    <!-- Error -->
+    <div id="adm-lic-err" style="display:none;padding:7px 10px;background:rgba(224,82,82,.1);border:1px solid var(--red);border-radius:6px;color:var(--red);font-family:var(--font-mono);font-size:10px;margin-bottom:10px"></div>
+
+    <!-- Botones -->
+    <div style="display:flex;gap:8px">
+      <button onclick="adminCloseLicModal()" style="flex:1;padding:11px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--tdim);font-family:var(--font-mono);font-size:11px;cursor:pointer;letter-spacing:1px">CANCELAR</button>
+      <button onclick="adminSaveLicense()" style="flex:2;padding:11px;background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.5);border-radius:8px;color:var(--amber);font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer">💾 GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL ADMIN: Editar saldo Usina de otro usuario
+════════════════════════════════════════════════════════════ -->
+<div class="lic-popup-overlay off" id="adm-usina-modal" onclick="if(event.target===this)adminCloseUsina()">
+  <div class="lic-popup-card" style="max-width:340px;padding:20px 18px 16px">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div style="font-size:26px;line-height:1">🏭</div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#4a9eda;letter-spacing:2px;text-transform:uppercase;font-family:var(--font-mono)">ADMIN · SALDO USINA</div>
+        <div style="font-size:13px;font-weight:600;color:var(--tbright);margin-top:2px" id="adm-usina-username">—</div>
+      </div>
+    </div>
+
+    <!-- Campos -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#0d1420;border:1px solid #1e2d40;border-radius:10px;padding:12px 10px;text-align:center">
+        <div style="font-size:8px;font-family:var(--font-mono);color:#3dba78;letter-spacing:2px;margin-bottom:6px">🌿 VACACIONES</div>
+        <input type="number" id="adm-usina-vac" min="0" max="999" placeholder="0"
+          style="width:100%;padding:6px;background:transparent;border:none;border-bottom:1px solid #2a3d50;color:#e8eaf0;font-size:22px;font-family:var(--font-mono);font-weight:700;text-align:center;outline:none">
+        <div style="font-size:9px;color:var(--tdim);margin-top:4px">días</div>
+      </div>
+      <div style="background:#0d1420;border:1px solid #1e2d40;border-radius:10px;padding:12px 10px;text-align:center">
+        <div style="font-size:8px;font-family:var(--font-mono);color:#4a9eda;letter-spacing:2px;margin-bottom:6px">🔄 DC</div>
+        <input type="number" id="adm-usina-dc" min="0" max="999" placeholder="0"
+          style="width:100%;padding:6px;background:transparent;border:none;border-bottom:1px solid #2a3d50;color:#e8eaf0;font-size:22px;font-family:var(--font-mono);font-weight:700;text-align:center;outline:none">
+        <div style="font-size:9px;color:var(--tdim);margin-top:4px">horas</div>
+      </div>
+      <div style="background:#0d1420;border:1px solid #1e2d40;border-radius:10px;padding:12px 10px;text-align:center">
+        <div style="font-size:8px;font-family:var(--font-mono);color:#b07ee8;letter-spacing:2px;margin-bottom:6px">🔑 PEG</div>
+        <input type="number" id="adm-usina-peg" min="0" max="999" placeholder="0"
+          style="width:100%;padding:6px;background:transparent;border:none;border-bottom:1px solid #2a3d50;color:#e8eaf0;font-size:22px;font-family:var(--font-mono);font-weight:700;text-align:center;outline:none">
+        <div style="font-size:9px;color:var(--tdim);margin-top:4px">días</div>
+      </div>
+      <div style="background:#0d1420;border:1px solid #1e2d40;border-radius:10px;padding:12px 10px;text-align:center">
+        <div style="font-size:8px;font-family:var(--font-mono);color:#ff8c42;letter-spacing:2px;margin-bottom:6px">🔑 PEGA</div>
+        <input type="number" id="adm-usina-pega" min="0" max="999" placeholder="0"
+          style="width:100%;padding:6px;background:transparent;border:none;border-bottom:1px solid #2a3d50;color:#e8eaf0;font-size:22px;font-family:var(--font-mono);font-weight:700;text-align:center;outline:none">
+        <div style="font-size:9px;color:var(--tdim);margin-top:4px">días</div>
+      </div>
+    </div>
+
+    <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);text-align:center;margin-bottom:14px">
+      SAP SF → Ver tipo de tiempo → A fecha de hoy
+    </div>
+
+    <!-- Botones -->
+    <div style="display:flex;gap:8px">
+      <button onclick="adminCloseUsina()" style="flex:1;padding:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--tdim);font-family:var(--font-mono);font-size:11px;cursor:pointer;letter-spacing:1px">CANCELAR</button>
+      <button onclick="adminSaveUsina()" style="flex:2;padding:10px;background:rgba(74,158,218,.15);border:1px solid rgba(74,158,218,.45);border-radius:8px;color:#4a9eda;font-family:var(--font-ui);font-size:13px;font-weight:700;cursor:pointer">💾 GUARDAR</button>
     </div>
   </div>
 </div>
