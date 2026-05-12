@@ -1,4 +1,4 @@
-const CACHE = 'dg-pwa-v1';
+const CACHE = 'dg-pwa-v4';
 const OFFLINE_URLS = ['/'];
 
 // Instalación: cachear la página principal

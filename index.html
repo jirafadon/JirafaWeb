@@ -1606,7 +1606,7 @@ function startRealtimeListeners() {
     USERS = []; snap.forEach(d => USERS.push(d.data()));
     if (ME) { const updated = USERS.find(u => u.id === ME.id); if (updated) ME = updated; }
     if (!_initDone) return;
-    buildUserGrid(); updateUBar();
+    buildUserGrid(); updateUBar(); renderCal();
   });
 
   onSnapshot(fbCol('events'), snap => {
