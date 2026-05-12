@@ -2434,7 +2434,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     rowsHtml += '</tr>';
   });
 
-  // ── OP row ── Operador siempre T2 (06:00-11:59), sin francos del schedule ──
+  // ── OP row ── Francos de Guardia D, pero en días trabajados siempre T2 ──
   const isOpMe = ME && ME.guardia === 'OP';
   rowsHtml += `<tr class="spec-row op-row${isOpMe?' gs':''}">`;
   rowsHtml += `<td class="gn"><span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--adim)">${isOpMe?'YO':'Operador'}</span></td>`;
@@ -2443,19 +2443,20 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     const dayEvs = getEvsByDateAndG(date, 'OP');
     const dayRecs = isOpMe ? RECARGOS.filter(r => r.date===date && r.guardia==='OP' && ME && r.userId===ME.id) : [];
     const hasRec = dayRecs.length > 0;
-    let cls = 't2'; // Siempre T2
+    // Francos heredados de la guardia D; días trabajados → T2
+    const turnoD = getTurno('D', date);
+    const esFranco = turnoD === 'F';
+    let cls = esFranco ? 'tf' : 't2';
     if (isSel) cls += ' cs'; if (isFer&&!isSel) cls += ' cf';
     if (dayEvs.length > 0) {
       const ev=dayEvs[0]; const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
       rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" data-date="${date}" data-g="OP" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
-    } else if (hasRec) {
-      const isFranco = false; // OP no tiene francos
-      cls = 'has-rec';
+    } else if (hasRec && !esFranco) {
       const recTitle = dayRecs.map(r=>`Recargo: T${r.turno}${r.note?' ('+r.note+')':''}`).join('\n');
-      rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="OP" title="${recTitle}"><div class="cell-inner"><div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">T2</div></div></div></td>`;
+      rowsHtml += `<td class="has-rec" data-date="${date}" data-g="OP" title="${recTitle}"><div class="cell-inner"><div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">T2</div></div></div></td>`;
     } else {
       const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
-      rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="OP"${ferTitle}><div class="cell-inner"><div class="cn">2</div></div></td>`;
+      rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="OP"${ferTitle}><div class="cell-inner"><div class="cn">${esFranco?'F':'2'}</div></div></td>`;
     }
   });
   rowsHtml += '</tr>';
