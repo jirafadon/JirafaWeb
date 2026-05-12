@@ -1606,7 +1606,7 @@ function startRealtimeListeners() {
     USERS = []; snap.forEach(d => USERS.push(d.data()));
     if (ME) { const updated = USERS.find(u => u.id === ME.id); if (updated) ME = updated; }
     if (!_initDone) return;
-    buildUserGrid(); updateUBar(); renderCal();
+    buildUserGrid(); updateUBar();
   });
 
   onSnapshot(fbCol('events'), snap => {
@@ -2006,8 +2006,8 @@ function updateUBar() {
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = '';
     renderRecPanel();
-    if (['A','B','C','D','E','OP'].includes(ME.guardia)) {
-      document.getElementById('sg2').value = ME.guardia !== 'OP' ? ME.guardia : 'D';
+    if (['A','B','C','D','E'].includes(ME.guardia)) {
+      document.getElementById('sg2').value = ME.guardia;
       dh.classList.add('show');
     } else {
       dh.classList.remove('show');
@@ -2434,29 +2434,21 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     rowsHtml += '</tr>';
   });
 
-  // ── OP row ── Francos de Guardia D, pero en días trabajados siempre T2 ──
-  const isOpMe = ME && ME.guardia === 'OP';
-  rowsHtml += `<tr class="spec-row op-row${isOpMe?' gs':''}">`;
-  rowsHtml += `<td class="gn"><span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--adim)">${isOpMe?'YO':'Operador'}</span></td>`;
+  // ── OP row ──────────────────────────────────────────────────────────────
+  rowsHtml += '<tr class="spec-row op-row">';
+  rowsHtml += `<td class="gn"><span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--tdim)">Operador</span></td>`;
   days.forEach(date => {
+    const turno = getTurno('D', date);
     const isSel = date===selDate, isFer = !!fmap[date];
     const dayEvs = getEvsByDateAndG(date, 'OP');
-    const dayRecs = isOpMe ? RECARGOS.filter(r => r.date===date && r.guardia==='OP' && ME && r.userId===ME.id) : [];
-    const hasRec = dayRecs.length > 0;
-    // Francos heredados de la guardia D; días trabajados → T2
-    const turnoD = getTurno('D', date);
-    const esFranco = turnoD === 'F';
-    let cls = esFranco ? 'tf' : 't2';
+    let cls = turno==='F'?'tf':(turno?`t${turno}`:'');
     if (isSel) cls += ' cs'; if (isFer&&!isSel) cls += ' cf';
     if (dayEvs.length > 0) {
       const ev=dayEvs[0]; const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-      rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" data-date="${date}" data-g="OP" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
-    } else if (hasRec && !esFranco) {
-      const recTitle = dayRecs.map(r=>`Recargo: T${r.turno}${r.note?' ('+r.note+')':''}`).join('\n');
-      rowsHtml += `<td class="has-rec" data-date="${date}" data-g="OP" title="${recTitle}"><div class="cell-inner"><div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">T2</div></div></div></td>`;
+      rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
     } else {
       const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
-      rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="OP"${ferTitle}><div class="cell-inner"><div class="cn">${esFranco?'F':'2'}</div></div></td>`;
+      rowsHtml += `<td class="${cls.trim()}"${ferTitle}><div class="cell-inner"><div class="cn">${turno==='F'?'F':(turno?''+turno:'·')}</div></div></td>`;
     }
   });
   rowsHtml += '</tr>';
@@ -2502,7 +2494,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
       td.addEventListener('click', e => {
         if (dsDragging) return;
         const date = td.dataset.date, g = td.dataset.g;
-        const turno = g === 'OP' ? 2 : getTurno(g, date);
+        const turno = getTurno(g, date);
         const dayEvs = getEvsByDateAndG(date, g);
         const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g && ME && r.userId===ME.id);
         // Celda con recargo propio y sin licencia → popup recargo
@@ -2515,8 +2507,8 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     });
   }
 
-  // ── Drag-select for own guardia (A–E y OP) ───────────────────────────────────────────
-  if (ME && ['A','B','C','D','E','OP'].includes(ME.guardia)) {
+  // ── Drag-select for own guardia ───────────────────────────────────────────
+  if (ME && ['A','B','C','D','E'].includes(ME.guardia)) {
     const userG = ME.guardia;
     const getTdAt = (cx,cy) => { const e=document.elementFromPoint(cx,cy); return e?.closest(`td[data-date][data-g="${userG}"]`)||null; };
     const updateRange = endTd => {
@@ -2542,7 +2534,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
         const tapEvs=getEvsByDateAndG(startD,userG);
         const tapRecs=RECARGOS.filter(r=>r.date===startD&&r.guardia===userG&&ME&&r.userId===ME.id);
         if(tapEvs.length>0){ dsClearHighlights(); openLicPopupForDay(tapEvs); return; }
-        if(tapRecs.length>0){ dsClearHighlights(); openRecPopup(tapRecs[0], userG==='OP' ? '2' : getTurno(userG,startD)); return; }
+        if(tapRecs.length>0){ dsClearHighlights(); openRecPopup(tapRecs[0],getTurno(userG,startD)); return; }
       }
       if(startD) dsOpen(startD,endD,userG);
     };
@@ -3714,8 +3706,8 @@ async function loadUsinaData() {
   if (!ME) return;
   const snap = await getDocs(fbCol('usina-saldo'));
   const docSnap = snap.docs.find(d => d.id === ME.id);
-  // Si no hay datos guardados, mostrar tarjetas vacías (tocables) igualmente
-  const d = docSnap ? docSnap.data() : { vac: null, dc: null, peg: null, pega: null };
+  const d = docSnap ? docSnap.data() : {};
+  if (!docSnap) { renderUsinaSaldoCards(d); return; }
   document.getElementById('usina-vac').value  = d.vac  || '';
   document.getElementById('usina-dc').value   = d.dc   || '';
   document.getElementById('usina-peg').value  = d.peg  || '';
@@ -3800,36 +3792,9 @@ async function renderUsinaPanel() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
-  // ── 0. Registrar Service Worker + forzar actualización si hay nueva versión ──
-  const APP_VERSION = 'v4'; // ← incrementar con cada deploy para forzar cache bust
+  // ── 0. Registrar Service Worker (PWA + notificaciones push) ──────────
   if ('serviceWorker' in navigator) {
-    const reg = await navigator.serviceWorker.register('/sw.js').catch(() => null);
-    if (reg) {
-      reg.update(); // fuerza re-chequeo del SW contra el servidor
-      // Si hay un SW en espera (nueva versión), activarlo inmediatamente
-      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Nuevo SW instalado — limpiar caches y recargar
-              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
-                .then(() => location.reload());
-            }
-          });
-        }
-      });
-    }
-  }
-  // Cache bust: si la versión guardada no coincide, limpiar todo
-  const storedVer = localStorage.getItem('app-version');
-  if (storedVer !== APP_VERSION) {
-    localStorage.setItem('app-version', APP_VERSION);
-    if ('caches' in window) {
-      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-    }
-    sessionStorage.clear(); // limpiar feriados cacheados también
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
   // ── 1. UI instantánea ──────────────────────────────────────────────────

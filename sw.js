@@ -1,10 +1,5 @@
-const CACHE = 'dg-pwa-v4';
+const CACHE = 'dg-pwa-v1';
 const OFFLINE_URLS = ['/'];
-
-// Forzar activación inmediata cuando la página lo pide
-self.addEventListener('message', e => {
-  if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
 
 // Instalación: cachear la página principal
 self.addEventListener('install', e => {
