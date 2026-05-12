@@ -3800,9 +3800,36 @@ async function renderUsinaPanel() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
-  // ── 0. Registrar Service Worker (PWA + notificaciones push) ──────────
+  // ── 0. Registrar Service Worker + forzar actualización si hay nueva versión ──
+  const APP_VERSION = 'v4'; // ← incrementar con cada deploy para forzar cache bust
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    const reg = await navigator.serviceWorker.register('/sw.js').catch(() => null);
+    if (reg) {
+      reg.update(); // fuerza re-chequeo del SW contra el servidor
+      // Si hay un SW en espera (nueva versión), activarlo inmediatamente
+      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Nuevo SW instalado — limpiar caches y recargar
+              caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+                .then(() => location.reload());
+            }
+          });
+        }
+      });
+    }
+  }
+  // Cache bust: si la versión guardada no coincide, limpiar todo
+  const storedVer = localStorage.getItem('app-version');
+  if (storedVer !== APP_VERSION) {
+    localStorage.setItem('app-version', APP_VERSION);
+    if ('caches' in window) {
+      caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+    }
+    sessionStorage.clear(); // limpiar feriados cacheados también
   }
 
   // ── 1. UI instantánea ──────────────────────────────────────────────────
