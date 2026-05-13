@@ -2756,6 +2756,11 @@ function showLicDetail(ev) {
             onclick="toggleLicChangePanel('${ev.id}')">✏️ CAMBIAR</button>
         </div>
       ` : ''}
+      ${window._licPopupRecCtx ? `
+        <button class="lic-popup-close" style="background:rgba(90,184,168,.12);color:#5ab8a8;border:1px solid rgba(90,184,168,.35);letter-spacing:2px"
+          onclick="closeLicPopup();const ctx=window._licPopupRecCtx;window._licPopupRecCtx=null;openRecPicker(ctx.date,ctx.guardia,ctx.turno,ctx.sobreFranco)">
+          ⬆ RECARGO${window._licPopupRecCtx.sobreFranco?' 🔴':''}</button>
+      ` : ''}
       <button class="lic-popup-close" style="background:${color}18;color:${color};border:1px solid ${color}44;letter-spacing:3px"
         onclick="closeLicPopup()">CERRAR</button>
     </div>
@@ -2807,6 +2812,8 @@ function openLicPopupForDay(dayEvs) {
       </div>`;
   });
   listHtml += '</div>';
+  const recCtx3 = window._licPopupRecCtx;
+  listHtml += recCtx3 ? `<button class="lic-popup-close" style="background:rgba(90,184,168,.12);color:#5ab8a8;border:1px solid rgba(90,184,168,.35);letter-spacing:2px;margin-bottom:6px" onclick="closeLicPopup();window._licPopupRecCtx=null;openRecPicker('${recCtx3.date}','${recCtx3.guardia}',${JSON.stringify(recCtx3.turno)},${recCtx3.sobreFranco})">⬆ RECARGO${recCtx3.sobreFranco?' 🔴':''}</button>` : '';
   listHtml += `<button class="lic-popup-close" style="background:rgba(255,255,255,.06);color:#8a9ab5;border:1px solid #2a3545" onclick="closeLicPopup()">CERRAR</button>`;
 
   window._licPopupEvs = dayEvs;
@@ -2823,8 +2830,15 @@ function openCellActions(date,guardia,turno,dayEvs){
   const turnoLabel=turno==='F'?'Franco':turno?`T${turno}`:'·';
   document.getElementById('ca-date').textContent=`${formatDate(date).toUpperCase()}  ·  Guardia ${guardia}  ·  ${turnoLabel}`;
   const acts=document.getElementById('ca-actions');acts.innerHTML='';
-  // Si hay licencias, mostrar popup visual en lugar del panel plano
-  if(dayEvs.length>0){ openLicPopupForDay(dayEvs); return; }
+  const sobreFranco=isEsSobreFranco(guardia,date,turno);
+
+  // Si hay licencias, abrir el popup de licencia Y agregar botón de recargo al final
+  if(dayEvs.length>0){
+    // Guardar contexto para que el botón de recargo funcione desde el popup de licencia
+    window._licPopupRecCtx = {date, guardia, turno, sobreFranco};
+    openLicPopupForDay(dayEvs);
+    return;
+  }
 
   const secLic=el('div','ca-section','');
   secLic.appendChild(el('div','ca-sec-title','LICENCIAS'));
@@ -2836,7 +2850,6 @@ function openCellActions(date,guardia,turno,dayEvs){
   bLic.innerHTML='<span>📋</span> Licencia';
   bLic.onclick=()=>{closeCellActions();document.getElementById('ev-from').value=date;document.getElementById('ev-to').value=date;document.getElementById('ev-note').value='';document.getElementById('ev-dc-hours').value=6;document.getElementById('dc-hours-row').style.display='none';document.getElementById('ev-err').classList.remove('show');document.getElementById('m-event').classList.remove('off');};
   btnRow.appendChild(bLic);
-  const sobreFranco=isEsSobreFranco(guardia,date,turno);
   const bRec=el('button','ca-bottom-btn rec','');
   bRec.innerHTML=`<span>⬆</span> Rec.${sobreFranco?' 🔴':''}`;
   bRec.title=sobreFranco?'Recargo sobre franco':'Recargo en día trabajado';
