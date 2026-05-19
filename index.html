@@ -797,6 +797,11 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <button class="ev-tab on" data-e="mine" onclick="showET('mine')">MIS LICENCIAS</button>
       <button class="ev-tab" data-e="all" onclick="showET('all')">TODAS</button>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:4px 6px">
+      <button onclick="evNavMonth(-1)" style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">◄</button>
+      <span id="ev-month-label" style="font-family:var(--font-mono);font-size:11px;color:var(--text);letter-spacing:2px;font-weight:700"></span>
+      <button onclick="evNavMonth(1)"  style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">►</button>
+    </div>
     <div id="ev-list"></div>
   </div>
 </div>
@@ -1137,6 +1142,17 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div id="pega-hint" style="display:none;font-family:var(--font-mono);font-size:10px;color:#ff8c42;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.25);border-radius:6px;padding:8px 12px;margin-bottom:4px">
       ⚠ El PEGA se toma de a 2 días. Seleccioná un período de 2, 4, 6… días.
     </div>
+    <div class="mfg" id="ct-guardia-row" style="display:none">
+      <label>CON GUARDIA (la que cubre tu turno)</label>
+      <select id="ct-guardia" style="font-size:15px;padding:9px 12px;">
+        <option value="">— Seleccionar —</option>
+        <option value="A">GUARDIA A</option>
+        <option value="B">GUARDIA B</option>
+        <option value="C">GUARDIA C</option>
+        <option value="D">GUARDIA D</option>
+        <option value="E">GUARDIA E</option>
+      </select>
+    </div>
     <div class="mfg"><label>Nota (opcional)</label><textarea id="ev-note" placeholder="Observación, motivo..."></textarea></div>
     <div class="err-msg" id="ev-err"></div>
     <div class="mbtns">
@@ -1416,6 +1432,7 @@ const LIC = {
   DC: { name: 'Desc. Compensatorio',   color: '#4a9eda', icon: '🔄' },
   PG: { name: 'Perm. Guardia (PEG)',   color: '#f5a623', icon: '🔑' },
   PA: { name: 'Perm. Guardia Adic. (PEGA)', color: '#ff8c42', icon: '🔑' },
+  CT: { name: 'Cambio de Turno',       color: '#5ab8a8', icon: '↕',  noDS: true },
   MA: { name: 'Matrimonio',            color: '#b07ee8', icon: '💍' },
   NA: { name: 'Nacimiento',            color: '#5ab8a8', icon: '👶' },
   AD: { name: 'Adopción',              color: '#8a9ab5', icon: '🤝' },
@@ -1472,6 +1489,7 @@ const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D
         btn.classList.add('sel'); btn.style.background = v.color + '22'; btn.style.borderColor = v.color;
         if (gid === 'lic-type-grid') {
           document.getElementById('dc-hours-row').style.display = code === 'DC' ? '' : 'none';
+          document.getElementById('ct-guardia-row').style.display = code === 'CT' ? '' : 'none';
           const hint = document.getElementById('pega-hint');
           if (hint) hint.style.display = code === 'PA' ? '' : 'none';
         }
@@ -2191,8 +2209,84 @@ function updateUBar() {
 // EVENTS CRUD
 // ═══════════════════════════════════════════════════════════════════════════
 let evTab = 'mine';
-function showET(t) { evTab = t; document.querySelectorAll('.ev-tab').forEach(b => b.classList.toggle('on', b.dataset.e===t)); renderEvList(); }
+let evMonthY = new Date().getFullYear();
+let evMonthM = new Date().getMonth() + 1; // 1-12
+function showET(t) {
+  evTab = t;
+  document.querySelectorAll('.ev-tab').forEach(b => b.classList.toggle('on', b.dataset.e===t));
+  renderEvList();
+}
 
+function evNavMonth(delta) {
+  evMonthM += delta;
+  if (evMonthM > 12) { evMonthM = 1; evMonthY++; }
+  if (evMonthM < 1)  { evMonthM = 12; evMonthY--; }
+  renderEvList();
+}
+
+function renderEvP() {
+  const cnt = document.getElementById('evp-cnt');
+  if (!ME) { if(cnt) cnt.textContent=''; return; }
+  const myEvs = EVENTS.filter(e => e.userId === ME.id);
+  if(cnt) cnt.textContent = myEvs.length ? myEvs.length + ' licencia' + (myEvs.length!==1?'s':'') : '';
+  renderEvList();
+}
+
+function renderEvList() {
+  const list = document.getElementById('ev-list'); if (!list) return;
+  list.innerHTML = '';
+  if (!ME) return;
+
+  // ── Etiqueta mes ─────────────────────────────────────────────────────────
+  const lbl = document.getElementById('ev-month-label');
+  if (lbl) lbl.textContent = MES_S[evMonthM] + ' ' + evMonthY;
+
+  // ── Filtrar eventos del mes seleccionado ─────────────────────────────────
+  const firstDay = dk(evMonthY, evMonthM, 1);
+  const lastDay  = dk(evMonthY, evMonthM, new Date(evMonthY, evMonthM, 0).getDate());
+
+  const base = evTab === 'mine'
+    ? EVENTS.filter(e => e.userId === ME.id)
+    : EVENTS;
+
+  const evs = base
+    .filter(e => e.startDate <= lastDay && e.endDate >= firstDay)
+    .sort((a,b) => b.startDate.localeCompare(a.startDate));
+
+  if (evs.length === 0) {
+    list.innerHTML = '<div class="ev-empty">SIN LICENCIAS ESTE MES</div>'; return;
+  }
+
+  evs.forEach(ev => {
+    const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
+    const item = el('div','ev-item','');
+    const lbar = el('div','ev-lbar',''); lbar.style.background = li.color; item.appendChild(lbar);
+    const info = el('div','ev-info','');
+    const who = el('div','ev-who', ev.userName + ' · ' + (G_LABEL[ev.guardia]||ev.guardia)); info.appendChild(who);
+    const badge = el('div','ev-code-badge', ev.type); badge.style.background = li.color; info.appendChild(badge);
+    // CT: mostrar nombre con la guardia del cambio
+    let typeName = li.name;
+    if (ev.type === 'CT' && ev.ctWithGuardia) typeName = 'Cambio de Turno ↕ Guardia ' + ev.ctWithGuardia;
+    const tn = el('div','ev-type-name', typeName); tn.style.color = li.color; info.appendChild(tn);
+    const dts = el('div','ev-dates','');
+    dts.textContent = ev.startDate===ev.endDate ? formatDate(ev.startDate) : formatDate(ev.startDate)+' → '+formatDate(ev.endDate);
+    if (ev.type==='DC'&&ev.dcHours) dts.textContent += '  ·  '+ev.dcHours+'h/día';
+    info.appendChild(dts);
+    if (ev.descuento && ev.userId === ME?.id) {
+      const dd = el('div','','');
+      dd.style.cssText = 'font-size:9px;font-family:var(--font-mono);color:var(--adim);margin-top:3px;letter-spacing:.5px';
+      dd.textContent = '↓ ' + ev.descuento.detalle + ' descontado' + (ev.descuento.tipo==='dc'?'s':'') + ' del saldo';
+      info.appendChild(dd);
+    }
+    if (ev.note) { const nt = el('div','ev-note', ev.note); info.appendChild(nt); }
+    const ts = el('div','ev-ts',''); ts.innerHTML = '⏱ '+(ev.createdAtStr||fmtTs(new Date(ev.createdAt)))+' · <strong>'+ev.createdBy+'</strong>'; info.appendChild(ts);
+    item.appendChild(info);
+    if (!ME || ev.userId===ME.id) {
+      const del = el('button','ev-del','✕'); del.title = 'Eliminar'; del.onclick = ()=>deleteEvent(ev.id); item.appendChild(del);
+    }
+    list.appendChild(item);
+  });
+}
 function openAddEvent() {
   if (!ME) { showSection('sec-user'); return; }
   document.querySelectorAll('.lt-btn').forEach(b => { b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; });
@@ -2202,6 +2296,8 @@ function openAddEvent() {
   document.getElementById('ev-note').value  = '';
   document.getElementById('ev-dc-hours').value = 6;
   document.getElementById('dc-hours-row').style.display = 'none';
+  document.getElementById('ct-guardia-row').style.display = 'none';
+  document.getElementById('ct-guardia').value = '';
   const ph = document.getElementById('pega-hint'); if(ph) ph.style.display='none';
   document.getElementById('ev-err').classList.remove('show');
   document.getElementById('m-event').classList.remove('off');
@@ -2236,10 +2332,18 @@ async function saveEvent() {
   const to    = document.getElementById('ev-to').value;
   const note  = document.getElementById('ev-note').value.trim();
   const dcHours = parseInt(document.getElementById('ev-dc-hours').value) || 6;
+  const ctWithGuardia = document.getElementById('ct-guardia').value;
   const err   = document.getElementById('ev-err');
   if (!type) { err.textContent = '⚠ Seleccioná el tipo de licencia.'; err.classList.add('show'); return; }
   if (!from || !to) { err.textContent = '⚠ Completá las fechas.'; err.classList.add('show'); return; }
   if (from > to) { err.textContent = '⚠ La fecha inicio debe ser antes que la de fin.'; err.classList.add('show'); return; }
+
+  // CT: requiere guardia y solo un día
+  if (type === 'CT') {
+    if (!ctWithGuardia) { err.textContent = '⚠ Seleccioná la guardia con la que se realizó el cambio.'; err.classList.add('show'); return; }
+    if (ctWithGuardia === ME.guardia) { err.textContent = '⚠ Seleccioná una guardia diferente a la tuya.'; err.classList.add('show'); return; }
+    if (from !== to) { err.textContent = '⚠ El cambio de turno es solo por un día.'; err.classList.add('show'); return; }
+  }
 
   // PEGA: mínimo 2 días
   if (type === 'PA') {
@@ -2255,13 +2359,14 @@ async function saveEvent() {
   }
   const now = new Date();
   let effectiveTo = to;
-  if (['A','B','C','D','E'].includes(ME.guardia)) {
+  if (type !== 'CT' && ['A','B','C','D','E'].includes(ME.guardia)) {
     effectiveTo = computeLicenseDates(ME.guardia, from, to).effectiveTo;
   }
   const ev = {
     id: 'ev'+Date.now(), userId: ME.id, userName: ME.name, guardia: ME.guardia,
     type, startDate: from, endDate: effectiveTo, note,
     dcHours: type==='DC' ? dcHours : null,
+    ctWithGuardia: type==='CT' ? ctWithGuardia : null,
     createdAt: now.toISOString(), createdAtStr: fmtTs(now), createdBy: ME.name
   };
 
@@ -2319,50 +2424,6 @@ async function deleteEvent(id) {
   }
 
   renderEvP(); renderCal(); if (S) renderRT(RT);
-}
-function renderEvP() {
-  const cnt = document.getElementById('evp-cnt');
-  if (!ME) { if(cnt) cnt.textContent=''; return; }
-  const myEvs = EVENTS.filter(e => e.userId === ME.id);
-  if(cnt) cnt.textContent = myEvs.length ? myEvs.length + ' licencia' + (myEvs.length!==1?'s':'') : '';
-  renderEvList();
-}
-function renderEvList() {
-  const list = document.getElementById('ev-list'); list.innerHTML='';
-  if (!ME) return;
-  const evs = evTab === 'mine'
-    ? EVENTS.filter(e => e.userId === ME.id).sort((a,b) => b.startDate.localeCompare(a.startDate))
-    : EVENTS.sort((a,b) => b.startDate.localeCompare(a.startDate));
-  if (evs.length === 0) {
-    list.innerHTML='<div class="ev-empty">SIN LICENCIAS REGISTRADAS</div>'; return;
-  }
-  evs.forEach(ev => {
-    const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
-    const item = el('div','ev-item','');
-    const lbar = el('div','ev-lbar',''); lbar.style.background = li.color; item.appendChild(lbar);
-    const info = el('div','ev-info','');
-    const who = el('div','ev-who', ev.userName + ' · ' + (G_LABEL[ev.guardia]||ev.guardia)); info.appendChild(who);
-    const badge = el('div','ev-code-badge', ev.type); badge.style.background = li.color; info.appendChild(badge);
-    const tn = el('div','ev-type-name', li.name); tn.style.color = li.color; info.appendChild(tn);
-    const dts = el('div','ev-dates','');
-    dts.textContent = ev.startDate===ev.endDate ? formatDate(ev.startDate) : formatDate(ev.startDate)+' → '+formatDate(ev.endDate);
-    if (ev.type==='DC'&&ev.dcHours) dts.textContent += '  ·  '+ev.dcHours+'h/día';
-    info.appendChild(dts);
-    // Mostrar detalle del descuento aplicado al saldo
-    if (ev.descuento && ev.userId === ME?.id) {
-      const dd = el('div','','');
-      dd.style.cssText = 'font-size:9px;font-family:var(--font-mono);color:var(--adim);margin-top:3px;letter-spacing:.5px';
-      dd.textContent = '↓ ' + ev.descuento.detalle + ' descontado' + (ev.descuento.tipo==='dc'?'s':'') + ' del saldo';
-      info.appendChild(dd);
-    }
-    if (ev.note) { const nt = el('div','ev-note', ev.note); info.appendChild(nt); }
-    const ts = el('div','ev-ts',''); ts.innerHTML = '⏱ '+( ev.createdAtStr||fmtTs(new Date(ev.createdAt)))+' · <strong>'+ev.createdBy+'</strong>'; info.appendChild(ts);
-    item.appendChild(info);
-    if (!ME || ev.userId===ME.id) {
-      const del = el('button','ev-del','✕'); del.title = 'Eliminar'; del.onclick = ()=>deleteEvent(ev.id); item.appendChild(del);
-    }
-    list.appendChild(item);
-  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2576,8 +2637,9 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
       if (dayEvs.length > 0) {
         const ev = dayEvs[0]; const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
         inlineStyle = `background:${li.color}${isSel?'50':'28'}`;
-        innerHtml = `<div class="lic-cell" style="background:${li.color}18"><div class="lic-code" style="color:${li.color}">${ev.type}</div>${turno&&turno!=='F'?`<div class="lic-turno" style="color:${li.color}99">T${turno}</div>`:''}${dayEvs.length>1?`<div class="lic-more" style="background:${li.color}88"></div>`:''}</div>`;
-        const tdTitle = dayEvs.map(e=>`${LIC[e.type]?.name||e.type}: ${e.userName}`).join('\n');
+        const ctLabel = ev.type==='CT' && ev.ctWithGuardia ? `<div class="lic-turno" style="color:${li.color}cc;font-size:7px">↕${ev.ctWithGuardia}</div>` : (turno&&turno!=='F'?`<div class="lic-turno" style="color:${li.color}99">T${turno}</div>`:'');
+        innerHtml = `<div class="lic-cell" style="background:${li.color}18"><div class="lic-code" style="color:${li.color}">${ev.type==='CT'?'↕':ev.type}</div>${ctLabel}${dayEvs.length>1?`<div class="lic-more" style="background:${li.color}88"></div>`:''}</div>`;
+        const tdTitle = dayEvs.map(e=>`${LIC[e.type]?.name||e.type}${e.ctWithGuardia?' ↕ Guardia '+e.ctWithGuardia:''}: ${e.userName}`).join('\n');
         if (hasRec) { const isFranco = dayRecs.some(r=>isEsSobreFranco(g,date,r.turno)); cls = isFranco?'has-rec-franco':'has-rec'; }
         rowsHtml += `<td class="${cls.trim()}" style="${inlineStyle}" data-date="${date}" data-g="${g}" title="${tdTitle}"><div class="cell-inner">${innerHtml}</div></td>`;
       } else if (hasRec) {
@@ -2735,6 +2797,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
 function dsInit(){
   const g=document.getElementById('ds-lic-grid');g.innerHTML='';
   Object.entries(LIC).forEach(([code,v])=>{
+    if(v.noDS) return; // CT y otros que no aplican en selección múltiple
     const b=document.createElement('div');b.className='ds-lic-btn';
     const lc=document.createElement('span');lc.className='ds-lic-code';lc.style.background=v.color;lc.textContent=code;
     const ln=document.createElement('span');ln.className='ds-lic-name';ln.textContent=v.name;
@@ -3377,7 +3440,7 @@ Object.assign(window, {
   showSection, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
-  openAddEvent, saveEvent, deleteEvent, closeM, showET,
+  openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
   dsInit, dsSave, dsCancel, dsOpen, adjDCH,
   showCT, calNav, calGoToday, renderCal, setToday,
   showRT, renderRT, renderRDia, renderRSemana, renderRMes, renderRAnio,
