@@ -451,7 +451,34 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .mbtn.cancel { background: none; border: 1px solid var(--border); color: var(--tdim); }
 .mbtn.cancel:hover { border-color: var(--tdim); color: var(--tbright); }
 
-/* License type grid */
+/* ── Modal contraseña ─────────────────────────────────────────────────── */
+.pwd-input-wrap { position: relative; }
+.pwd-input-wrap input[type=password] {
+  width: 100%; box-sizing: border-box;
+  background: var(--cell-bg); border: 1px solid var(--border); border-radius: 3px;
+  padding: 11px 44px 11px 12px; font-size: 18px; color: var(--text);
+  font-family: var(--font-ui); letter-spacing: 4px; outline: none;
+  transition: border-color .2s;
+}
+.pwd-input-wrap input[type=password]:focus { border-color: var(--amber); }
+.pwd-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--tdim); font-size: 16px;
+  padding: 2px 4px; line-height: 1; }
+.pwd-error { font-family: var(--font-mono); font-size: 11px; color: #e05252;
+  min-height: 16px; margin-top: 6px; letter-spacing: 1px; }
+.pwd-hint { font-family: var(--font-mono); font-size: 9px; color: var(--adim);
+  letter-spacing: 1px; margin-top: 8px; }
+@keyframes pwdShake {
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+}
+.pwd-shake { animation: pwdShake .35s ease; }
+/* Cambiar contraseña (admin) */
+.pwd-admin-section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+.pwd-admin-title { font-family: var(--font-mono); font-size: 10px; color: var(--amber);
+  letter-spacing: 2px; margin-bottom: 10px; }
+
+
 .lic-type-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 5px; }
 .lt-btn { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 3px; padding: 8px 6px; text-align: left; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 7px; }
 .lt-btn:hover { border-color: var(--tdim); }
@@ -671,7 +698,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
         </div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-outline btn-blue" onclick="openAddEvent()">+ LICENCIA</button>
         <button class="btn btn-outline" onclick="showSection('sec-lic')">&#9776; MIS LICENCIAS</button>
       </div>
       <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
@@ -1031,6 +1057,11 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <!-- Tab: Accesos -->
     <div id="admin-accesos">
       <div id="audit-content" style="padding:4px 0"></div>
+      <!-- Contraseñas por usuario -->
+      <div class="pwd-admin-section">
+        <div class="pwd-admin-title">🔐 CONTRASEÑAS DE ACCESO</div>
+        <div id="admin-pwd-list"></div>
+      </div>
     </div>
     <!-- Tab: Todas las licencias -->
     <div id="admin-licencias" style="display:none">
@@ -1059,7 +1090,34 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
      MODALES Y BOTTOM SHEETS
 ════════════════════════════════════════ -->
 
-<!-- Modal: Add Event -->
+<!-- Modal: Contraseña -->
+<div class="overlay off" id="m-password">
+  <div class="modal" style="max-width:340px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+      <div style="width:36px;height:36px;border-radius:4px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔐</div>
+      <div>
+        <div class="modal-title" style="margin:0;font-size:14px">IDENTIFICACIÓN</div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-top:2px">JONATAN · GUARDIA C</div>
+      </div>
+    </div>
+    <div class="mfg">
+      <label>CONTRASEÑA</label>
+      <input type="text" id="pwd-input"
+        placeholder="Ingresá tu contraseña"
+        onkeydown="if(event.key==='Enter')confirmPassword()"
+        style="background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:11px 12px;font-size:16px;color:var(--text);font-family:var(--font-ui);width:100%;box-sizing:border-box;outline:none;letter-spacing:2px"
+        autocomplete="off">
+      <div class="pwd-error" id="pwd-error"></div>
+    </div>
+    <div class="mbtns">
+      <button class="mbtn cancel" onclick="closePwdModal()">CANCELAR</button>
+      <button class="mbtn ok" onclick="confirmPassword()">ENTRAR</button>
+    </div>
+    <div class="pwd-hint">&#9673; La sesión queda guardada en este dispositivo.</div>
+  </div>
+</div>
+
+
 <div class="overlay off" id="m-event">
   <div class="modal green-top">
     <div class="modal-title">&#9632; Registrar licencia</div>
@@ -1730,7 +1788,7 @@ function buildUserGrid() {
     }
     // Siempre se puede tocar — multi-dispositivo
     card.style.cursor = 'pointer';
-    card.onclick = () => selectUser(u);
+    card.onclick = () => handleCardClick(u);
     g.appendChild(card);
   });
 }
@@ -1747,6 +1805,79 @@ const PRESET_USERS = [
   { name: 'Lucas',    guardia: 'REL' },
 ];
 const ADMIN_NAME = 'Jonatan'; // único que ve auditoría
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SISTEMA DE CONTRASEÑA — simple, sin hashing
+// Extensible: agregar más nombres a USERS_WITH_PWD en futuras versiones
+// ═══════════════════════════════════════════════════════════════════════════
+const USERS_WITH_PWD = ['Jonatan']; // usuarios que requieren contraseña
+const DEFAULT_PWDS   = { Jonatan: 'Jirafa2025' }; // contraseñas por defecto
+
+function getPwd(name) {
+  const stored = lsGet('gd-pwd-' + name.toLowerCase());
+  return (stored !== null && stored !== undefined && stored !== '') ? stored : (DEFAULT_PWDS[name] || '');
+}
+function setPwd(name, pwd) {
+  lsSet('gd-pwd-' + name.toLowerCase(), pwd);
+}
+
+let _pendingUser = null;
+
+// Punto de entrada desde la tarjeta de usuario
+function handleCardClick(u) {
+  if (USERS_WITH_PWD.includes(u.name)) {
+    _pendingUser = u;
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-error').textContent = '';
+    document.getElementById('m-password').classList.remove('off');
+    setTimeout(() => document.getElementById('pwd-input').focus(), 80);
+  } else {
+    selectUser(u);
+  }
+}
+
+// Verificar contraseña — comparación directa, sin hashing
+function confirmPassword() {
+  const entered  = document.getElementById('pwd-input').value;
+  const correct  = getPwd(_pendingUser.name);
+  const err      = document.getElementById('pwd-error');
+  if (entered === correct) {
+    document.getElementById('m-password').classList.add('off');
+    const u = _pendingUser;
+    _pendingUser = null;
+    selectUser(u); // llamada directa, selectUser ya no tiene lógica de contraseña
+  } else {
+    err.textContent = '✕ Contraseña incorrecta.';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').classList.add('pwd-shake');
+    setTimeout(() => document.getElementById('pwd-input').classList.remove('pwd-shake'), 400);
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+function closePwdModal() {
+  document.getElementById('m-password').classList.add('off');
+  _pendingUser = null;
+}
+
+// Cambiar contraseña desde Panel Admin
+function adminSavePwd(name) {
+  const inp = document.getElementById('admin-pwd-inp-' + name.toLowerCase());
+  const msg = document.getElementById('admin-pwd-msg-' + name.toLowerCase());
+  const val = (inp.value || '').trim();
+  if (!val || val.length < 3) {
+    msg.style.color = '#e05252';
+    msg.textContent = '⚠ Mínimo 3 caracteres.';
+    setTimeout(() => { msg.textContent = ''; }, 2500);
+    return;
+  }
+  setPwd(name, val);
+  inp.value = val; // dejar visible la nueva contraseña
+  msg.style.color = 'var(--green)';
+  msg.textContent = '✓ Guardada.';
+  setTimeout(() => { msg.textContent = ''; }, 2500);
+}
+
 
 async function ensurePresetUsers() {
   // Si ya están todos los usuarios predefinidos, salir inmediatamente (caso normal)
@@ -1917,6 +2048,36 @@ async function renderAuditPanel() {
 
   html += '</div>';
   div.innerHTML = html;
+  renderAdminPwdList();
+}
+
+function renderAdminPwdList() {
+  const container = document.getElementById('admin-pwd-list');
+  if (!container) return;
+  let html = '';
+  PRESET_USERS.forEach(p => {
+    const name   = p.name;
+    const nameLc = name.toLowerCase();
+    const hasPwd = USERS_WITH_PWD.includes(name);
+    const curPwd = hasPwd ? getPwd(name) : '';
+    html += `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:28px;height:28px;border-radius:3px;background:${G_COLORS[p.guardia]||'#8a9ab5'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${name.charAt(0)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text);letter-spacing:1px">${name.toUpperCase()}</div>
+        ${hasPwd ? `
+        <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+          <input id="admin-pwd-inp-${nameLc}" type="text" value="${curPwd}"
+            style="flex:1;min-width:0;background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;color:var(--amber);font-family:var(--font-mono);outline:none"
+            onkeydown="if(event.key==='Enter')adminSavePwd('${name}')">
+          <button onclick="adminSavePwd('${name}')" style="background:var(--amber);border:none;border-radius:3px;padding:5px 10px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#111;white-space:nowrap">GUARDAR</button>
+        </div>
+        <div id="admin-pwd-msg-${nameLc}" style="font-family:var(--font-mono);font-size:9px;min-height:12px;margin-top:3px;letter-spacing:1px"></div>
+        ` : `<div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:3px;letter-spacing:1px">SIN CONTRASEÑA (futuras versiones)</div>`}
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
 }
 
 async function selectUser(u) {
