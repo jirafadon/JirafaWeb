@@ -1223,6 +1223,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
         <option value="C">GUARDIA C</option>
         <option value="D">GUARDIA D</option>
         <option value="E">GUARDIA E</option>
+        <option value="REL">RELEVANTE</option>
       </select>
     </div>
     <div class="mfg"><label>Nota (opcional)</label><textarea id="ev-note" placeholder="Observación, motivo..."></textarea></div>
@@ -1257,6 +1258,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
         <option value="C">GUARDIA C</option>
         <option value="D">GUARDIA D</option>
         <option value="E">GUARDIA E</option>
+        <option value="REL">RELEVANTE</option>
       </select>
     </div>
     <textarea class="ds-note-inp" id="ds-note" placeholder="Nota opcional..."></textarea>
@@ -2395,6 +2397,30 @@ function renderEvList() {
     list.appendChild(item);
   });
 }
+/**
+ * populateCTSelect(selectId)
+ * Rellena un select de "guardia para CT" mostrando solo opciones válidas
+ * (excluye la guardia propia de ME para evitar confusión).
+ */
+function populateCTSelect(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const myG = ME ? ME.guardia : null;
+  const prev = sel.value; // conservar selección si ya había
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  const opts = [
+    { v:'A', l:'GUARDIA A' }, { v:'B', l:'GUARDIA B' }, { v:'C', l:'GUARDIA C' },
+    { v:'D', l:'GUARDIA D' }, { v:'E', l:'GUARDIA E' }, { v:'REL', l:'RELEVANTE' },
+  ];
+  opts.forEach(o => {
+    if (o.v === myG) return; // ocultar propia guardia
+    const opt = document.createElement('option');
+    opt.value = o.v; opt.textContent = o.l;
+    if (o.v === prev) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
 function openAddEvent() {
   if (!ME) { showSection('sec-user'); return; }
   document.querySelectorAll('.lt-btn').forEach(b => { b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; });
@@ -2406,6 +2432,7 @@ function openAddEvent() {
   document.getElementById('dc-hours-row').style.display = 'none';
   document.getElementById('ct-guardia-row').style.display = 'none';
   document.getElementById('ct-guardia').value = '';
+  populateCTSelect('ct-guardia');
   const ph = document.getElementById('pega-hint'); if(ph) ph.style.display='none';
   document.getElementById('ev-err').classList.remove('show');
   document.getElementById('m-event').classList.remove('off');
@@ -2449,7 +2476,7 @@ async function saveEvent() {
   // CT: requiere guardia con la que se hace el cambio
   if (type === 'CT') {
     if (!ctWithGuardia) { err.textContent = '⚠ Seleccioná la guardia con la que se hace el cambio.'; err.classList.add('show'); return; }
-    if (ctWithGuardia === ME.guardia) { err.textContent = '⚠ Seleccioná una guardia diferente a la tuya.'; err.classList.add('show'); return; }
+    if (ctWithGuardia !== 'REL' && ctWithGuardia === ME.guardia) { err.textContent = '⚠ Seleccioná una guardia diferente a la tuya.'; err.classList.add('show'); return; }
   }
 
   // PEGA: mínimo 2 días
@@ -2719,12 +2746,25 @@ let dsDragging=false;
 let relDsDragging=false,relDsStart=null,relDsEnd=null;
 
 /**
+ * getTurnoForG(g, date)
+ * Devuelve el turno programado de cualquier guardia, incluyendo REL.
+ * El Relevante, cuando no tiene turno asignado explícitamente (undefined),
+ * trabaja de mañana (Turno 2). Solo devuelve 'F' si fue marcado como franco.
+ */
+function getTurnoForG(g, date) {
+  if (g === 'REL') {
+    const s = REL_SCHEDULE[date];
+    if (s === 'F') return 'F';           // franco explícito
+    if (s !== undefined) return s;       // turno asignado (1-4)
+    return 2;                            // default: mañana (T2) cuando libre
+  }
+  return getTurno(g, date);
+}
+
+/**
  * findCTSwap(g, date)
- * Devuelve { swappedTurno, partnerG } si hay un Cambio de Turno que afecta
- * a la guardia g en esa fecha, o null si no hay CT.
- *
- * Caso A: g registró CT con X  → g trabajó el turno de X  → muestra getTurno(X, date)
- * Caso B: X registró CT con g  → g trabajó el turno de X  → muestra getTurno(X, date)
+ * Devuelve { swappedTurno, partnerG } si hay CT que afecta a g en esa fecha.
+ * Soporta guardias A-E y REL como registrante o como partner.
  */
 function findCTSwap(g, date) {
   // Caso A: esta guardia registró el CT
@@ -2733,17 +2773,15 @@ function findCTSwap(g, date) {
     e.startDate <= date && e.endDate >= date
   );
   if (ctOwn) {
-    const st = getTurno(ctOwn.ctWithGuardia, date);
-    return { swappedTurno: st, partnerG: ctOwn.ctWithGuardia };
+    return { swappedTurno: getTurnoForG(ctOwn.ctWithGuardia, date), partnerG: ctOwn.ctWithGuardia };
   }
-  // Caso B: otra guardia registró CT apuntando a esta
+  // Caso B: otra guardia registró CT apuntando a esta (incluido REL)
   const ctTarget = EVENTS.find(e =>
     e.type === 'CT' && e.ctWithGuardia === g &&
     e.startDate <= date && e.endDate >= date
   );
   if (ctTarget) {
-    const st = getTurno(ctTarget.guardia, date);
-    return { swappedTurno: st, partnerG: ctTarget.guardia };
+    return { swappedTurno: getTurnoForG(ctTarget.guardia, date), partnerG: ctTarget.guardia };
   }
   return null;
 }
@@ -2862,16 +2900,29 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
   rowsHtml += `<td class="gn"><span style="font-size:9px;color:#8a9ab5;font-weight:700">REL</span><br><span style="font-size:7px;color:var(--tdim)">Relevante</span></td>`;
   days.forEach(date => {
     const isSel = date===selDate, isFer = !!fmap[date];
-    const sched = REL_SCHEDULE[date];
-    const dayEvs = getEvsByDateAndG(date, 'REL');
+    const schedRel = REL_SCHEDULE[date];
+    const ctSwapRel = findCTSwap('REL', date);
+    const dayEvs = getEvsByDateAndG(date, 'REL').filter(e => e.type !== 'CT');
     let cls = 'rel-cell';
-    if (sched==='F'||sched===undefined) cls += ' tf'; else cls += ` t${sched}`;
+    if (ctSwapRel && dayEvs.length === 0) {
+      const st = ctSwapRel.swappedTurno;
+      cls += st === 'F' ? ' tf' : (st ? ` t${st}` : '');
+    } else {
+      if (schedRel==='F'||schedRel===undefined) cls += ' tf'; else cls += ` t${schedRel}`;
+    }
     if (isSel) cls += ' cs'; if (isFer&&!isSel) cls += ' cf';
-    const disp = sched!==undefined ? String(sched) : '·';
-    if (dayEvs.length>0 && ME) {
+
+    if (ctSwapRel && dayEvs.length === 0) {
+      const st  = ctSwapRel.swappedTurno;
+      const numStr = st === 'F' ? 'F' : (st ? String(st) : '·');
+      const tooltip = `↕ Cambio de turno con Guardia ${ctSwapRel.partnerG} (trabajó T${st})`;
+      const tinted  = `background:#5ab8a816`;
+      rowsHtml += `<td class="${cls.trim()}" style="${tinted}" data-date="${date}" data-relrow="1" title="${tooltip}"><div class="cell-inner"><div class="ct-swap-cell" style="${tinted}"><div class="ct-swap-n c${st}">${numStr}</div><div class="ct-swap-arrow">↕</div></div></div></td>`;
+    } else if (dayEvs.length > 0 && ME) {
       const ev=dayEvs[0]; const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
       rowsHtml += `<td class="${cls.trim()}" style="background:${li.color}28" data-date="${date}" data-relrow="1" title="${li.name}: ${ev.userName}"><div class="cell-inner"><div class="lic-code" style="color:${li.color};font-size:10px">${ev.type}</div></div></td>`;
     } else {
+      const disp   = schedRel !== undefined ? String(schedRel) : '·';
       const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
       rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-relrow="1"${ferTitle}><div class="cell-inner"><div class="cn">${disp}</div></div></td>`;
     }
@@ -2995,6 +3046,7 @@ function dsInit(){
   // Reset CT guardia when sheet opens
   document.getElementById('ds-ct-row').style.display='none';
   const ctSel=document.getElementById('ds-ct-guardia');if(ctSel)ctSel.value='';
+  populateCTSelect('ds-ct-guardia');
 }
 function dsOpen(fromDate,toDate,guardia){
   if(!ME){showSection('sec-user');return;}
@@ -3021,7 +3073,7 @@ async function dsSave(){
   if(dsSelLic==='CT'){
     const ctG=document.getElementById('ds-ct-guardia').value;
     if(!ctG){alert('⚠ Seleccioná la guardia con la que se hace el cambio.');return;}
-    if(ctG===myGuardia){alert('⚠ Seleccioná una guardia diferente a la tuya.');return;}
+    if(ctG!=='REL' && ctG===myGuardia){alert('⚠ Seleccioná una guardia diferente a la tuya.');return;}
   }
   const ctWithGuardia=dsSelLic==='CT'?(document.getElementById('ds-ct-guardia').value||null):null;
 
@@ -3635,7 +3687,7 @@ Object.assign(window, {
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
-  findCTSwap,
+  findCTSwap, populateCTSelect,
   dsInit, dsSave, dsCancel, dsOpen, adjDCH,
   showCT, calNav, calGoToday, renderCal, setToday,
   showRT, renderRT, renderRDia, renderRSemana, renderRMes, renderRAnio,
