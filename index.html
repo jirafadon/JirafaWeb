@@ -2,11 +2,14 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0c0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Diagrama DG">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Diagrama DG">
+<meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,6 +17,64 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
 <style>
+/* ══════════════════════════════════════════════
+   PWA — RESET TÁCTIL Y SAFE AREAS
+══════════════════════════════════════════════ */
+html {
+  /* Evita el fondo blanco al hacer overscroll */
+  background: #0a0c0f;
+  /* Impide que iOS agrande el texto en modo landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Sin parpadeo azul en tap */
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  /* No rubber-band / overscroll glow */
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  /* Sin highlight azul en tap */
+  -webkit-tap-highlight-color: transparent;
+  /* Sin selección de texto accidental con tap largo */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Elimina el delay de 300ms en todos los elementos táctiles */
+  touch-action: manipulation;
+}
+/* Permitir selección de texto solo donde tiene sentido */
+input, textarea, select, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+/* ── Safe Areas (notch / Dynamic Island / home indicator) ─────────────── */
+/* Ajuste del contenedor principal para cubrir barra de estado translúcida */
+.wrap {
+  padding-top:    calc(20px + env(safe-area-inset-top,    0px));
+  padding-right:  calc(12px + env(safe-area-inset-right,  0px));
+  padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  padding-left:   calc(12px + env(safe-area-inset-left,   0px));
+}
+/* ── Touch-action: manipulation en todos los controles ───────────────── */
+button, a, select, input, textarea, label,
+.btn, .mbtn, .lt-btn, .ds-lic-btn, .rel-t-btn, .usr-card,
+.section-header, .new-user-toggle, .rel-panel-hdr,
+.ca-bottom-btn, .ca-cancel, .ds-save, .ds-cancel,
+.theme-btn, .ev-tab, .admin-tab, .sort-btn, .ds-dc-ctrl button {
+  touch-action: manipulation;
+}
+/* ── Áreas de toque mínimas 44×44 px (WCAG 2.5.5) ───────────────────── */
+.btn        { min-height: 44px; }
+.mbtn       { min-height: 44px; }
+.section-header { min-height: 48px; }
+.lt-btn     { min-height: 44px; }
+.ds-lic-btn { min-height: 48px; }
+.ds-save, .ca-cancel, .ds-cancel { min-height: 48px; }
+/* Botones pequeños (delete / close): área extendida con padding */
+.ev-del { padding: 10px 12px; min-width: 44px; min-height: 44px; }
+.usr-del { padding: 8px 10px; min-width: 36px; min-height: 36px; }
+.ca-lic-del { padding: 8px 10px; min-width: 44px; min-height: 44px; }
+.lic-popup-close { min-height: 44px; }
+
 /* ══════════════════════════════════════════════
    VARIABLES Y RESET
 ══════════════════════════════════════════════ */
@@ -63,11 +124,13 @@ body {
   color: var(--text);
   font-family: var(--font-ui);
   font-size: 16px;
-  min-height: 100vh;
+  min-height: 100svh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 body::before { display: none; }
-.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 20px 12px 60px; }
+/* .wrap padding overridden by PWA safe-area block above — max-width kept here */
+.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; }
 
 /* ══════════════════════════════════════════════
    HEADER
@@ -99,6 +162,9 @@ h1 span { color: var(--amber); }
   padding: 12px 14px;
   cursor: pointer;
   user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition: background .15s;
 }
 .section-header:hover { background: rgba(255,255,255,.02); }
@@ -134,7 +200,7 @@ h1 span { color: var(--amber); }
 .unm { font-size: 15px; font-weight: 700; color: var(--tbright); letter-spacing: 1px; }
 .ugd { font-family: var(--font-mono); font-size: 9px; color: var(--adim); letter-spacing: 2px; }
 .btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
-.btn { padding: 0 16px; height: 34px; background: var(--amber); border: none; border-radius: 3px; color: #000; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; box-sizing: border-box; }
+.btn { padding: 0 16px; height: 44px; min-height: 44px; background: var(--amber); border: none; border-radius: 3px; color: #000; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .btn:hover { background: #ffc04a; }
 .btn.btn-outline { background: none; border: 1px solid var(--border); color: var(--tdim); }
 .btn.btn-outline:hover { border-color: var(--amber); color: var(--amber); }
@@ -145,7 +211,7 @@ h1 span { color: var(--amber); }
 
 /* USER GRID */
 .user-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 12px; }
-.usr-card { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 4px; padding: 10px 7px; text-align: center; cursor: pointer; transition: all .2s; position: relative; }
+.usr-card { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 4px; padding: 10px 7px; text-align: center; cursor: pointer; transition: all .2s; position: relative; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .usr-card:hover { border-color: var(--amber); transform: translateY(-1px); }
 .usr-card.sel { border-color: var(--amber); background: var(--aglow); }
 .usr-av2 { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #000; margin: 0 auto 5px; }
@@ -257,17 +323,17 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .ev-tab { flex: 1; padding: 5px 3px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
 .ev-tab.on { background: var(--green); color: #000; font-weight: 700; }
 
-.ev-item { display: flex; gap: 0; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 6px; transition: border-color .2s; }
+.ev-item { display: flex; align-items: center; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 4px; min-height: 44px; touch-action: manipulation; }
 .ev-item:hover { border-color: var(--tdim); }
-.ev-lbar { width: 3px; flex-shrink: 0; }
-.ev-info { padding: 9px 10px; flex: 1; }
-.ev-who { font-size: 12px; font-weight: 700; color: var(--tbright); margin-bottom: 2px; }
-.ev-dates { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 1px; margin-bottom: 2px; }
-.ev-code-badge { display: inline-block; padding: 1px 5px; border-radius: 2px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; color: #000; margin-bottom: 2px; }
-.ev-type-name { font-size: 11px; margin-bottom: 2px; }
-.ev-note { font-size: 11px; color: var(--tdim); font-style: italic; margin-bottom: 2px; }
-.ev-ts { font-family: var(--font-mono); font-size: 9px; color: #3a4a5a; letter-spacing: .5px; }
-.ev-del { background: none; border: none; color: #3a4a5a; font-size: 13px; cursor: pointer; padding: 9px 10px; transition: color .15s; align-self: center; }
+.ev-lbar { width: 3px; min-height: 44px; flex-shrink: 0; }
+.ev-info { padding: 7px 10px; flex: 1; min-width: 0; }
+.ev-row1 { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+.ev-who  { font-size: 11px; font-weight: 700; color: var(--tbright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0; }
+.ev-dates { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; }
+.ev-code-badge { display: inline-flex; align-items: center; justify-content: center; padding: 1px 5px; border-radius: 2px; font-family: var(--font-mono); font-size: 9px; font-weight: 900; color: #000; white-space: nowrap; flex-shrink: 0; }
+.ev-ct-tag { font-family: var(--font-mono); font-size: 9px; color: #5ab8a8; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; }
+.ev-note { font-size: 10px; color: var(--tdim); font-style: italic; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-del { background: none; border: none; color: #3a4a5a; font-size: 13px; cursor: pointer; padding: 10px 12px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; transition: color .15s; flex-shrink: 0; touch-action: manipulation; }
 .ev-del:hover { color: var(--red); }
 .ev-empty { font-family: var(--font-mono); font-size: 11px; color: var(--tdim); text-align: center; padding: 16px; letter-spacing: 1px; }
 
@@ -363,6 +429,11 @@ table.gt tr.rel-row td.rel-cell[style*="cursor"]:hover { filter: brightness(1.4)
 /* License in cell */
 .lic-cell { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 1px; }
 .lic-code { font-family: var(--font-ui); font-size: 11px; font-weight: 900; letter-spacing: .5px; color: #000; line-height: 1; z-index: 1; }
+/* ── Cambio de Turno: celda en el diagrama ─────────────── */
+.ct-swap-cell { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.ct-swap-n { font-family: var(--font-mono); font-size: 11px; font-weight: 900; }
+.ct-swap-arrow { position: absolute; top: 1px; right: 2px; font-size: 7px; color: #5ab8a8; line-height: 1; pointer-events: none; }
+.wd-ct { background: #5ab8a820; border: 1px solid #5ab8a855; border-radius: 2px; padding: 1px 4px; font-family: var(--font-mono); font-size: 9px; font-weight: 900; color: #5ab8a8; }
 .lic-turno { font-family: var(--font-mono); font-size: 7px; font-weight: 700; opacity: .6; line-height: 1; margin-top: 1px; color: #000; }
 .lic-more { width: 4px; height: 4px; border-radius: 50%; background: rgba(0,0,0,.4); margin-top: 2px; }
 
@@ -432,9 +503,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 /* ══════════════════════════════════════════════
    OVERLAYS / MODALES / BOTTOM SHEETS
 ══════════════════════════════════════════════ */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 12px; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.72); z-index: 100; display: flex; align-items: center; justify-content: center; padding: max(12px, env(safe-area-inset-top, 12px)) max(12px, env(safe-area-inset-right, 12px)) max(12px, env(safe-area-inset-bottom, 12px)) max(12px, env(safe-area-inset-left, 12px)); }
 .overlay.off { display: none; }
-.modal { background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--amber); border-radius: 6px; padding: 22px; width: 100%; max-width: 430px; max-height: 90vh; overflow-y: auto; animation: fadeUp .2s ease; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-top: 2px solid var(--amber); border-radius: 6px; padding: 22px; width: 100%; max-width: 430px; max-height: min(90vh, calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px)); overflow-y: auto; animation: fadeUp .2s ease; }
 .modal.blue-top { border-top-color: var(--blue); }
 .modal.green-top { border-top-color: var(--green); }
 .modal.rec-top { border-top-color: var(--rec-color); }
@@ -443,7 +514,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .mfg label { font-family: var(--font-mono); font-size: 10px; color: var(--adim); letter-spacing: 2px; }
 .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 .mbtns { display: flex; gap: 7px; margin-top: 14px; }
-.mbtn { flex: 1; padding: 9px; border: none; border-radius: 3px; font-family: var(--font-ui); font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all .2s; }
+.mbtn { flex: 1; padding: 11px 9px; min-height: 44px; border: none; border-radius: 3px; font-family: var(--font-ui); font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all .2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .mbtn.ok { background: var(--amber); color: #000; }
 .mbtn.ok:hover { background: #ffc04a; }
 .mbtn.ok.g { background: var(--green); } .mbtn.ok.g:hover { background: #4dd48a; }
@@ -480,7 +551,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 
 
 .lic-type-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 5px; }
-.lt-btn { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 3px; padding: 8px 6px; text-align: left; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 7px; }
+.lt-btn { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 3px; padding: 8px 6px; min-height: 44px; text-align: left; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 7px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .lt-btn:hover { border-color: var(--tdim); }
 .lt-btn.sel { color: #000; font-weight: 700; }
 .lt-code { font-family: var(--font-ui); font-size: 14px; font-weight: 900; min-width: 24px; text-align: center; padding: 1px 4px; border-radius: 2px; color: #000; }
@@ -493,13 +564,13 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 /* Bottom sheets */
 .ds-picker { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
 .ds-picker.off { display: none; }
-.ds-sheet { background: var(--panel); border-top: 2px solid var(--green); border-radius: 10px 10px 0 0; padding: 20px; width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto; }
-.rec-sheet { background: var(--panel); border-top: 2px solid var(--rec-color); border-radius: 10px 10px 0 0; padding: 20px; width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto; }
+.ds-sheet { background: var(--panel); border-top: 2px solid var(--green); border-radius: 10px 10px 0 0; padding: 20px 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)); width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto; }
+.rec-sheet { background: var(--panel); border-top: 2px solid var(--rec-color); border-radius: 10px 10px 0 0; padding: 20px 20px max(20px, calc(env(safe-area-inset-bottom, 0px) + 12px)); width: 100%; max-width: 460px; max-height: 85vh; overflow-y: auto; }
 .ds-range-lbl { font-family: var(--font-mono); font-size: 10px; color: var(--green); letter-spacing: 3px; margin-bottom: 4px; }
 .rec-title { font-family: var(--font-mono); font-size: 10px; color: var(--rec-color); letter-spacing: 3px; margin-bottom: 4px; }
 .ds-range-dates, .rec-sub { font-size: 15px; font-weight: 700; color: var(--tbright); margin-bottom: 14px; letter-spacing: 1px; }
 .ds-lic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-bottom: 14px; }
-.ds-lic-btn { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 5px; padding: 8px 10px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s; }
+.ds-lic-btn { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 5px; padding: 10px 10px; min-height: 48px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .ds-lic-btn:hover { border-color: var(--tdim); }
 .ds-lic-btn.sel { border-width: 2px; transform: scale(1.04); }
 .ds-lic-code { font-family: var(--font-ui); font-size: 14px; font-weight: 900; padding: 1px 5px; border-radius: 3px; color: #000; }
@@ -514,16 +585,16 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .ds-note-inp { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; color: var(--tbright); font-family: var(--font-mono); font-size: 12px; padding: 10px 12px; width: 100%; resize: none; min-height: 52px; margin-bottom: 14px; }
 .ds-note-inp:focus { outline: none; border-color: var(--amber); }
 .ds-btns { display: flex; gap: 8px; }
-.ds-save { flex: 1; padding: 13px; background: var(--green); border: none; border-radius: 6px; color: #000; font-family: var(--font-ui); font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all .2s; }
+.ds-save { flex: 1; padding: 14px; min-height: 48px; background: var(--green); border: none; border-radius: 6px; color: #000; font-family: var(--font-ui); font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer; transition: all .2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .ds-save:hover { background: #4dd48a; }
 .ds-save:active { background: #4dd48a; }
-.ds-cancel { padding: 12px 16px; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--tdim); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: all .2s; }
+.ds-cancel { padding: 13px 16px; min-height: 48px; background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--tdim); font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: all .2s; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .ds-cancel:hover { border-color: var(--tdim); color: var(--tbright); }
 
 /* Cell actions */
 .cell-actions { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 250; display: flex; align-items: flex-end; justify-content: center; }
 .cell-actions.off { display: none; }
-.ca-sheet { background: var(--panel); border-top: 2px solid var(--amber); border-radius: 10px 10px 0 0; padding: 16px; width: 100%; max-width: 460px; max-height: 70vh; overflow-y: auto; }
+.ca-sheet { background: var(--panel); border-top: 2px solid var(--amber); border-radius: 10px 10px 0 0; padding: 16px 16px max(16px, calc(env(safe-area-inset-bottom, 0px) + 10px)); width: 100%; max-width: 460px; max-height: 70vh; overflow-y: auto; }
 .ca-date { font-family: var(--font-mono); font-size: 10px; color: var(--amber); letter-spacing: 2px; margin-bottom: 12px; }
 .ca-section { margin-bottom: 10px; }
 .ca-sec-title { font-family: var(--font-mono); font-size: 8px; color: var(--tdim); letter-spacing: 3px; margin-bottom: 6px; }
@@ -537,11 +608,11 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .ca-lic-empty { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); padding: 6px; letter-spacing: 1px; }
 .ca-divider { height: 1px; background: var(--border); margin: 10px 0; }
 .ca-btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.ca-bottom-btn { flex: 1; padding: 10px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 5px; color: var(--tbright); font-family: var(--font-ui); font-size: 13px; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+.ca-bottom-btn { flex: 1; padding: 12px; min-height: 48px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 5px; color: var(--tbright); font-family: var(--font-ui); font-size: 13px; cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 5px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .ca-bottom-btn:hover { border-color: var(--amber); }
 .ca-bottom-btn.rec { border-color: rgba(255,107,53,.3); color: var(--rec-color); }
 .ca-bottom-btn.rec:hover { border-color: var(--rec-color); background: rgba(255,107,53,.08); }
-.ca-cancel { width: 100%; padding: 12px; background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--tdim); font-family: var(--font-mono); font-size: 11px; cursor: pointer; transition: all .2s; letter-spacing: 1px; }
+.ca-cancel { width: 100%; padding: 13px; min-height: 48px; background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--tdim); font-family: var(--font-mono); font-size: 11px; cursor: pointer; transition: all .2s; letter-spacing: 1px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .ca-cancel:hover { border-color: var(--tdim); color: var(--tbright); }
 
 /* Relevante panel */
@@ -632,12 +703,13 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   .lic-popup-cell-value { font-size: 11px; }
 }
 .lic-popup-close {
-  width: 100%; padding: 12px 8px;
+  width: 100%; padding: 13px 8px; min-height: 44px;
   border-radius: 10px; border: none;
   font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
   cursor: pointer; font-family: var(--font-ui);
   transition: all .15s; white-space: nowrap;
   text-overflow: ellipsis; overflow: hidden;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .lic-popup-close:hover { filter: brightness(1.15); }
 /* multi-licencia: lista antes de la grilla */
@@ -1176,6 +1248,17 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
         <button onclick="adjDCH(1)">+</button>
       </div>
     </div>
+    <div id="ds-ct-row" style="display:none;margin-bottom:12px">
+      <label style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;display:block;margin-bottom:5px">GUARDIA CON LA QUE SE HACE EL CAMBIO</label>
+      <select id="ds-ct-guardia" style="font-size:15px;padding:10px 12px;width:100%">
+        <option value="">— Seleccionar —</option>
+        <option value="A">GUARDIA A</option>
+        <option value="B">GUARDIA B</option>
+        <option value="C">GUARDIA C</option>
+        <option value="D">GUARDIA D</option>
+        <option value="E">GUARDIA E</option>
+      </select>
+    </div>
     <textarea class="ds-note-inp" id="ds-note" placeholder="Nota opcional..."></textarea>
     <div class="ds-btns">
       <button class="ds-save" id="ds-save" onclick="dsSave()" disabled style="opacity:.4">GUARDAR</button>
@@ -1432,7 +1515,7 @@ const LIC = {
   DC: { name: 'Desc. Compensatorio',   color: '#4a9eda', icon: '🔄' },
   PG: { name: 'Perm. Guardia (PEG)',   color: '#f5a623', icon: '🔑' },
   PA: { name: 'Perm. Guardia Adic. (PEGA)', color: '#ff8c42', icon: '🔑' },
-  CT: { name: 'Cambio de Turno',       color: '#5ab8a8', icon: '↕',  noDS: true },
+  CT: { name: 'Cambio de Turno',       color: '#5ab8a8', icon: '↕' },
   MA: { name: 'Matrimonio',            color: '#b07ee8', icon: '💍' },
   NA: { name: 'Nacimiento',            color: '#5ab8a8', icon: '👶' },
   AD: { name: 'Adopción',              color: '#8a9ab5', icon: '🤝' },
@@ -2237,19 +2320,14 @@ function renderEvList() {
   list.innerHTML = '';
   if (!ME) return;
 
-  // ── Etiqueta mes ─────────────────────────────────────────────────────────
   const lbl = document.getElementById('ev-month-label');
   if (lbl) lbl.textContent = MES_S[evMonthM] + ' ' + evMonthY;
 
-  // ── Filtrar eventos del mes seleccionado ─────────────────────────────────
   const firstDay = dk(evMonthY, evMonthM, 1);
   const lastDay  = dk(evMonthY, evMonthM, new Date(evMonthY, evMonthM, 0).getDate());
 
-  const base = evTab === 'mine'
-    ? EVENTS.filter(e => e.userId === ME.id)
-    : EVENTS;
-
-  const evs = base
+  const base = evTab === 'mine' ? EVENTS.filter(e => e.userId === ME.id) : EVENTS;
+  const evs  = base
     .filter(e => e.startDate <= lastDay && e.endDate >= firstDay)
     .sort((a,b) => b.startDate.localeCompare(a.startDate));
 
@@ -2258,32 +2336,62 @@ function renderEvList() {
   }
 
   evs.forEach(ev => {
-    const li = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
-    const item = el('div','ev-item','');
-    const lbar = el('div','ev-lbar',''); lbar.style.background = li.color; item.appendChild(lbar);
-    const info = el('div','ev-info','');
-    const who = el('div','ev-who', ev.userName + ' · ' + (G_LABEL[ev.guardia]||ev.guardia)); info.appendChild(who);
-    const badge = el('div','ev-code-badge', ev.type); badge.style.background = li.color; info.appendChild(badge);
-    // CT: mostrar nombre con la guardia del cambio
-    let typeName = li.name;
-    if (ev.type === 'CT' && ev.ctWithGuardia) typeName = 'Cambio de Turno ↕ Guardia ' + ev.ctWithGuardia;
-    const tn = el('div','ev-type-name', typeName); tn.style.color = li.color; info.appendChild(tn);
-    const dts = el('div','ev-dates','');
-    dts.textContent = ev.startDate===ev.endDate ? formatDate(ev.startDate) : formatDate(ev.startDate)+' → '+formatDate(ev.endDate);
-    if (ev.type==='DC'&&ev.dcHours) dts.textContent += '  ·  '+ev.dcHours+'h/día';
-    info.appendChild(dts);
-    if (ev.descuento && ev.userId === ME?.id) {
-      const dd = el('div','','');
-      dd.style.cssText = 'font-size:9px;font-family:var(--font-mono);color:var(--adim);margin-top:3px;letter-spacing:.5px';
-      dd.textContent = '↓ ' + ev.descuento.detalle + ' descontado' + (ev.descuento.tipo==='dc'?'s':'') + ' del saldo';
-      info.appendChild(dd);
+    const li  = LIC[ev.type] || { name: ev.type, color: '#8a9ab5' };
+    const canDel = !ME || ev.userId === ME.id;
+
+    // Formato de fecha compacto
+    const sameMY = ev.startDate.slice(0,7) === ev.endDate.slice(0,7);
+    let dateStr;
+    if (ev.startDate === ev.endDate) {
+      dateStr = formatDate(ev.startDate);
+    } else if (sameMY) {
+      // "6 → 7 JUN 2026"
+      const [dy1] = ev.startDate.split('-').slice(2);
+      dateStr = parseInt(dy1) + ' → ' + formatDate(ev.endDate);
+    } else {
+      dateStr = formatDate(ev.startDate) + ' → ' + formatDate(ev.endDate);
     }
-    if (ev.note) { const nt = el('div','ev-note', ev.note); info.appendChild(nt); }
-    const ts = el('div','ev-ts',''); ts.innerHTML = '⏱ '+(ev.createdAtStr||fmtTs(new Date(ev.createdAt)))+' · <strong>'+ev.createdBy+'</strong>'; info.appendChild(ts);
+
+    const item  = el('div', 'ev-item', '');
+    const lbar  = el('div', 'ev-lbar', ''); lbar.style.background = li.color;
+    const info  = el('div', 'ev-info', '');
+    const row1  = el('div', 'ev-row1', '');
+
+    // Badge tipo
+    const badge = el('span', 'ev-code-badge', ev.type === 'CT' ? '↕' : ev.type);
+    badge.style.background = li.color;
+
+    // Nombre · guardia
+    const who = el('span', 'ev-who', ev.userName + ' · ' + (G_LABEL[ev.guardia] || ev.guardia));
+
+    // Fechas
+    const dates = el('span', 'ev-dates', dateStr);
+
+    // CT: guardia del cambio
+    if (ev.type === 'CT' && ev.ctWithGuardia) {
+      const ctTag = el('span', 'ev-ct-tag', '↕ G' + ev.ctWithGuardia);
+      row1.append(badge, who, dates, ctTag);
+    } else {
+      row1.append(badge, who, dates);
+    }
+    info.appendChild(row1);
+
+    // Nota (si hay, segunda línea discreta)
+    if (ev.note) {
+      const nt = el('div', 'ev-note', ev.note);
+      info.appendChild(nt);
+    }
+
+    item.appendChild(lbar);
     item.appendChild(info);
-    if (!ME || ev.userId===ME.id) {
-      const del = el('button','ev-del','✕'); del.title = 'Eliminar'; del.onclick = ()=>deleteEvent(ev.id); item.appendChild(del);
+
+    if (canDel) {
+      const del = el('button', 'ev-del', '✕');
+      del.title = 'Eliminar';
+      del.onclick = () => deleteEvent(ev.id);
+      item.appendChild(del);
     }
+
     list.appendChild(item);
   });
 }
@@ -2338,11 +2446,10 @@ async function saveEvent() {
   if (!from || !to) { err.textContent = '⚠ Completá las fechas.'; err.classList.add('show'); return; }
   if (from > to) { err.textContent = '⚠ La fecha inicio debe ser antes que la de fin.'; err.classList.add('show'); return; }
 
-  // CT: requiere guardia y solo un día
+  // CT: requiere guardia con la que se hace el cambio
   if (type === 'CT') {
-    if (!ctWithGuardia) { err.textContent = '⚠ Seleccioná la guardia con la que se realizó el cambio.'; err.classList.add('show'); return; }
+    if (!ctWithGuardia) { err.textContent = '⚠ Seleccioná la guardia con la que se hace el cambio.'; err.classList.add('show'); return; }
     if (ctWithGuardia === ME.guardia) { err.textContent = '⚠ Seleccioná una guardia diferente a la tuya.'; err.classList.add('show'); return; }
-    if (from !== to) { err.textContent = '⚠ El cambio de turno es solo por un día.'; err.classList.add('show'); return; }
   }
 
   // PEGA: mínimo 2 días
@@ -2491,15 +2598,24 @@ function renderRT(t) { if(t==='dia')renderRDia();else if(t==='semana')renderRSem
 
 function renderRDia() {
   const c = document.getElementById('t-dia'); c.innerHTML='';
-  const {g,f,turno} = S;
+  const {g, f} = S;
+  const ctSwapDay = findCTSwap(g, f);
+  const turno = ctSwapDay ? ctSwapDay.swappedTurno : S.turno;
+
   c.appendChild(el('div','slbl','TURNOS DEL DÍA'));
   if (turno==='F') {
     const ff=el('div','franco-card',''); ff.innerHTML='<div class="franco-f">F</div><div><div class="franco-l">DÍA FRANCO</div></div>'; c.appendChild(ff);
   } else if (turno) {
+    if (ctSwapDay) {
+      const notice = el('div','','');
+      notice.style.cssText = 'font-family:var(--font-mono);font-size:9px;color:#5ab8a8;letter-spacing:1.5px;margin-bottom:8px;padding:5px 8px;background:#5ab8a812;border:1px solid #5ab8a830;border-radius:3px';
+      notice.textContent = `↕ CAMBIO DE TURNO CON GUARDIA ${ctSwapDay.partnerG}`;
+      c.appendChild(notice);
+    }
     const row=el('div','turns-row','');
     TNFO.forEach(t=>{
       const a=t.n===turno, card=el('div','turn-card '+(a?'active':'inactive'),'');
-      if(a){const b=el('div','tc-badge','▶ TU TURNO');card.appendChild(b);}
+      if(a){const b=el('div','tc-badge',ctSwapDay?'↕ TU TURNO (CT)':'▶ TU TURNO');card.appendChild(b);}
       card.appendChild(el('div','tc-num',''+t.n));
       card.appendChild(el('div','tc-hours',t.i+'  '+t.f));
       row.appendChild(card);
@@ -2515,9 +2631,12 @@ function renderRDia() {
       const item=el('div','ev-item','');
       const lbar=el('div','ev-lbar','');lbar.style.background=li.color;item.appendChild(lbar);
       const info=el('div','ev-info','');
-      info.appendChild(el('div','ev-who',ev.userName+' · '+G_LABEL[ev.guardia]));
-      const badge=el('div','ev-code-badge',ev.type);badge.style.background=li.color;info.appendChild(badge);
-      const tn=el('div','ev-type-name',li.name);tn.style.color=li.color;info.appendChild(tn);
+      const row1=el('div','ev-row1','');
+      const badge=el('span','ev-code-badge',ev.type==='CT'?'↕':ev.type);badge.style.background=li.color;
+      const who=el('span','ev-who',ev.userName+' · '+G_LABEL[ev.guardia]);
+      const ctTag = ev.type==='CT'&&ev.ctWithGuardia ? el('span','ev-ct-tag','↕ G'+ev.ctWithGuardia) : null;
+      row1.append(badge, who); if(ctTag) row1.appendChild(ctTag);
+      info.appendChild(row1);
       if(ev.note){info.appendChild(el('div','ev-note',ev.note));}
       item.appendChild(info); evl.appendChild(item);
     });
@@ -2531,16 +2650,23 @@ function renderRDia() {
   const wg=el('div','week-grid','');
   const WN=['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
   week.forEach((wd2,i)=>{
-    const {d:dd}=pd(wd2),wt=getTurno(g,wd2),isSel=wd2===f,isFer=!!fmap[wd2];
-    const dayEvs=getEvsByDateAndG(wd2,g);
+    const {d:dd}=pd(wd2);
+    const ctSwapW = findCTSwap(g, wd2);
+    const wt = ctSwapW ? ctSwapW.swappedTurno : getTurno(g, wd2);
+    const isSel=wd2===f, isFer=!!fmap[wd2];
+    const dayEvs=getEvsByDateAndG(wd2,g).filter(e=>e.type!=='CT');
     const hasLic=dayEvs.length>0;
-    let cls='wd';if(isSel)cls+=' ws';if(isFer)cls+=' wf2';if(wt==='F'&&!hasLic)cls+=' wp';
+    let cls='wd';if(isSel)cls+=' ws';if(isFer)cls+=' wf2';if(wt==='F'&&!hasLic&&!ctSwapW)cls+=' wp';
     const card=el('div',cls,'');
     card.appendChild(el('div','wdn',WN[i]));card.appendChild(el('div','wdd',''+dd));
     if(hasLic){
       const ev=dayEvs[0];const li=LIC[ev.type];
       const lbl=el('div','wd-lic','');lbl.style.background=li.color;lbl.textContent=ev.type;
       lbl.title=`${ev.userName}: ${li.name}`;card.appendChild(lbl);
+    } else if(ctSwapW) {
+      const lbl=el('div','wd-ct','↕'+wt);
+      lbl.title=`Cambio de turno con Guardia ${ctSwapW.partnerG} — trabajás T${wt}`;
+      card.appendChild(lbl);
     } else {
       let tc='wdt';if(wt&&wt!=='F')tc+=` c${wt}`;card.appendChild(el('div',tc,wt?''+wt:'·'));
     }
@@ -2592,6 +2718,36 @@ let dsActive=false,dsStartDate=null,dsEndDate=null,dsGuardia=null,dsSelLic=null,
 let dsDragging=false;
 let relDsDragging=false,relDsStart=null,relDsEnd=null;
 
+/**
+ * findCTSwap(g, date)
+ * Devuelve { swappedTurno, partnerG } si hay un Cambio de Turno que afecta
+ * a la guardia g en esa fecha, o null si no hay CT.
+ *
+ * Caso A: g registró CT con X  → g trabajó el turno de X  → muestra getTurno(X, date)
+ * Caso B: X registró CT con g  → g trabajó el turno de X  → muestra getTurno(X, date)
+ */
+function findCTSwap(g, date) {
+  // Caso A: esta guardia registró el CT
+  const ctOwn = EVENTS.find(e =>
+    e.type === 'CT' && e.guardia === g &&
+    e.startDate <= date && e.endDate >= date
+  );
+  if (ctOwn) {
+    const st = getTurno(ctOwn.ctWithGuardia, date);
+    return { swappedTurno: st, partnerG: ctOwn.ctWithGuardia };
+  }
+  // Caso B: otra guardia registró CT apuntando a esta
+  const ctTarget = EVENTS.find(e =>
+    e.type === 'CT' && e.ctWithGuardia === g &&
+    e.startDate <= date && e.endDate >= date
+  );
+  if (ctTarget) {
+    const st = getTurno(ctTarget.guardia, date);
+    return { swappedTurno: st, partnerG: ctTarget.guardia };
+  }
+  return null;
+}
+
 function buildTable(days, selDate, selG, fmap, title, isCurrent) {
   const today = dk(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
   const DAYS_ABBR = ['D','L','M','M','J','V','S'];
@@ -2618,39 +2774,64 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     rowsHtml += `<tr class="${isMe?'gs':''}">`;
     rowsHtml += `<td class="gn"><span style="font-size:11px;font-weight:700;color:${G_COLORS[g]}">${g}</span>${isMe?'<br><span style="font-size:7px;color:var(--adim)">YO</span>':''}</td>`;
     days.forEach(date => {
-      const turno = getTurno(g, date);
-      const isSel = date===selDate && g===selG;
-      const isFer = !!fmap[date];
-      const dayEvs = getEvsByDateAndG(date, g);
+      const turnoBase = getTurno(g, date);
+      const ctSwap    = findCTSwap(g, date);
+      const turno     = ctSwap ? ctSwap.swappedTurno : turnoBase;
+      const isSel  = date===selDate && g===selG;
+      const isFer  = !!fmap[date];
+      // For cell background class use effective turno
+      const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
+      const allEvs = getEvsByDateAndG(date, g); // includes CT for tooltip
       const dayRecs = RECARGOS.filter(r => r.date===date && r.guardia===g && ME && r.userId===ME.id);
       const hasRec = dayRecs.length > 0;
+
       let cls = '';
-      if (dayEvs.length===0 && dayRecs.length===0) {
-        if (turno==='F') cls='tf'; else if (turno) cls=`t${turno}`;
+      if (dayEvs.length===0 && dayRecs.length===0 && !ctSwap) {
+        if (turnoBase==='F') cls='tf'; else if (turnoBase) cls=`t${turnoBase}`;
+      } else if (ctSwap && dayEvs.length===0 && dayRecs.length===0) {
+        // CT swap: use swapped turno color class
+        cls = turno==='F' ? 'tf' : (turno ? `t${turno}` : '');
       }
       if (isSel && !cls.includes('cs')) cls += ' cs';
-      if (isFer && turno!=='F' && !isSel) cls += ' cf';
-      if (isFer && turno==='F') cls += ' ixf';
-      if (isSel && turno!=='F') cls += ' ix';
+      if (isFer && turnoBase!=='F' && !isSel) cls += ' cf';
+      if (isFer && turnoBase==='F') cls += ' ixf';
+      if (isSel && turnoBase!=='F') cls += ' ix';
+
       let inlineStyle = '';
-      let innerHtml = '';
-      if (dayEvs.length > 0) {
+      let innerHtml   = '';
+
+      if (ctSwap && dayEvs.length === 0 && dayRecs.length === 0) {
+        // ── CT swap cell: muestra turno real trabajado ─────────────────────
+        const tinted = `background:#5ab8a816`;
+        const numClass = turno && turno!=='F' ? `ct-swap-n c${turno}` : 'ct-swap-n';
+        const numStr   = turno === 'F' ? 'F' : (turno ? String(turno) : '·');
+        innerHtml = `<div class="ct-swap-cell" style="${tinted}"><div class="${numClass}">${numStr}</div><div class="ct-swap-arrow">↕</div></div>`;
+        inlineStyle = tinted;
+        const tooltip = `↕ Cambio de turno con Guardia ${ctSwap.partnerG} (trabajó T${turno})`;
+        rowsHtml += `<td class="${cls.trim()}" style="${inlineStyle}" data-date="${date}" data-g="${g}" title="${tooltip}"><div class="cell-inner">${innerHtml}</div></td>`;
+
+      } else if (dayEvs.length > 0) {
+        // ── Licencia (no CT) ───────────────────────────────────────────────
         const ev = dayEvs[0]; const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
         inlineStyle = `background:${li.color}${isSel?'50':'28'}`;
-        const ctLabel = ev.type==='CT' && ev.ctWithGuardia ? `<div class="lic-turno" style="color:${li.color}cc;font-size:7px">↕${ev.ctWithGuardia}</div>` : (turno&&turno!=='F'?`<div class="lic-turno" style="color:${li.color}99">T${turno}</div>`:'');
-        innerHtml = `<div class="lic-cell" style="background:${li.color}18"><div class="lic-code" style="color:${li.color}">${ev.type==='CT'?'↕':ev.type}</div>${ctLabel}${dayEvs.length>1?`<div class="lic-more" style="background:${li.color}88"></div>`:''}</div>`;
-        const tdTitle = dayEvs.map(e=>`${LIC[e.type]?.name||e.type}${e.ctWithGuardia?' ↕ Guardia '+e.ctWithGuardia:''}: ${e.userName}`).join('\n');
+        const tLabel = turnoBase && turnoBase!=='F' ? `<div class="lic-turno" style="color:${li.color}99">T${turnoBase}</div>` : '';
+        innerHtml = `<div class="lic-cell" style="background:${li.color}18"><div class="lic-code" style="color:${li.color}">${ev.type}</div>${tLabel}${dayEvs.length>1?`<div class="lic-more" style="background:${li.color}88"></div>`:''}</div>`;
+        const tdTitle = allEvs.map(e=>`${LIC[e.type]?.name||e.type}${e.ctWithGuardia?' ↕ Guardia '+e.ctWithGuardia:''}: ${e.userName}`).join('\n');
         if (hasRec) { const isFranco = dayRecs.some(r=>isEsSobreFranco(g,date,r.turno)); cls = isFranco?'has-rec-franco':'has-rec'; }
         rowsHtml += `<td class="${cls.trim()}" style="${inlineStyle}" data-date="${date}" data-g="${g}" title="${tdTitle}"><div class="cell-inner">${innerHtml}</div></td>`;
+
       } else if (hasRec) {
+        // ── Recargo ────────────────────────────────────────────────────────
         const isFranco = dayRecs.some(r=>isEsSobreFranco(g,date,r.turno));
         cls = isFranco ? 'has-rec-franco' : 'has-rec';
         const recTitle = dayRecs.map(r=>`Recargo${r.sobreFranco?' sobre franco':''}: T${r.turno}${r.note?' ('+r.note+')':''}`).join('\n');
-        innerHtml = `<div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">${turno&&turno!=='F'?'T'+turno:'F'}</div></div>`;
+        innerHtml = `<div class="rec-cell-overlay"><div class="rec-label">R</div><div class="rec-label-sub">${turnoBase&&turnoBase!=='F'?'T'+turnoBase:'F'}</div></div>`;
         rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="${g}" title="${recTitle}"><div class="cell-inner">${innerHtml}</div></td>`;
+
       } else {
+        // ── Celda normal ───────────────────────────────────────────────────
         const ferTitle = isFer ? ` title="${fmap[date].nombre}"` : '';
-        innerHtml = `<div class="cn">${turno==='F'?'F':(turno?''+turno:'·')}</div>`;
+        innerHtml = `<div class="cn">${turnoBase==='F'?'F':(turnoBase?''+turnoBase:'·')}</div>`;
         rowsHtml += `<td class="${cls.trim()}" data-date="${date}" data-g="${g}"${ferTitle}><div class="cell-inner">${innerHtml}</div></td>`;
       }
     });
@@ -2797,9 +2978,8 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
 function dsInit(){
   const g=document.getElementById('ds-lic-grid');g.innerHTML='';
   Object.entries(LIC).forEach(([code,v])=>{
-    if(v.noDS) return; // CT y otros que no aplican en selección múltiple
     const b=document.createElement('div');b.className='ds-lic-btn';
-    const lc=document.createElement('span');lc.className='ds-lic-code';lc.style.background=v.color;lc.textContent=code;
+    const lc=document.createElement('span');lc.className='ds-lic-code';lc.style.background=v.color;lc.textContent=code==='CT'?'↕':code;
     const ln=document.createElement('span');ln.className='ds-lic-name';ln.textContent=v.name;
     b.appendChild(lc);b.appendChild(ln);
     b.addEventListener('click',()=>{
@@ -2807,10 +2987,14 @@ function dsInit(){
       b.classList.add('sel');b.style.borderColor=v.color;b.style.background=v.color+'18';
       dsSelLic=code;
       document.getElementById('ds-dc-row').classList.toggle('on',code==='DC');
+      document.getElementById('ds-ct-row').style.display=code==='CT'?'':'none';
       const sv=document.getElementById('ds-save');sv.disabled=false;sv.style.opacity='1';
     });
     g.appendChild(b);
   });
+  // Reset CT guardia when sheet opens
+  document.getElementById('ds-ct-row').style.display='none';
+  const ctSel=document.getElementById('ds-ct-guardia');if(ctSel)ctSel.value='';
 }
 function dsOpen(fromDate,toDate,guardia){
   if(!ME){showSection('sec-user');return;}
@@ -2831,8 +3015,18 @@ async function dsSave(){
   if(!dsSelLic||!dsStartDate||!dsEndDate)return;
   const note=document.getElementById('ds-note').value.trim();
   const now=new Date();
+  const myGuardia=dsGuardia||ME.guardia;
+
+  // CT: validar guardia del cambio
+  if(dsSelLic==='CT'){
+    const ctG=document.getElementById('ds-ct-guardia').value;
+    if(!ctG){alert('⚠ Seleccioná la guardia con la que se hace el cambio.');return;}
+    if(ctG===myGuardia){alert('⚠ Seleccioná una guardia diferente a la tuya.');return;}
+  }
+  const ctWithGuardia=dsSelLic==='CT'?(document.getElementById('ds-ct-guardia').value||null):null;
+
   let effectiveTo=dsEndDate;
-  if(['A','B','C','D','E'].includes(dsGuardia)){effectiveTo=computeLicenseDates(dsGuardia,dsStartDate,dsEndDate).effectiveTo;}
+  if(dsSelLic!=='CT'&&['A','B','C','D','E'].includes(myGuardia)){effectiveTo=computeLicenseDates(myGuardia,dsStartDate,dsEndDate).effectiveTo;}
 
   // PEGA: validar múltiplo de 2
   if(dsSelLic==='PA'){
@@ -2840,14 +3034,14 @@ async function dsSave(){
     if(dias<2||dias%2!==0){alert(`⚠ El PEGA se toma de a 2 días. Período seleccionado: ${dias} día${dias>1?'s':''}.`);return;}
   }
 
-  const ev={id:'ev'+Date.now(),userId:ME.id,userName:ME.name,guardia:dsGuardia||ME.guardia,type:dsSelLic,startDate:dsStartDate,endDate:effectiveTo,note,dcHours:dsSelLic==='DC'?dsDCH:null,createdAt:now.toISOString(),createdAtStr:fmtTs(now),createdBy:ME.name};
+  const ev={id:'ev'+Date.now(),userId:ME.id,userName:ME.name,guardia:myGuardia,type:dsSelLic,startDate:dsStartDate,endDate:effectiveTo,note,dcHours:dsSelLic==='DC'?dsDCH:null,ctWithGuardia,createdAt:now.toISOString(),createdAtStr:fmtTs(now),createdBy:ME.name};
 
   // Calcular descuento y guardarlo en el evento
-  const desc=calcDescuento(dsSelLic,dsGuardia||ME.guardia,dsStartDate,dsEndDate);
+  const desc=dsSelLic!=='CT'?calcDescuento(dsSelLic,myGuardia,dsStartDate,dsEndDate):null;
   if(desc) ev.descuento=desc;
 
   EVENTS.push(ev);await saveOneEvent(ev);
-  await queueNotification(ev); // Notificación push
+  await queueNotification(ev);
 
   // Aplicar descuento al saldo Usina
   if(desc){
@@ -3441,6 +3635,7 @@ Object.assign(window, {
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
+  findCTSwap,
   dsInit, dsSave, dsCancel, dsOpen, adjDCH,
   showCT, calNav, calGoToday, renderCal, setToday,
   showRT, renderRT, renderRDia, renderRSemana, renderRMes, renderRAnio,
