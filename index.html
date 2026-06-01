@@ -1170,20 +1170,23 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <!-- Modal: Contraseña -->
 <div class="overlay off" id="m-password">
   <div class="modal" style="max-width:340px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
-      <div style="width:36px;height:36px;border-radius:4px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔐</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div id="pwd-modal-avatar" style="width:36px;height:36px;border-radius:4px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">?</div>
       <div>
         <div class="modal-title" style="margin:0;font-size:14px">IDENTIFICACIÓN</div>
-        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-top:2px">JONATAN · GUARDIA C</div>
+        <div id="pwd-modal-name" style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-top:2px">···</div>
       </div>
     </div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);background:var(--cell-bg);border-radius:4px;padding:8px 10px;margin-bottom:14px;line-height:1.5;border-left:3px solid var(--amber)">
+      &#9673; Este perfil tiene clave de acceso.<br>Ingresá tu <strong style="color:var(--text)">número de legajo</strong>.
+    </div>
     <div class="mfg">
-      <label>CONTRASEÑA</label>
+      <label>LEGAJO</label>
       <input type="text" id="pwd-input"
-        placeholder="Ingresá tu contraseña"
+        placeholder="Ej: 70421"
         onkeydown="if(event.key==='Enter')confirmPassword()"
-        style="background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:11px 12px;font-size:16px;color:var(--text);font-family:var(--font-ui);width:100%;box-sizing:border-box;outline:none;letter-spacing:2px"
-        autocomplete="off">
+        style="background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:11px 12px;font-size:20px;color:var(--text);font-family:var(--font-mono);width:100%;box-sizing:border-box;outline:none;letter-spacing:3px"
+        autocomplete="off" inputmode="numeric">
       <div class="pwd-error" id="pwd-error"></div>
     </div>
     <div class="mbtns">
@@ -1911,10 +1914,17 @@ const ADMIN_NAME = 'Jonatan'; // único que ve auditoría
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SISTEMA DE CONTRASEÑA — simple, sin hashing
-// Extensible: agregar más nombres a USERS_WITH_PWD en futuras versiones
 // ═══════════════════════════════════════════════════════════════════════════
-const USERS_WITH_PWD = ['Jonatan']; // usuarios que requieren contraseña
-const DEFAULT_PWDS   = { Jonatan: 'Jirafa2025' }; // contraseñas por defecto
+const USERS_WITH_PWD = ['Jonatan','Lucas','Gastón','Lisandro','Rodrigo','Matías','Sergio'];
+const DEFAULT_PWDS   = {
+  Jonatan:  '70294',
+  Lucas:    '70421',
+  Gastón:   '70312',
+  Lisandro: '70310',
+  Rodrigo:  '70314',
+  Matías:   '70155',
+  Sergio:   '70138',
+};
 
 function getPwd(name) {
   const stored = lsGet('gd-pwd-' + name.toLowerCase());
@@ -1928,8 +1938,16 @@ let _pendingUser = null;
 
 // Punto de entrada desde la tarjeta de usuario
 function handleCardClick(u) {
-  if (USERS_WITH_PWD.includes(u.name)) {
+  // Si este dispositivo ya está vinculado al usuario, entra directo sin clave
+  const ids = u.deviceIds || (u.deviceId ? [u.deviceId] : []);
+  const isOwnDevice = ids.includes(DEVICE_ID);
+  if (USERS_WITH_PWD.includes(u.name) && !isOwnDevice) {
     _pendingUser = u;
+    // Actualizar el modal con el nombre y guardia del usuario
+    const col = G_COLORS[u.guardia] || '#8a9ab5';
+    document.getElementById('pwd-modal-avatar').style.background = col;
+    document.getElementById('pwd-modal-avatar').textContent = u.name.charAt(0).toUpperCase();
+    document.getElementById('pwd-modal-name').textContent = u.name.toUpperCase() + ' · ' + (G_LABEL[u.guardia] || u.guardia);
     document.getElementById('pwd-input').value = '';
     document.getElementById('pwd-error').textContent = '';
     document.getElementById('m-password').classList.remove('off');
@@ -2109,14 +2127,22 @@ async function renderAuditPanel() {
     const c = counts[p.name] || 0;
     const col = G_COLORS[p.guardia] || '#8a9ab5';
     const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
-    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 5); // <-- ultimas 5
+    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 1); // ultima conexion
 
     let devicesHtml = ids.length
       ? ids.map(did => {
           const isMe = did === DEVICE_ID;
-          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
-            ···${did.slice(-6)} ${isMe?'(este)':''}
-            <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
+          // Buscar el ultimo log de este dispositivo para mostrar su info
+          const devLog = logs.filter(l => l.userName === p.name && l.deviceId === did)[0];
+          const devLabel = devLog ? parseUA(devLog.ua) : '?';
+          const devGeo   = devLog ? geoStr(devLog) : '';
+          const devTime  = devLog ? (devLog.date + ' ' + devLog.time) : '';
+          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:4px 8px;display:inline-flex;flex-direction:column;gap:1px;max-width:100%">
+            <span style="display:flex;align-items:center;gap:6px;justify-content:space-between">
+              <span>···${did.slice(-6)} ${isMe?'<span style='color:var(--green)'>● ESTE</span>':''} ${devLabel}</span>
+              <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0;line-height:1" title="Desvincular">✕</button>
+            </span>
+            ${devTime ? `<span style="color:var(--adim);font-size:7px">${devTime}${devGeo?' · '+devGeo:''}</span>` : '<span style="color:var(--adim);font-size:7px">Sin accesos registrados</span>'}
           </span>`;
         }).join(' ')
       : `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
@@ -2144,7 +2170,7 @@ async function renderAuditPanel() {
         </div>
       </div>
       <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Últimas 5 conexiones</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Última conexión</div>
       <div>${logsHtml}</div>
     </div>`;
   });
@@ -2733,8 +2759,8 @@ async function renderCal(){
   else{const t=`AÑO ${y}`;lbl.textContent=t;badge.textContent=t;}
   const body=document.getElementById('cal-body');body.innerHTML='';
   const selDate=S?S.f:calDate,selG=g||(S?S.g:'A');
-  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,false));}
-  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,false));}
+  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true));}
+  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true));}
   else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
 }
 
