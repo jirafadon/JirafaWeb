@@ -1178,7 +1178,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       </div>
     </div>
     <div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);background:var(--cell-bg);border-radius:4px;padding:8px 10px;margin-bottom:14px;line-height:1.5;border-left:3px solid var(--amber)">
-      &#9673; Este perfil tiene clave de acceso.<br>Ingresá tu <strong style="color:var(--text)">número de legajo</strong>.
+      &#9673; Este perfil tiene clave. Ingresá tu <strong style="color:var(--text)">número de legajo</strong>.
     </div>
     <div class="mfg">
       <label>LEGAJO</label>
@@ -1938,12 +1938,10 @@ let _pendingUser = null;
 
 // Punto de entrada desde la tarjeta de usuario
 function handleCardClick(u) {
-  // Si este dispositivo ya está vinculado al usuario, entra directo sin clave
+  // Si el dispositivo ya está vinculado a este usuario, entra directo sin clave
   const ids = u.deviceIds || (u.deviceId ? [u.deviceId] : []);
-  const isOwnDevice = ids.includes(DEVICE_ID);
-  if (USERS_WITH_PWD.includes(u.name) && !isOwnDevice) {
+  if (USERS_WITH_PWD.includes(u.name) && !ids.includes(DEVICE_ID)) {
     _pendingUser = u;
-    // Actualizar el modal con el nombre y guardia del usuario
     const col = G_COLORS[u.guardia] || '#8a9ab5';
     document.getElementById('pwd-modal-avatar').style.background = col;
     document.getElementById('pwd-modal-avatar').textContent = u.name.charAt(0).toUpperCase();
@@ -2127,7 +2125,7 @@ async function renderAuditPanel() {
     const c = counts[p.name] || 0;
     const col = G_COLORS[p.guardia] || '#8a9ab5';
     const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
-    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 5); // <-- ultimas 5
+    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 1); // ultima conexion
 
     let devicesHtml = ids.length
       ? ids.map(did => {
@@ -2162,7 +2160,7 @@ async function renderAuditPanel() {
         </div>
       </div>
       <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Últimas 5 conexiones</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Última conexión</div>
       <div>${logsHtml}</div>
     </div>`;
   });
@@ -2751,8 +2749,8 @@ async function renderCal(){
   else{const t=`AÑO ${y}`;lbl.textContent=t;badge.textContent=t;}
   const body=document.getElementById('cal-body');body.innerHTML='';
   const selDate=S?S.f:calDate,selG=g||(S?S.g:'A');
-  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,false));}
-  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,false));}
+  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true));}
+  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true));}
   else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
 }
 

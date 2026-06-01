@@ -1,4 +1,4 @@
-const CACHE = 'dg-pwa-v1';
+const CACHE = 'dg-pwa-v4';
 const OFFLINE_URLS = ['/'];
 
 // Instalación: cachear la página principal
@@ -9,27 +9,23 @@ self.addEventListener('install', e => {
   );
 });
 
-// Activación: limpiar caches viejas
+// Activación: limpiar TODAS las caches viejas y tomar control inmediato
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // Fetch: network first, cache fallback
 self.addEventListener('fetch', e => {
-  // Solo interceptar requests del mismo origen
   if (!e.request.url.startsWith(self.location.origin)) return;
-  // No cachear Firebase ni APIs externas
   if (e.request.url.includes('firebase') || e.request.url.includes('googleapis')) return;
 
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Actualizar cache con respuesta fresca
         if (res.ok && e.request.method === 'GET') {
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
@@ -40,13 +36,10 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// ── Notificaciones push (app cerrada / en segundo plano) ─────────────────
-// El payload llega desde queueNotification() vía el evento 'push'
-// cuando el servidor lo envíe, o bien desde postMessage de la app.
+// ── Notificaciones push ───────────────────────────────────────────────────
 self.addEventListener('push', e => {
   let data = {};
   try { data = e.data ? e.data.json() : {}; } catch(_) {}
-
   const title = data.title || '📋 Nueva licencia';
   const options = {
     body: data.body || '',
@@ -54,11 +47,9 @@ self.addEventListener('push', e => {
     badge: '/icon-192.png',
     data: { url: '/' }
   };
-
   e.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Al tocar la notificación: abrir / enfocar la app
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   const url = e.notification.data?.url || '/';
@@ -70,4 +61,3 @@ self.addEventListener('notificationclick', e => {
     })
   );
 });
-
