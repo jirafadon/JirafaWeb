@@ -2953,10 +2953,19 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
   sec.appendChild(scr);
 
   // ── Scroll to today ───────────────────────────────────────────────────────
-  requestAnimationFrame(() => {
-    const todayTh = scr.querySelector('th[data-today]');
-    if (todayTh) scr.scrollLeft = Math.max(0, todayTh.offsetLeft - 60);
-  });
+  if (isCurrent) {
+    // Doble RAF: primer frame adjunta al DOM, segundo frame tiene medidas reales
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const todayTh = scr.querySelector('th[data-today]');
+      if (todayTh) {
+        const containerW = scr.clientWidth;
+        const cellLeft   = todayTh.offsetLeft;
+        const cellW      = todayTh.offsetWidth;
+        // Centrar la columna de hoy en el viewport horizontal
+        scr.scrollLeft = Math.max(0, cellLeft - containerW / 2 + cellW / 2);
+      }
+    }));
+  }
 
   // ── Click listeners on guardia cells ─────────────────────────────────────
   if (ME) {
