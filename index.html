@@ -2127,22 +2127,14 @@ async function renderAuditPanel() {
     const c = counts[p.name] || 0;
     const col = G_COLORS[p.guardia] || '#8a9ab5';
     const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
-    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 1); // ultima conexion
+    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 5); // <-- ultimas 5
 
     let devicesHtml = ids.length
       ? ids.map(did => {
           const isMe = did === DEVICE_ID;
-          // Buscar el ultimo log de este dispositivo para mostrar su info
-          const devLog = logs.filter(l => l.userName === p.name && l.deviceId === did)[0];
-          const devLabel = devLog ? parseUA(devLog.ua) : '?';
-          const devGeo   = devLog ? geoStr(devLog) : '';
-          const devTime  = devLog ? (devLog.date + ' ' + devLog.time) : '';
-          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:4px 8px;display:inline-flex;flex-direction:column;gap:1px;max-width:100%">
-            <span style="display:flex;align-items:center;gap:6px;justify-content:space-between">
-              <span>···${did.slice(-6)} ${isMe?'<span style='color:var(--green)'>● ESTE</span>':''} ${devLabel}</span>
-              <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0;line-height:1" title="Desvincular">✕</button>
-            </span>
-            ${devTime ? `<span style="color:var(--adim);font-size:7px">${devTime}${devGeo?' · '+devGeo:''}</span>` : '<span style="color:var(--adim);font-size:7px">Sin accesos registrados</span>'}
+          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
+            ···${did.slice(-6)} ${isMe?'(este)':''}
+            <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
           </span>`;
         }).join(' ')
       : `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
@@ -2170,7 +2162,7 @@ async function renderAuditPanel() {
         </div>
       </div>
       <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Última conexión</div>
+      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Últimas 5 conexiones</div>
       <div>${logsHtml}</div>
     </div>`;
   });
@@ -2759,8 +2751,8 @@ async function renderCal(){
   else{const t=`AÑO ${y}`;lbl.textContent=t;badge.textContent=t;}
   const body=document.getElementById('cal-body');body.innerHTML='';
   const selDate=S?S.f:calDate,selG=g||(S?S.g:'A');
-  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true));}
-  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true));}
+  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,false));}
+  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,false));}
   else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
 }
 
