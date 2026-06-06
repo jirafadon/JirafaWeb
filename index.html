@@ -1130,6 +1130,8 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:70px">📋 LICENCIAS</button>
       <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:70px">⭐ RELEVANTE</button>
       <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab" style="flex:1;min-width:70px">🎨 APARIENCIA</button>
+      <button onclick="showAdminTab('historial')" id="atab-historial" class="tab" style="flex:1;min-width:70px">📜 HISTORIAL</button>
+      <button onclick="showAdminTab('exportar')" id="atab-exportar" class="tab" style="flex:1;min-width:70px">📤 EXPORTAR</button>
     </div>
     <!-- Tab: Accesos -->
     <div id="admin-accesos">
@@ -1151,6 +1153,14 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <!-- Tab: Apariencia del diagrama -->
     <div id="admin-apariencia" style="display:none">
       <div id="admin-appear-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Historial de cambios -->
+    <div id="admin-historial" style="display:none">
+      <div id="admin-hist-content" style="padding:4px 0"></div>
+    </div>
+    <!-- Tab: Exportar -->
+    <div id="admin-exportar" style="display:none">
+      <div id="admin-export-content" style="padding:4px 0"></div>
     </div>
   </div>
 </div>
@@ -1386,7 +1396,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import {
-  getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot,
+  getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, deleteDoc, onSnapshot,
   getDoc, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -1401,10 +1411,16 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+enableIndexedDbPersistence(db).catch(err => {
+  if (err.code === 'failed-precondition') { /* múltiples tabs */ }
+  else if (err.code === 'unimplemented') { /* browser sin soporte */ }
+});
 
 // ── Notificaciones — Firestore realtime ─────────────────────────────────
 const NOTIFY_USERS = ['Jonatan', 'Lucas'];
 let _notifUnsub = null;
+let _unsubUsers = null, _unsubEvents = null, _unsubRecargos = null;
+let _unsubRelSched = null, _unsubRelCov = null;
 
 // Llama a esta funcion UNA vez cuando ME ya esta seteado
 function initNotifications() {
@@ -1766,21 +1782,21 @@ async function loadData() {
 
 // ── LISTENERS EN TIEMPO REAL — solo activos después del init ─────────────
 function startRealtimeListeners() {
-  onSnapshot(fbCol('users'), snap => {
+  _unsubUsers = onSnapshot(fbCol('users'), snap => {
     USERS = []; snap.forEach(d => USERS.push(d.data()));
     if (ME) { const updated = USERS.find(u => u.id === ME.id); if (updated) ME = updated; }
     if (!_initDone) return;
     buildUserGrid(); updateUBar();
   });
 
-  onSnapshot(fbCol('events'), snap => {
+  _unsubEvents = onSnapshot(fbCol('events'), snap => {
     EVENTS = []; snap.forEach(d => EVENTS.push(d.data()));
     if (!_initDone) return;
     renderEvP(); renderCal();
     if (window.S) renderRT(window.RT || 'dia');
   });
 
-  onSnapshot(fbCol('recargos'), snap => {
+  _unsubRecargos = onSnapshot(fbCol('recargos'), snap => {
     RECARGOS = [];
     snap.forEach(d => {
       const r = d.data();
@@ -1800,14 +1816,14 @@ function startRealtimeListeners() {
     if (window.S) renderRT(window.RT || 'dia');
   });
 
-  onSnapshot(fbDoc('config', 'rel-schedule'), snap => {
+  _unsubRelSched = onSnapshot(fbDoc('config', 'rel-schedule'), snap => {
     REL_SCHEDULE = snap.exists() ? (snap.data().schedule || {}) : {};
     if (!_initDone) return;
     renderCal();
     if (window.S) renderRT(window.RT || 'dia');
   });
 
-  onSnapshot(fbCol('rel-coverages'), snap => {
+  _unsubRelCov = onSnapshot(fbCol('rel-coverages'), snap => {
     REL_COVERAGES = []; snap.forEach(d => REL_COVERAGES.push(d.data()));
     if (!_initDone) return;
     if (ME && ME.guardia === 'REL') renderRelPanel();
@@ -1991,6 +2007,7 @@ function adminSavePwd(name) {
     return;
   }
   setPwd(name, val);
+  logChange('config', `Contraseña de ${name} actualizada`);
   inp.value = val; // dejar visible la nueva contraseña
   msg.style.color = 'var(--green)';
   msg.textContent = '✓ Guardada.';
@@ -2236,12 +2253,16 @@ async function selectUser(u) {
 
 async function logout() {
   ME = null;
+  lsDel('gd-me-id');       // limpiar sesión guardada en este dispositivo
   await saveMe();
   updateUBar();
   renderEvP();
   renderCal();
   renderVacTable();
   document.getElementById('sec-audit').style.display = 'none';
+  // Desuscribir listeners activos para evitar duplicados si vuelve a entrar
+  [_unsubUsers,_unsubEvents,_unsubRecargos,_unsubRelSched,_unsubRelCov,_notifUnsub]
+    .forEach(fn => { try { if (fn) fn(); } catch(_) {} });
 }
 
 async function deleteUser(id) {
@@ -2546,6 +2567,7 @@ async function saveEvent() {
     }
   }
 
+  logChange('licencia', `Licencia guardada — ${ME ? ME.name : ''}`);
   closeM('m-event'); renderEvP(); renderCal(); if (S) renderRT(RT);
 }
 async function deleteEvent(id) {
@@ -2732,8 +2754,8 @@ function showCT(t){CT=t;document.querySelectorAll('.ctab').forEach(b=>b.classLis
 function calNav(dir){
   const{y,m,d}=pd(calDate);
   if(CT==='sem'){const nd=new Date(y,m-1,d);nd.setDate(d+dir*7);calDate=dk(nd.getFullYear(),nd.getMonth()+1,nd.getDate());}
-  else if(CT==='mes'){let nm=m+dir,ny=y;if(nm<1){nm=12;ny--;}if(nm>12){nm=1;ny++;}if(ny<2025||ny>2030)return;calDate=dk(ny,nm,1);}
-  else{const ny=y+dir;if(ny<2025||ny>2030)return;calDate=dk(ny,m,d);}
+  else if(CT==='mes'){let nm=m+dir,ny=y;if(nm<1){nm=12;ny--;}if(nm>12){nm=1;ny++;}if(ny<2025||ny>new Date().getFullYear()+6)return;calDate=dk(ny,nm,1);}
+  else{const ny=y+dir;if(ny<2025||ny>new Date().getFullYear()+6)return;calDate=dk(ny,m,d);}
   renderCal();
 }
 function calGoToday(){const n=new Date();calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());renderCal();}
@@ -3420,7 +3442,7 @@ async function saveRecargo(){
   const guardiaPropia = ME?.guardia || guardia; // guardia propia del trabajador
   const sobreFranco=isEsSobreFranco(guardia,recPickerDate,parseInt(turno),guardiaPropia);
   const rec={id:'rec'+Date.now(),date:recPickerDate,guardia,guardiaPropia,turno:parseInt(turno),note,sobreFranco,userId:ME.id,userName:ME.name,createdAt:new Date().toISOString()};
-  RECARGOS.push(rec);await saveOneRecargo(rec);closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
+  RECARGOS.push(rec);await saveOneRecargo(rec);logChange("recargo", `Recargo guardado — G${guardia} · T${turno} · ${recPickerDate}`);closeRecPicker();renderCal();if(S)renderRT(RT);renderRecPanel();
 }
 async function deleteRecargo(id){
   if(!confirm('¿Eliminar este recargo?'))return;
@@ -3725,6 +3747,7 @@ Object.assign(window, {
   showCombiTab,
   saveUsina, renderUsinaPanel,
   showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
+  renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3992,6 +4015,180 @@ async function revertirDescuento(ev) {
   renderUsinaPanel();
 }
 // ═══════════════════════════════════════════════════════════════════════════
+// ── Historial de cambios (admin) ──────────────────────────────────────────
+function renderAdminHistorial() {
+  const div = document.getElementById('admin-hist-content');
+  if (!div) return;
+
+  // Leer historial guardado en localStorage
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem('gd-history') || '[]'); } catch(_) {}
+
+  if (!history.length) {
+    div.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:12px 0;text-align:center">Sin cambios registrados aún.<br>Los próximos cambios quedarán acá.</div>';
+    return;
+  }
+
+  // Mostrar más recientes primero
+  const sorted = [...history].reverse();
+  const byDate = {};
+  sorted.forEach(h => {
+    const d = h.date || '?';
+    if (!byDate[d]) byDate[d] = [];
+    byDate[d].push(h);
+  });
+
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-family:var(--font-mono);font-size:9px;color:var(--tdim)">${history.length} cambio${history.length!==1?'s':''} registrado${history.length!==1?'s':''}</span>
+    <button onclick="clearAdminHistory()" style="background:none;border:1px solid var(--red);color:var(--red);font-family:var(--font-mono);font-size:8px;padding:3px 8px;border-radius:3px;cursor:pointer">LIMPIAR</button>
+  </div>`;
+
+  Object.entries(byDate).forEach(([date, items]) => {
+    html += `<div style="font-family:var(--font-mono);font-size:8px;color:var(--amber);letter-spacing:2px;margin:10px 0 4px">${date}</div>`;
+    items.forEach(h => {
+      const icons = {licencia:'📋', recargo:'💰', relevante:'⭐', usuario:'👤', config:'⚙️'};
+      const icon = icons[h.type] || '•';
+      html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:var(--panel);border-radius:5px;margin-bottom:3px;border-left:2px solid var(--border)">
+        <span style="font-size:13px;flex-shrink:0">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;color:var(--tbright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.desc}</div>
+          <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono)">${h.user} · ${h.time}</div>
+        </div>
+      </div>`;
+    });
+  });
+
+  div.innerHTML = html;
+}
+
+function clearAdminHistory() {
+  if (!confirm('¿Limpiar todo el historial de cambios?')) return;
+  localStorage.removeItem('gd-history');
+  renderAdminHistorial();
+}
+
+// Registrar un cambio en el historial local
+function logChange(type, desc) {
+  try {
+    const history = JSON.parse(localStorage.getItem('gd-history') || '[]');
+    const now = new Date();
+    history.push({
+      type, desc,
+      user: ME ? ME.name : 'Admin',
+      date: now.toLocaleDateString('es-AR', {day:'2-digit', month:'short', year:'numeric'}),
+      time: now.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}),
+      ts: Date.now()
+    });
+    // Guardar solo los últimos 200 cambios
+    if (history.length > 200) history.splice(0, history.length - 200);
+    localStorage.setItem('gd-history', JSON.stringify(history));
+  } catch(_) {}
+}
+
+// ── Exportar (admin) ──────────────────────────────────────────────────────
+function renderAdminExportar() {
+  const div = document.getElementById('admin-export-content');
+  if (!div) return;
+
+  const now = new Date();
+  const mesNombre = now.toLocaleDateString('es-AR', {month:'long', year:'numeric'});
+  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  div.innerHTML = `
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:12px">EXPORTAR DATOS</div>
+
+    <!-- Resumen del mes -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">📋 Resumen de licencias — ${mesNombre}</div>
+      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las licencias del mes actual para copiar o compartir</div>
+      <button onclick="exportLicencias('${ym}')" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
+        COPIAR RESUMEN DEL MES
+      </button>
+    </div>
+
+    <!-- Resumen de recargas -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">💰 Recargas del mes — ${mesNombre}</div>
+      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las recargas registradas este mes</div>
+      <button onclick="exportRecargas('${ym}')" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
+        COPIAR RECARGAS DEL MES
+      </button>
+    </div>
+
+    <!-- Todos los usuarios -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
+      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">👥 Estado de usuarios</div>
+      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Resumen de dispositivos vinculados y accesos</div>
+      <button onclick="exportUsuarios()" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
+        COPIAR ESTADO DE USUARIOS
+      </button>
+    </div>
+
+    <div id="export-msg" style="font-family:var(--font-mono);font-size:10px;color:var(--green);text-align:center;margin-top:10px;min-height:18px"></div>
+  `;
+}
+
+function exportLicencias(ym) {
+  const evs = EVENTS.filter(e => e.startDate && e.startDate.startsWith(ym));
+  if (!evs.length) { showExportMsg('Sin licencias en este mes'); return; }
+  const sorted = [...evs].sort((a,b) => a.startDate.localeCompare(b.startDate));
+  let txt = `📋 LICENCIAS ${ym.replace('-','/')}
+${'─'.repeat(32)}
+`;
+  const byUser = {};
+  sorted.forEach(e => { if (!byUser[e.userName]) byUser[e.userName]=[]; byUser[e.userName].push(e); });
+  Object.entries(byUser).forEach(([name, evs]) => {
+    txt += `
+👤 ${name}
+`;
+    evs.forEach(e => {
+      const li = LIC[e.type] || {name: e.type};
+      const rng = e.startDate === e.endDate ? e.startDate : `${e.startDate} → ${e.endDate}`;
+      txt += `  ${e.type} · ${li.name} · ${rng}
+`;
+    });
+  });
+  copyToClipboard(txt);
+}
+
+function exportRecargas(ym) {
+  const recs = RECARGOS.filter(r => r.date && r.date.startsWith(ym));
+  if (!recs.length) { showExportMsg('Sin recargas en este mes'); return; }
+  const sorted = [...recs].sort((a,b) => a.date.localeCompare(b.date));
+  let txt = `💰 RECARGAS ${ym.replace('-','/')}
+${'─'.repeat(32)}
+`;
+  sorted.forEach(r => {
+    txt += `${r.date} · ${r.userName} · ${r.turno} · ${r.sobreFranco?'⭐ SF':'Normal'}
+`;
+  });
+  copyToClipboard(txt);
+}
+
+function exportUsuarios() {
+  let txt = `👥 USUARIOS
+${'─'.repeat(32)}
+`;
+  PRESET_USERS.forEach(u => {
+    const ids = u.deviceIds || (u.deviceId ? [u.deviceId] : []);
+    txt += `${u.name} (G${u.guardia}) · ${ids.length} dispositivo${ids.length!==1?'s':''} vinculado${ids.length!==1?'s':''}
+`;
+  });
+  copyToClipboard(txt);
+}
+
+function copyToClipboard(txt) {
+  navigator.clipboard.writeText(txt)
+    .then(() => showExportMsg('✓ Copiado al portapapeles'))
+    .catch(() => showExportMsg('Error al copiar'));
+}
+
+function showExportMsg(msg) {
+  const el = document.getElementById('export-msg');
+  if (el) { el.textContent = msg; setTimeout(() => { if(el) el.textContent=''; }, 3000); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // ── Admin tab switching ───────────────────────────────────────────────────
 function renderAdminApariencia() {
   const div = document.getElementById('admin-appear-content');
@@ -4098,7 +4295,7 @@ function applyStoredCellTheme() {
 }
 
 function showAdminTab(tab) {
-  ['accesos','licencias','relevante','apariencia'].forEach(t => {
+  ['accesos','licencias','relevante','apariencia','historial','exportar'].forEach(t => {
     document.getElementById('admin-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('atab-'+t);
     if (btn) btn.classList.toggle('on', t===tab);
@@ -4106,6 +4303,8 @@ function showAdminTab(tab) {
   if (tab === 'licencias') renderAdminLicencias();
   if (tab === 'relevante') renderAdminRelevante();
   if (tab === 'apariencia') renderAdminApariencia();
+  if (tab === 'historial') renderAdminHistorial();
+  if (tab === 'exportar') renderAdminExportar();
 }
 
 // ── Tab: Todas las licencias ──────────────────────────────────────────────
