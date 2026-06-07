@@ -22,8 +22,6 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
   if (e.request.url.includes('firebase') || e.request.url.includes('googleapis')) return;
-  // Exclude Vercel Analytics requests from caching
-  if (e.request.url.includes('/_vercel/insights') || e.request.url.includes('vercel-insights.com')) return;
 
   e.respondWith(
     fetch(e.request)

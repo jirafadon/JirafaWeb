@@ -16,8 +16,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
-<!-- Vercel Web Analytics -->
-<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 <style>
 /* ══════════════════════════════════════════════
    PWA — RESET TÁCTIL Y SAFE AREAS
@@ -733,6 +731,8 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 .s-indicadores { border-left-color: #4a9eda; }
 @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
 </style>
+  <!-- Vercel Analytics — registra visitas reales en el dashboard de Vercel -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -3750,6 +3750,7 @@ Object.assign(window, {
   saveUsina, renderUsinaPanel,
   showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
   renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
+  adminDeleteEvent, adminDeleteDuplicates,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4315,26 +4316,75 @@ function renderAdminLicencias() {
   if (!div) return;
   const sorted = [...EVENTS].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
   if (sorted.length === 0) { div.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:8px 0">Sin licencias registradas.</div>'; return; }
+
+  // Detectar duplicados: mismo usuario, mismo tipo, misma fecha de inicio
+  const seen = {};
+  const dupIds = new Set();
+  sorted.forEach(ev => {
+    const key = `${ev.userName}|${ev.type}|${ev.startDate}`;
+    if (seen[key]) dupIds.add(ev.id);
+    else seen[key] = true;
+  });
+
   const byUser = {};
   sorted.forEach(ev => { const u = ev.userName||'?'; if (!byUser[u]) byUser[u]=[]; byUser[u].push(ev); });
+
   let html = '';
+
+  // Botón borrar duplicados si hay
+  if (dupIds.size > 0) {
+    html += `<div style="background:rgba(220,38,38,.12);border:1px solid var(--red);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-size:11px;color:var(--red);font-weight:600">⚠ ${dupIds.size} licencia${dupIds.size>1?'s duplicadas detectadas':'  duplicada detectada'}</div>
+        <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">Mismo tipo y fecha en el mismo usuario</div>
+      </div>
+      <button onclick="adminDeleteDuplicates(${JSON.stringify([...dupIds])})"
+        style="background:var(--red);border:none;border-radius:4px;padding:6px 12px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap;flex-shrink:0">
+        BORRAR TODAS
+      </button>
+    </div>`;
+  }
+
   PRESET_USERS.forEach(p => {
     const evs = byUser[p.name] || [];
     if (!evs.length) return;
     const col = G_COLORS[p.guardia]||'#8a9ab5';
-    html += `<div style="margin-bottom:14px"><div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} licencia${evs.length>1?'s':''}</div>`;
+    html += `<div style="margin-bottom:14px">
+      <div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} licencia${evs.length>1?'s':''}</div>`;
     evs.forEach(ev => {
       const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
       const desc = ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '';
-      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
+      const isDup = dupIds.has(ev.id);
+      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${isDup?'var(--red)':li.color};margin-bottom:4px;${isDup?'opacity:.75':''}" id="ev-row-${ev.id}">
         <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
-        <div style="flex:1"><div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div><div style="font-size:9px;color:var(--tdim)">${li.name}${desc}</div></div>
-        <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono)">${ev.createdAtStr||''}</span>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
+          <div style="font-size:9px;color:var(--tdim)">${li.name}${desc}${isDup?' · <span style="color:var(--red)">DUPLICADA</span>':''}</div>
+        </div>
+        <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono);flex-shrink:0">${ev.createdAtStr||''}</span>
+        <button onclick="adminDeleteEvent('${ev.id}')"
+          style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer;flex-shrink:0" title="Eliminar">✕</button>
       </div>`;
     });
     html += '</div>';
   });
   div.innerHTML = html;
+}
+
+async function adminDeleteEvent(id) {
+  if (!confirm('¿Eliminar esta licencia?')) return;
+  await deleteEvent(id);
+  logChange('licencia', `Admin eliminó licencia ID ${id}`);
+  renderAdminLicencias();
+}
+
+async function adminDeleteDuplicates(ids) {
+  if (!confirm(`¿Eliminar ${ids.length} licencia${ids.length>1?'s duplicadas':'  duplicada'}? Esta acción no se puede deshacer.`)) return;
+  for (const id of ids) {
+    await deleteEvent(id);
+  }
+  logChange('licencia', `Admin eliminó ${ids.length} licencias duplicadas`);
+  renderAdminLicencias();
 }
 
 // ── Tab: Panel REL de Lucas ───────────────────────────────────────────────
