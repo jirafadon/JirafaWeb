@@ -1246,7 +1246,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div class="err-msg" id="ev-err"></div>
     <div class="mbtns">
       <button class="mbtn ok g" onclick="saveEvent()">GUARDAR</button>
-      <button class="mbtn cancel" onclick="closeM('m-event')">CANCELAR</button>
+      <button class="mbtn cancel" onclick="_adminTargetUser=null;closeM('m-event')">CANCELAR</button>
     </div>
   </div>
 </div>
@@ -2529,101 +2529,139 @@ async function saveEvent() {
   const dcHours = parseInt(document.getElementById('ev-dc-hours').value) || 6;
   const ctWithGuardia = document.getElementById('ct-guardia').value;
   const err   = document.getElementById('ev-err');
+
+  // ── Validaciones ─────────────────────────────────────────────────────────
   if (!type) { err.textContent = '⚠ Seleccioná el tipo de licencia.'; err.classList.add('show'); return; }
   if (!from || !to) { err.textContent = '⚠ Completá las fechas.'; err.classList.add('show'); return; }
   if (from > to) { err.textContent = '⚠ La fecha inicio debe ser antes que la de fin.'; err.classList.add('show'); return; }
-
-  // CT: requiere guardia con la que se hace el cambio
   if (type === 'CT') {
     if (!ctWithGuardia) { err.textContent = '⚠ Seleccioná la guardia con la que se hace el cambio.'; err.classList.add('show'); return; }
-    if (ctWithGuardia !== 'REL' && ctWithGuardia === ME.guardia) { err.textContent = '⚠ Seleccioná una guardia diferente a la tuya.'; err.classList.add('show'); return; }
+    const guardiaPropia = (_adminTargetUser || ME).guardia;
+    if (ctWithGuardia !== 'REL' && ctWithGuardia === guardiaPropia) { err.textContent = '⚠ Seleccioná una guardia diferente.'; err.classList.add('show'); return; }
   }
-
-  // PEGA: mínimo 2 días
   if (type === 'PA') {
     const dias = getDaysInRange(from, to).length;
-    if (dias < 2) {
-      err.textContent = '⚠ El PEGA se toma de a 2 días mínimo.';
-      err.classList.add('show'); return;
-    }
-    if (dias % 2 !== 0) {
-      err.textContent = `⚠ El PEGA se toma de a 2 días. Ajustá el período (${dias} día${dias>1?'s':''} seleccionado${dias>1?'s':''}).`;
-      err.classList.add('show'); return;
-    }
-  }
-  const now = new Date();
-  let effectiveTo = to;
-  // Determinar usuario destino (admin puede cargar para otro)
-  const targetU = _adminTargetUser || ME;
-  if (type !== 'CT' && ['A','B','C','D','E'].includes(targetU.guardia)) {
-    effectiveTo = computeLicenseDates(targetU.guardia, from, to).effectiveTo;
-  }
-  const ev = {
-    id: 'ev'+Date.now(), userId: targetU.id, userName: targetU.name, guardia: targetU.guardia,
-    type, startDate: from, endDate: effectiveTo, note,
-    dcHours: type==='DC' ? dcHours : null,
-    ctWithGuardia: type==='CT' ? ctWithGuardia : null,
-    createdAt: now.toISOString(), createdAtStr: fmtTs(now), createdBy: ME.name
-  };
-
-  // Calcular y guardar el descuento junto con el evento
-  const desc = calcDescuento(type, targetU.guardia, from, to);
-  if (desc) ev.descuento = desc;
-
-  EVENTS.push(ev);
-  await saveOneEvent(ev);  // Firebase
-  await queueNotification(ev); // Notificación push
-
-  // Aplicar descuento al saldo Usina si hay saldo cargado
-  if (desc) {
-    const snap = await getDocs(fbCol('usina-saldo'));
-    const docData = snap.docs.find(d => d.id === targetU.id)?.data();
-    if (docData) {
-      let nuevo = { ...docData };
-      const n2 = new Date();
-      nuevo.updatedAt = n2.toISOString();
-      nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-      if (desc.tipo === 'vac')  nuevo.vac  = Math.max(0, (parseFloat(nuevo.vac) ||0) - desc.valor);
-      else if (desc.tipo === 'dc')   nuevo.dc   = Math.max(0, (parseFloat(nuevo.dc)  ||0) - desc.valor);
-      else if (desc.tipo === 'peg')  nuevo.peg  = Math.max(0, (parseFloat(nuevo.peg) ||0) - desc.valor);
-      else if (desc.tipo === 'pega') nuevo.pega = Math.max(0, (parseFloat(nuevo.pega)||0) - desc.valor);
-      await fbSet('usina-saldo', targetU.id, nuevo);
-      renderUsinaPanel();
-    }
+    if (dias < 2) { err.textContent = '⚠ El PEGA se toma de a 2 días mínimo.'; err.classList.add('show'); return; }
+    if (dias % 2 !== 0) { err.textContent = `⚠ El PEGA se toma de a 2 días (${dias} día${dias>1?'s':''} seleccionado${dias>1?'s':''}).`; err.classList.add('show'); return; }
   }
 
-  logChange('licencia', `Licencia guardada — ${targetU.name}${_adminTargetUser?' (por admin)':''}`);
-  _adminTargetUser = null;
-  closeM('m-event'); renderEvP(); renderCal(); if (S) renderRT(RT);
-  // Si estábamos en el panel admin, refrescar licencias
-  if (document.getElementById('admin-licencias')?.style.display !== 'none') renderAdminLicencias();
+  // ── Deshabilitar botón mientras guarda ────────────────────────────────────
+  const saveBtn = document.querySelector('#m-event .mbtn.ok');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'GUARDANDO...'; }
+  err.classList.remove('show');
+
+  try {
+    const now = new Date();
+    let effectiveTo = to;
+
+    // Determinar usuario destino (admin puede cargar para otro)
+    const targetU = _adminTargetUser || ME;
+    if (!targetU || !targetU.id) throw new Error('Usuario destino no encontrado');
+
+    if (type !== 'CT' && ['A','B','C','D','E'].includes(targetU.guardia)) {
+      effectiveTo = computeLicenseDates(targetU.guardia, from, to).effectiveTo;
+    }
+
+    const ev = {
+      id: 'ev' + Date.now(),
+      userId: targetU.id,
+      userName: targetU.name,
+      guardia: targetU.guardia,
+      type,
+      startDate: from,
+      endDate: effectiveTo,
+      note,
+      dcHours: type === 'DC' ? dcHours : null,
+      ctWithGuardia: type === 'CT' ? ctWithGuardia : null,
+      createdAt: now.toISOString(),
+      createdAtStr: fmtTs(now),
+      createdBy: ME.name
+    };
+
+    // Calcular descuento (solo para guardias A-E, no REL/OP)
+    let desc = null;
+    try { desc = calcDescuento(type, targetU.guardia, from, to); } catch(_) {}
+    if (desc) ev.descuento = desc;
+
+    // Guardar en Firebase — operación principal
+    EVENTS.push(ev);
+    await saveOneEvent(ev);
+
+    // Notificación push — no bloquear si falla
+    try { await queueNotification(ev); } catch(_) {}
+
+    // Descuento en saldo Usina — no bloquear si falla
+    if (desc) {
+      try {
+        const snap = await getDocs(fbCol('usina-saldo'));
+        const docData = snap.docs.find(d => d.id === targetU.id)?.data();
+        if (docData) {
+          const nuevo = { ...docData };
+          const n2 = new Date();
+          nuevo.updatedAt = n2.toISOString();
+          nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+          if (desc.tipo === 'vac')        nuevo.vac  = Math.max(0, (parseFloat(nuevo.vac)  || 0) - desc.valor);
+          else if (desc.tipo === 'dc')    nuevo.dc   = Math.max(0, (parseFloat(nuevo.dc)   || 0) - desc.valor);
+          else if (desc.tipo === 'peg')   nuevo.peg  = Math.max(0, (parseFloat(nuevo.peg)  || 0) - desc.valor);
+          else if (desc.tipo === 'pega')  nuevo.pega = Math.max(0, (parseFloat(nuevo.pega) || 0) - desc.valor);
+          await fbSet('usina-saldo', targetU.id, nuevo);
+          try { renderUsinaPanel(); } catch(_) {}
+        }
+      } catch(_) {}
+    }
+
+    try { logChange('licencia', `Licencia guardada — ${targetU.name}${_adminTargetUser ? ' (por admin)' : ''}`); } catch(_) {}
+
+    // ── Cerrar y actualizar UI ──────────────────────────────────────────────
+    _adminTargetUser = null;
+    closeM('m-event');
+    try { renderEvP(); } catch(_) {}
+    try { renderCal(); } catch(_) {}
+    try { if (S) renderRT(RT); } catch(_) {}
+    try { if (document.getElementById('admin-licencias')?.style.display !== 'none') renderAdminLicencias(); } catch(_) {}
+    try { if (document.getElementById('admin-rel-content')) renderAdminRelevante(); } catch(_) {}
+
+  } catch(e) {
+    // Error real — mostrar al usuario y restaurar botón
+    err.textContent = '⚠ Error al guardar: ' + (e.message || 'reintentá en un momento.');
+    err.classList.add('show');
+    // Revertir el push local si falló Firebase
+    EVENTS = EVENTS.filter(ev2 => !ev2.id || ev2.createdAt !== (EVENTS[EVENTS.length-1]?.createdAt));
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'GUARDAR'; }
+  }
 }
 async function deleteEvent(id) {
-  if (!confirm('¿Eliminar esta licencia?')) return;
   const ev = EVENTS.find(e => e.id === id);
   EVENTS = EVENTS.filter(e => e.id !== id);
-  await deleteOneEvent(id);  // Firebase
+  try { await deleteOneEvent(id); } catch(e) { console.error('deleteEvent Firebase:', e); }
 
-  // Revertir descuento si el evento tenía uno guardado
-  if (ev && ev.descuento && ev.userId === ME?.id) {
-    const snap = await getDocs(fbCol('usina-saldo'));
-    const docData = snap.docs.find(d => d.id === ME.id)?.data();
-    if (docData) {
-      let nuevo = { ...docData };
-      const n2 = new Date();
-      nuevo.updatedAt = n2.toISOString();
-      nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-      const desc = ev.descuento;
-      if (desc.tipo === 'vac')       nuevo.vac  = (parseFloat(nuevo.vac) ||0) + desc.valor;
-      else if (desc.tipo === 'dc')   nuevo.dc   = (parseFloat(nuevo.dc)  ||0) + desc.valor;
-      else if (desc.tipo === 'peg')  nuevo.peg  = (parseFloat(nuevo.peg) ||0) + desc.valor;
-      else if (desc.tipo === 'pega') nuevo.pega = (parseFloat(nuevo.pega)||0) + desc.valor;
-      await fbSet('usina-saldo', ME.id, nuevo);
-      renderUsinaPanel();
-    }
+  // Revertir descuento usando el userId del evento (no ME.id — puede ser admin borrando ajena)
+  if (ev && ev.descuento) {
+    const ownerId = ev.userId;
+    try {
+      const snap = await getDocs(fbCol('usina-saldo'));
+      const docData = snap.docs.find(d => d.id === ownerId)?.data();
+      if (docData) {
+        let nuevo = { ...docData };
+        const n2 = new Date();
+        nuevo.updatedAt = n2.toISOString();
+        nuevo.updatedStr = n2.toLocaleDateString('es-AR') + ' ' + n2.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+        const desc = ev.descuento;
+        if (desc.tipo === 'vac')       nuevo.vac  = (parseFloat(nuevo.vac) ||0) + desc.valor;
+        else if (desc.tipo === 'dc')   nuevo.dc   = (parseFloat(nuevo.dc)  ||0) + desc.valor;
+        else if (desc.tipo === 'peg')  nuevo.peg  = (parseFloat(nuevo.peg) ||0) + desc.valor;
+        else if (desc.tipo === 'pega') nuevo.pega = (parseFloat(nuevo.pega)||0) + desc.valor;
+        await fbSet('usina-saldo', ownerId, nuevo);
+        try { renderUsinaPanel(); } catch(_) {}
+      }
+    } catch(_) {}
   }
 
-  renderEvP(); renderCal(); if (S) renderRT(RT);
+  try { renderEvP(); } catch(_) {}
+  try { renderCal(); } catch(_) {}
+  try { if (S) renderRT(RT); } catch(_) {}
+  try { if (document.getElementById('admin-rel-content')) renderAdminRelevante(); } catch(_) {}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4407,8 +4445,14 @@ function renderAdminLicencias() {
 }
 
 function adminOpenAddEvent(userName) {
-  const targetUser = PRESET_USERS.find(u => u.name === userName) || USERS.find(u => u.name === userName);
-  if (!targetUser) return;
+  // Siempre buscar en USERS primero — tiene el id real de Firebase
+  // PRESET_USERS solo tiene { name, guardia } sin id, lo que rompe el guardado
+  const targetUser = USERS.find(u => u.name === userName)
+    || PRESET_USERS.find(u => u.name === userName);
+  if (!targetUser || !targetUser.id) {
+    alert('No se encontró el usuario "' + userName + '" en la base de datos. Asegurate de que haya iniciado sesión al menos una vez.');
+    return;
+  }
   openAddEvent(targetUser);
 }
 
@@ -4642,9 +4686,9 @@ function adminDiagDayClick(date) {
 }
 
 function adminDiagAddLic() {
-  // Abre el formulario de licencia para el usuario de la guardia seleccionada
-  const targetName = PRESET_USERS.find(p => p.guardia === _adminDiagG)?.name
-    || USERS.find(u => u.guardia === _adminDiagG)?.name || '';
+  // Buscar en USERS primero (tiene id real), luego PRESET_USERS solo para el nombre
+  const targetName = USERS.find(u => u.guardia === _adminDiagG)?.name
+    || PRESET_USERS.find(p => p.guardia === _adminDiagG)?.name || '';
   if (!targetName) { alert('No se encontró usuario para esta guardia'); return; }
   // Precargar fecha si hay selección
   const [a] = _adminDiagStart && _adminDiagEnd
