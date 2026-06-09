@@ -1213,6 +1213,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <div class="overlay off" id="m-event">
   <div class="modal green-top">
     <div class="modal-title">&#9632; Registrar licencia</div>
+    <div id="ev-admin-target-banner" style="display:none;background:rgba(234,179,8,.12);border:1px solid var(--amber);border-radius:5px;padding:6px 10px;margin-bottom:10px"></div>
     <div class="mfg">
       <label>Tipo de licencia</label>
       <div class="lic-type-grid" id="lic-type-grid"></div>
@@ -2460,8 +2461,13 @@ function populateCTSelect(selectId) {
   });
 }
 
-function openAddEvent() {
+// _adminTargetUser: si es admin y agrega licencia para otro usuario
+let _adminTargetUser = null;
+
+function openAddEvent(targetUser) {
   if (!ME) { showSection('sec-user'); return; }
+  _adminTargetUser = (ME.isAdmin && targetUser) ? targetUser : null;
+
   document.querySelectorAll('.lt-btn').forEach(b => { b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; });
   const n = new Date(), today = dk(n.getFullYear(), n.getMonth()+1, n.getDate());
   document.getElementById('ev-from').value = today;
@@ -2474,6 +2480,21 @@ function openAddEvent() {
   populateCTSelect('ct-guardia');
   const ph = document.getElementById('pega-hint'); if(ph) ph.style.display='none';
   document.getElementById('ev-err').classList.remove('show');
+
+  // Si es para otro usuario, mostrar indicador
+  const adminBanner = document.getElementById('ev-admin-target-banner');
+  if (adminBanner) {
+    if (_adminTargetUser) {
+      const col = G_COLORS[_adminTargetUser.guardia] || '#8a9ab5';
+      adminBanner.style.display = '';
+      adminBanner.innerHTML = `<span style="font-size:9px;font-family:var(--font-mono);color:${col}">
+        ⚙ ADMIN: cargando licencia para <strong>${_adminTargetUser.name.toUpperCase()}</strong> (G${_adminTargetUser.guardia})
+      </span>`;
+    } else {
+      adminBanner.style.display = 'none';
+    }
+  }
+
   document.getElementById('m-event').classList.remove('off');
 }
 
@@ -2532,11 +2553,13 @@ async function saveEvent() {
   }
   const now = new Date();
   let effectiveTo = to;
-  if (type !== 'CT' && ['A','B','C','D','E'].includes(ME.guardia)) {
-    effectiveTo = computeLicenseDates(ME.guardia, from, to).effectiveTo;
+  // Determinar usuario destino (admin puede cargar para otro)
+  const targetU = _adminTargetUser || ME;
+  if (type !== 'CT' && ['A','B','C','D','E'].includes(targetU.guardia)) {
+    effectiveTo = computeLicenseDates(targetU.guardia, from, to).effectiveTo;
   }
   const ev = {
-    id: 'ev'+Date.now(), userId: ME.id, userName: ME.name, guardia: ME.guardia,
+    id: 'ev'+Date.now(), userId: targetU.id, userName: targetU.name, guardia: targetU.guardia,
     type, startDate: from, endDate: effectiveTo, note,
     dcHours: type==='DC' ? dcHours : null,
     ctWithGuardia: type==='CT' ? ctWithGuardia : null,
@@ -2569,8 +2592,11 @@ async function saveEvent() {
     }
   }
 
-  logChange('licencia', `Licencia guardada — ${ME ? ME.name : ''}`);
+  logChange('licencia', `Licencia guardada — ${targetU.name}${_adminTargetUser?' (por admin)':''}`);
+  _adminTargetUser = null;
   closeM('m-event'); renderEvP(); renderCal(); if (S) renderRT(RT);
+  // Si estábamos en el panel admin, refrescar licencias
+  if (document.getElementById('admin-licencias')?.style.display !== 'none') renderAdminLicencias();
 }
 async function deleteEvent(id) {
   if (!confirm('¿Eliminar esta licencia?')) return;
@@ -2845,9 +2871,10 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
     thsHtml += `<th class="${cls}"${title_attr}${data_today}><div class="dd">${dow}</div><div class="dn">${d}</div>${isFer?'<div class="fd2"></div>':''}${isToday?'<div class="today-dot"></div>':''}</th>`;
   });
 
-  // ── Build guardia rows A-E ─────────────────────────────────────────────
+  // ── Build guardia rows A-E (filtrar si hay guardia seleccionada) ─────────
   let rowsHtml = '';
-  ['A','B','C','D','E'].forEach(g => {
+  const guardiasToShow = selG ? [selG] : ['A','B','C','D','E'];
+  guardiasToShow.forEach(g => {
     const isMe = ME && ME.guardia === g;
     rowsHtml += `<tr class="${isMe?'gs':''}">`;
     rowsHtml += `<td class="gn"><span style="font-size:11px;font-weight:700;color:${G_COLORS[g]}">${g}</span>${isMe?'<br><span style="font-size:7px;color:var(--adim)">YO</span>':''}</td>`;
@@ -3750,7 +3777,7 @@ Object.assign(window, {
   saveUsina, renderUsinaPanel,
   showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
   renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
-  adminDeleteEvent, adminDeleteDuplicates,
+  adminDeleteEvent, adminDeleteDuplicates, adminOpenAddEvent,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4366,9 +4393,20 @@ function renderAdminLicencias() {
           style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer;flex-shrink:0" title="Eliminar">✕</button>
       </div>`;
     });
+    // Botón para que el admin agregue nueva licencia para este usuario
+    html += `<button onclick="adminOpenAddEvent('${p.name}')"
+      style="width:100%;background:none;border:1px dashed var(--border);color:var(--tdim);border-radius:6px;padding:6px;font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-top:2px;letter-spacing:1px">
+      + AGREGAR LICENCIA A ${p.name.toUpperCase()}
+    </button>`;
     html += '</div>';
   });
   div.innerHTML = html;
+}
+
+function adminOpenAddEvent(userName) {
+  const targetUser = PRESET_USERS.find(u => u.name === userName) || USERS.find(u => u.name === userName);
+  if (!targetUser) return;
+  openAddEvent(targetUser);
 }
 
 async function adminDeleteEvent(id) {
