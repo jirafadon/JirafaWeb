@@ -3778,6 +3778,7 @@ Object.assign(window, {
   showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
   renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
   adminDeleteEvent, adminDeleteDuplicates, adminOpenAddEvent,
+  adminDiagSelectG, adminDiagMouseDown, adminDiagTouchStart, adminDiagApply, adminDiagDayClick, adminDiagAddLic,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4426,64 +4427,261 @@ async function adminDeleteDuplicates(ids) {
 }
 
 // ── Tab: Panel REL de Lucas ───────────────────────────────────────────────
+// _adminDiagG: guardia actualmente seleccionada en el editor de diagrama admin
+let _adminDiagG = 'REL';
+let _adminDiagDragging = false, _adminDiagStart = null, _adminDiagEnd = null;
+
 function renderAdminRelevante() {
   const div = document.getElementById('admin-rel-content');
   if (!div) return;
   const now = new Date(), y = now.getFullYear(), m = now.getMonth()+1;
   const todayStr = dk(y,m,now.getDate());
   const monthDays = getMonthDays(y,m);
-  const TURNO_START={1:0,2:6,3:12,4:18}, TURNO_END={1:6,2:12,3:18,4:24};
-  const schedule = monthDays.map(d=>({date:d,sched:REL_SCHEDULE[d]}));
-  const francoCount = schedule.filter(s=>s.sched==='F').length;
-  const workedCount = schedule.filter(s=>!isNaN(parseInt(s.sched))).length;
-  let francoHours=0;
-  for(let i=0;i<schedule.length;i++){
-    const{sched}=schedule[i]; if(!sched) continue;
-    const turno=parseInt(sched);
-    if(!isNaN(turno)){
-      const hoursAfter=24-TURNO_END[turno]; let j=i+1,fDays=0;
-      while(j<schedule.length&&schedule[j].sched==='F'){fDays++;j++;}
-      if(fDays>0){
-        francoHours+=hoursAfter+fDays*24;
-        if(j<schedule.length){const nt=parseInt(schedule[j].sched);if(!isNaN(nt))francoHours+=TURNO_START[nt];}
-        else francoHours+=now.getHours()+now.getMinutes()/60;
-      }
+
+  // ── Selector de guardia ──────────────────────────────────────────────
+  const guardias = [
+    { g:'A', label:'Guardia A', color: G_COLORS['A'] },
+    { g:'B', label:'Guardia B', color: G_COLORS['B'] },
+    { g:'C', label:'Guardia C', color: G_COLORS['C'] },
+    { g:'D', label:'Guardia D', color: G_COLORS['D'] },
+    { g:'E', label:'Guardia E', color: G_COLORS['E'] },
+    { g:'REL', label:'Relevante', color: '#8a9ab5' },
+  ];
+
+  let selHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">`;
+  guardias.forEach(({g, label, color}) => {
+    const isOn = _adminDiagG === g;
+    selHtml += `<button onclick="adminDiagSelectG('${g}')"
+      style="background:${isOn ? color : 'var(--panel)'};color:${isOn ? '#111' : color};
+             border:1px solid ${color};border-radius:5px;padding:5px 12px;
+             font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer">
+      ${g}
+    </button>`;
+  });
+  selHtml += `</div>`;
+
+  // ── Mini calendario editable ─────────────────────────────────────────
+  const g = _adminDiagG;
+  const col = G_COLORS[g] || '#8a9ab5';
+  const user = PRESET_USERS.find(p => p.guardia === g) || USERS.find(u => u.guardia === g);
+  const userName = user ? user.name : g;
+
+  // Para A-E usamos getTurno(), para REL usamos REL_SCHEDULE
+  function getTurnoAdmin(date) {
+    if (g === 'REL') return REL_SCHEDULE[date];
+    return getTurno(g, date);
+  }
+
+  const TCOLS = {1:'var(--t1)',2:'var(--t2)',3:'var(--t3)',4:'var(--t4)'};
+
+  let calHtml = `<div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:8px">`;
+  calHtml += `${g === 'REL' ? 'RELEVANTE · LUCAS' : userName.toUpperCase() + ' · GUARDIA ' + g} · ${MES_L[m].toUpperCase()} ${y}</div>`;
+
+
+
+  // Grid de días
+  calHtml += `<div id="admin-diag-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px">`;
+  ['D','L','M','M','J','V','S'].forEach(d => {
+    calHtml += `<div style="text-align:center;font-size:8px;font-family:var(--font-mono);color:var(--adim);padding:2px">${d}</div>`;
+  });
+  const firstDay = new Date(y, m-1, 1).getDay();
+  for (let i = 0; i < firstDay; i++) calHtml += '<div></div>';
+
+  monthDays.forEach(date => {
+    const {d} = pd(date);
+    const isToday = date === todayStr;
+    let turno, bgColor, textColor, label;
+
+    if (g === 'REL') {
+      turno = REL_SCHEDULE[date];
+      if (turno === 'F') { bgColor='rgba(220,38,38,.25)'; textColor='#ff2d2d'; label='F'; }
+      else if (turno !== undefined) { bgColor=`${TCOLS[turno]}22`; textColor=TCOLS[turno]; label=String(turno); }
+      else { bgColor='var(--panel)'; textColor='var(--adim)'; label='·'; }
+    } else {
+      turno = getTurno(g, date);
+      const ctSwap = findCTSwap(g, date);
+      const effective = ctSwap ? ctSwap.swappedTurno : turno;
+      const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
+      if (effective === 'F') { bgColor='rgba(220,38,38,.15)'; textColor='#ff2d2d44'; label='F'; }
+      else { bgColor=`${TCOLS[effective]}15`; textColor=`${TCOLS[effective]}`; label=String(effective); }
+      if (dayEvs.length) { bgColor='rgba(139,92,246,.2)'; textColor='#a78bfa'; label=dayEvs[0].type; }
+    }
+
+    calHtml += `<div data-adg="${date}"
+      style="text-align:center;padding:4px 2px;border-radius:5px;background:${bgColor};
+             border:${isToday?'1px solid var(--amber)':'1px solid transparent'};
+             cursor:pointer;user-select:none;-webkit-user-select:none"
+      onmousedown="adminDiagMouseDown('${date}',event)" ontouchstart="adminDiagTouchStart('${date}',event)">
+      <div style="font-size:7px;color:var(--adim)">${d}</div>
+      <div style="font-size:10px;font-weight:700;color:${textColor}">${label}</div>
+    </div>`;
+  });
+  calHtml += '</div>';
+
+  // Info de selección + botones para TODAS las guardias
+  calHtml += `<div id="admin-diag-sel-info" style="font-family:var(--font-mono);font-size:9px;color:var(--adim);text-align:center;margin-bottom:8px">Tocá un día o arrastrá un rango</div>`;
+
+  if (g === 'REL') {
+    calHtml += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">ASIGNAR TURNO REL</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">
+      ${[{v:'1',lbl:'T1',c:'var(--t1)'},{v:'2',lbl:'T2',c:'var(--t2)'},{v:'3',lbl:'T3',c:'var(--t3)'},{v:'4',lbl:'T4',c:'var(--t4)'},{v:'F',lbl:'Franco',c:'var(--red)'},{v:'',lbl:'✕ Limpiar',c:'var(--tdim)'}]
+        .map(({v,lbl,c}) => `<button onclick="adminDiagApply('${v}')"
+          style="border:1px solid ${c};color:${c};background:none;border-radius:5px;padding:7px 4px;
+                 font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer">${lbl}</button>`).join('')}
+    </div>`;
+  } else {
+    calHtml += `<div style="background:rgba(234,179,8,.08);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-family:var(--font-mono);font-size:9px;color:var(--tdim)">
+      ℹ Los turnos de G${g} son automáticos. Podés agregar licencias para los días seleccionados.
+    </div>`;
+  }
+
+  // Botón agregar licencia — siempre visible para todas las guardias
+  calHtml += `<button onclick="adminDiagAddLic()"
+    style="width:100%;background:var(--amber);border:none;border-radius:6px;padding:10px;
+           font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;margin-bottom:14px">
+    + AGREGAR LICENCIA${userName ? ' A ' + userName.toUpperCase() : ''}
+  </button>`;
+
+  // Licencias del usuario
+  const u2 = USERS.find(u => u.guardia === g);
+  const evs2 = u2 ? EVENTS.filter(e => e.userId === u2.id).sort((a,b) => b.startDate.localeCompare(a.startDate)) : [];
+  const evHtml = evs2.length > 0
+    ? evs2.map(ev => {
+        const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
+          <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
+          <div style="flex:1">
+            <div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
+            <div style="font-size:9px;color:var(--tdim)">${li.name}</div>
+          </div>
+          <button onclick="adminDeleteEvent('${ev.id}')"
+            style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer">✕</button>
+        </div>`;
+      }).join('')
+    : `<div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">Sin licencias.</div>`;
+
+  calHtml += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">LICENCIAS</div>`;
+  calHtml += evHtml;
+
+  div.innerHTML = selHtml + calHtml;
+
+  // Eventos de drag en el grid para REL
+  if (g === 'REL') {
+    const grid = document.getElementById('admin-diag-grid');
+    if (grid) {
+      grid.addEventListener('mousemove', e => {
+        if (!_adminDiagDragging) return;
+        const cell = e.target.closest('[data-adg]');
+        if (!cell) return;
+        _adminDiagEnd = cell.dataset.adg;
+        adminDiagHighlight();
+      });
+      grid.addEventListener('mouseup', () => { _adminDiagDragging = false; adminDiagShowInfo(); });
+      grid.addEventListener('touchmove', e => {
+        e.preventDefault();
+        const t = e.touches[0];
+        const el2 = document.elementFromPoint(t.clientX, t.clientY);
+        const cell = el2 && el2.closest('[data-adg]');
+        if (cell) { _adminDiagEnd = cell.dataset.adg; adminDiagHighlight(); }
+      }, {passive:false});
+      grid.addEventListener('touchend', () => { _adminDiagDragging = false; adminDiagShowInfo(); });
     }
   }
-  // Calendari mini
-  let calHtml=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:12px">`;
-  ['D','L','M','M','J','V','S'].forEach(d=>{ calHtml+=`<div style="text-align:center;font-size:8px;font-family:var(--font-mono);color:var(--adim);padding:2px">${d}</div>`; });
-  const firstDay=new Date(y,m-1,1).getDay();
-  for(let i=0;i<firstDay;i++) calHtml+='<div></div>';
-  monthDays.forEach(date=>{
-    const d=pd(date).d, sched=REL_SCHEDULE[date], isToday=date===todayStr, isFuture=date>todayStr;
-    let bg='var(--panel)',color='var(--tdim)',text=sched!==undefined?String(sched):'·';
-    if(sched==='F'){bg='rgba(220,38,38,.25)';color='#ff2d2d';}
-    else if(!isNaN(parseInt(sched))){const cols={1:'var(--t1)',2:'var(--t2)',3:'var(--t3)',4:'var(--t4)'};color=cols[parseInt(sched)]||'var(--tdim)';}
-    if(isFuture){bg='transparent';color='var(--adim)';}
-    calHtml+=`<div style="text-align:center;padding:3px 1px;border-radius:4px;background:${bg};border:${isToday?'1px solid var(--amber)':'1px solid transparent'}"><div style="font-size:8px;color:var(--adim)">${d}</div><div style="font-size:10px;font-weight:700;color:${color}">${text}</div></div>`;
-  });
-  calHtml+='</div>';
-  // Licencias de Lucas
-  const lucasUser=USERS.find(u=>u.name==='Lucas');
-  const relEvs=EVENTS.filter(e=>e.userId===lucasUser?.id).sort((a,b)=>b.startDate.localeCompare(a.startDate));
-  const hDisp=Number.isInteger(francoHours)?francoHours+'h':francoHours.toFixed(1)+'h';
-  const evHtml=relEvs.length>0?relEvs.map(ev=>{
-    const li=LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px"><span style="font-size:10px;font-weight:700;color:${li.color}">${ev.type}</span><div style="flex:1"><div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div><div style="font-size:9px;color:var(--tdim)">${li.name}</div></div></div>`;
-  }).join(''):'<div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">Sin licencias.</div>';
+}
 
-  div.innerHTML=`
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">LUCAS · RELEVANTE · ${MES_L[m].toUpperCase()} ${y}</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-      <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
-      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoCount}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
-      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${hDisp}</div><div class="rec-stat-lbl">HS FRANCO</div></div>
-    </div>
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">DIAGRAMA DEL MES</div>
-    ${calHtml}
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">LICENCIAS DE LUCAS</div>
-    ${evHtml}`;
+function adminDiagSelectG(g) {
+  _adminDiagG = g;
+  _adminDiagStart = null;
+  _adminDiagEnd = null;
+  renderAdminRelevante();
+}
+
+function adminDiagMouseDown(date, e) {
+  e.preventDefault();
+  _adminDiagDragging = true;
+  _adminDiagStart = date;
+  _adminDiagEnd = date;
+  adminDiagHighlight();
+  adminDiagShowInfo();
+}
+function adminDiagTouchStart(date, e) {
+  e.preventDefault();
+  _adminDiagDragging = true;
+  _adminDiagStart = date;
+  _adminDiagEnd = date;
+  adminDiagHighlight();
+  adminDiagShowInfo();
+}
+
+function adminDiagHighlight() {
+  const grid = document.getElementById('admin-diag-grid');
+  if (!grid || !_adminDiagStart) return;
+  const [a, b] = _adminDiagStart <= _adminDiagEnd
+    ? [_adminDiagStart, _adminDiagEnd]
+    : [_adminDiagEnd, _adminDiagStart];
+  grid.querySelectorAll('[data-adg]').forEach(cell => {
+    const d = cell.dataset.adg;
+    cell.style.outline = (d >= a && d <= b) ? '2px solid var(--amber)' : '';
+  });
+}
+
+function adminDiagShowInfo() {
+  const info = document.getElementById('admin-diag-sel-info');
+  if (!info || !_adminDiagStart) return;
+  const [a, b] = _adminDiagStart <= (_adminDiagEnd||_adminDiagStart)
+    ? [_adminDiagStart, _adminDiagEnd||_adminDiagStart]
+    : [_adminDiagEnd||_adminDiagStart, _adminDiagStart];
+  const {d:d1,m:m1,y:y1} = pd(a), {d:d2,m:m2} = pd(b);
+  info.textContent = a === b ? `${d1} ${MES_S[m1]} ${y1}` : `${d1} ${MES_S[m1]} → ${d2} ${MES_S[m2]}`;
+}
+
+function adminDiagDayClick(date) {
+  // No usado — ahora todas las celdas usan mousedown
+}
+
+function adminDiagAddLic() {
+  // Abre el formulario de licencia para el usuario de la guardia seleccionada
+  const targetName = PRESET_USERS.find(p => p.guardia === _adminDiagG)?.name
+    || USERS.find(u => u.guardia === _adminDiagG)?.name || '';
+  if (!targetName) { alert('No se encontró usuario para esta guardia'); return; }
+  // Precargar fecha si hay selección
+  const [a] = _adminDiagStart && _adminDiagEnd
+    ? (_adminDiagStart <= _adminDiagEnd ? [_adminDiagStart, _adminDiagEnd] : [_adminDiagEnd, _adminDiagStart])
+    : [null, null];
+  const [,b] = _adminDiagStart && _adminDiagEnd
+    ? (_adminDiagStart <= _adminDiagEnd ? [_adminDiagStart, _adminDiagEnd] : [_adminDiagEnd, _adminDiagStart])
+    : [null, null];
+  adminOpenAddEvent(targetName);
+  // Precargar fechas si hay selección activa
+  if (a) {
+    setTimeout(() => {
+      const from = document.getElementById('ev-from');
+      const to   = document.getElementById('ev-to');
+      if (from) from.value = a;
+      if (to)   to.value   = b || a;
+    }, 50);
+  }
+}
+
+async function adminDiagApply(val) {
+  if (!_adminDiagStart) return;
+  const [a, b] = _adminDiagStart <= (_adminDiagEnd||_adminDiagStart)
+    ? [_adminDiagStart, _adminDiagEnd||_adminDiagStart]
+    : [_adminDiagEnd||_adminDiagStart, _adminDiagStart];
+  let cur = new Date(a+'T12:00:00');
+  const end = new Date(b+'T12:00:00');
+  while (cur <= end) {
+    const ds = dk(cur.getFullYear(), cur.getMonth()+1, cur.getDate());
+    if (val === '') delete REL_SCHEDULE[ds];
+    else REL_SCHEDULE[ds] = val === 'F' ? 'F' : parseInt(val);
+    cur.setDate(cur.getDate()+1);
+  }
+  await saveRelSchedule();
+  logChange('config', `Admin asignó turno ${val||'(limpio)'} al Relevante: ${a}${a!==b?' → '+b:''}`);
+  _adminDiagStart = null; _adminDiagEnd = null;
+  renderAdminRelevante();
+  renderCal();
+  if (window.S) renderRT(window.RT||'dia');
 }
 
 async function saveUsina() {
