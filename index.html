@@ -2798,10 +2798,10 @@ async function renderCal(){
   else if(CT==='mes'){const t=`${MES_L[m].toUpperCase()} ${y}`;lbl.textContent=t;badge.textContent=t;}
   else{const t=`AÑO ${y}`;lbl.textContent=t;badge.textContent=t;}
   const body=document.getElementById('cal-body');body.innerHTML='';
-  const selDate=S?S.f:calDate,selG=g||(S?S.g:'A');
-  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true));}
-  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true));}
-  else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
+  const selDate=S?S.f:calDate,selG=g||(S?S.g:'A'),filterG=g;
+  if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true,filterG));}
+  else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true,filterG));}
+  else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur,filterG);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2852,7 +2852,7 @@ function findCTSwap(g, date) {
   return null;
 }
 
-function buildTable(days, selDate, selG, fmap, title, isCurrent) {
+function buildTable(days, selDate, selG, fmap, title, isCurrent, filterG) {
   const today = dk(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
   const DAYS_ABBR = ['D','L','M','M','J','V','S'];
 
@@ -2873,7 +2873,7 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent) {
 
   // ── Build guardia rows A-E (filtrar si hay guardia seleccionada) ─────────
   let rowsHtml = '';
-  const guardiasToShow = selG ? [selG] : ['A','B','C','D','E'];
+  const guardiasToShow = filterG ? [filterG] : ['A','B','C','D','E'];
   guardiasToShow.forEach(g => {
     const isMe = ME && ME.guardia === g;
     rowsHtml += `<tr class="${isMe?'gs':''}">`;
