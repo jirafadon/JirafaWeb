@@ -2466,7 +2466,7 @@ let _adminTargetUser = null;
 
 function openAddEvent(targetUser) {
   if (!ME) { showSection('sec-user'); return; }
-  _adminTargetUser = (ME.isAdmin && targetUser) ? targetUser : null;
+  _adminTargetUser = (ME.name === ADMIN_NAME && targetUser && targetUser.name !== ME.name) ? targetUser : null;
 
   document.querySelectorAll('.lt-btn').forEach(b => { b.classList.remove('sel'); b.style.background=''; b.style.borderColor=''; });
   const n = new Date(), today = dk(n.getFullYear(), n.getMonth()+1, n.getDate());
