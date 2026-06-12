@@ -1327,9 +1327,12 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <!-- Bottom sheet: REL turno picker -->
 <div class="ds-picker off" id="rel-picker">
   <div class="ds-sheet">
-    <div class="ds-range-lbl" style="color:#8a9ab5;">&#9679; RELEVANTE — ASIGNAR TURNO</div>
+    <div class="ds-range-lbl" style="color:#8a9ab5;">&#9679; RELEVANTE</div>
     <div class="ds-range-dates" id="rel-picker-dates">—</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;" id="rel-turno-grid">
+
+    <!-- Sección: Asignar turno -->
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">ASIGNAR TURNO</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;" id="rel-turno-grid">
       <button class="rel-t-btn" data-val="1" style="border-color:var(--t1);color:var(--t1)">T1<span>00:00–05:59</span></button>
       <button class="rel-t-btn" data-val="2" style="border-color:var(--t2);color:var(--t2)">T2<span>06:00–11:59</span></button>
       <button class="rel-t-btn" data-val="3" style="border-color:var(--t3);color:var(--t3)">T3<span>12:00–17:59</span></button>
@@ -1337,6 +1340,19 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <button class="rel-t-btn" data-val="F" style="border-color:var(--red);color:var(--red)">F<span>Franco</span></button>
       <button class="rel-t-btn" data-val="" style="border-color:var(--tdim);color:var(--tdim)">✕<span>Limpiar</span></button>
     </div>
+
+    <!-- Separador -->
+    <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
+
+    <!-- Sección: Registrar licencia -->
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">REGISTRAR LICENCIA</div>
+    <div id="rel-lic-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;max-height:200px;overflow-y:auto"></div>
+    <div id="rel-lic-note-row" style="display:none;margin-bottom:10px">
+      <input id="rel-lic-note" type="text" placeholder="Nota opcional..."
+        style="width:100%;box-sizing:border-box;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:var(--font-ui);font-size:13px;outline:none">
+    </div>
+    <button id="rel-lic-save" onclick="relLicSave()" disabled style="width:100%;background:var(--amber);border:none;border-radius:5px;padding:10px;font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;color:#111;opacity:.4;margin-bottom:10px">GUARDAR LICENCIA</button>
+
     <div class="ds-btns">
       <button class="ds-cancel" onclick="relPickerCancel()">CANCELAR</button>
     </div>
@@ -3684,10 +3700,15 @@ async function saveRelCoverage(){
 // ═══════════════════════════════════════════════════════════════════════════
 // REL PICKER
 // ═══════════════════════════════════════════════════════════════════════════
+let _relPickerFrom=null, _relPickerTo=null, _relSelLic=null;
+
 function openRelPicker(from,to){
+  _relPickerFrom=from; _relPickerTo=to; _relSelLic=null;
   const{d:d1,m:m1,y:y1}=pd(from),{d:d2,m:m2,y:y2}=pd(to);
   const same=from===to;
   document.getElementById('rel-picker-dates').textContent=same?`${d1} ${MES_S[m1]} ${y1}`:`${d1} ${MES_S[m1]} ${y1}  →  ${d2} ${MES_S[m2]} ${y2}`;
+
+  // Botones de turno
   document.querySelectorAll('.rel-t-btn').forEach(btn=>{
     btn.onclick=async()=>{
       const val=btn.dataset.val;
@@ -3696,7 +3717,61 @@ function openRelPicker(from,to){
       await saveRelSchedule();document.getElementById('rel-picker').classList.add('off');relClearHighlights();renderCal();if(S)renderRT(RT);
     };
   });
+
+  // Grilla de licencias
+  const grid=document.getElementById('rel-lic-grid');
+  grid.innerHTML='';
+  const saveBtn=document.getElementById('rel-lic-save');
+  saveBtn.disabled=true; saveBtn.style.opacity='.4';
+  document.getElementById('rel-lic-note-row').style.display='none';
+  document.getElementById('rel-lic-note').value='';
+
+  Object.entries(LIC).forEach(([code,v])=>{
+    const b=document.createElement('button');
+    b.style.cssText=`display:flex;align-items:center;gap:6px;padding:7px 8px;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer;text-align:left;font-family:var(--font-ui);font-size:11px;color:var(--text)`;
+    b.innerHTML=`<span style="background:${v.color};color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0">${code}</span><span style="color:var(--tdim);font-size:10px">${v.name}</span>`;
+    b.onclick=()=>{
+      grid.querySelectorAll('button').forEach(x=>{x.style.borderColor='var(--border)';x.style.background='none';});
+      b.style.borderColor=v.color; b.style.background=v.color+'18';
+      _relSelLic=code;
+      saveBtn.disabled=false; saveBtn.style.opacity='1';
+      document.getElementById('rel-lic-note-row').style.display='';
+    };
+    grid.appendChild(b);
+  });
+
   document.getElementById('rel-picker').classList.remove('off');
+}
+
+async function relLicSave(){
+  if(!_relSelLic||!_relPickerFrom||!_relPickerTo) return;
+  if(!ME||!ME.id){alert('No hay usuario activo');return;}
+  const note=document.getElementById('rel-lic-note').value.trim();
+  const saveBtn=document.getElementById('rel-lic-save');
+  saveBtn.disabled=true; saveBtn.style.opacity='.5'; saveBtn.textContent='GUARDANDO...';
+  try{
+    const now=new Date();
+    const ev={
+      id:'ev'+Date.now(), userId:ME.id, userName:ME.name, guardia:ME.guardia,
+      type:_relSelLic, startDate:_relPickerFrom, endDate:_relPickerTo, note,
+      dcHours:null, ctWithGuardia:null,
+      createdAt:now.toISOString(), createdAtStr:fmtTs(now), createdBy:ME.name
+    };
+    EVENTS.push(ev);
+    await saveOneEvent(ev);
+    try{await queueNotification(ev);}catch(_){}
+    document.getElementById('rel-picker').classList.add('off');
+    relClearHighlights();
+    _relSelLic=null;
+    try{renderEvP();}catch(_){}
+    try{renderCal();}catch(_){}
+    try{if(S)renderRT(RT);}catch(_){}
+  }catch(e){
+    EVENTS.pop();
+    alert('⚠ Error al guardar. Verificá tu conexión.');
+  }finally{
+    saveBtn.disabled=false; saveBtn.style.opacity='1'; saveBtn.textContent='GUARDAR LICENCIA';
+  }
 }
 function relPickerCancel(){document.getElementById('rel-picker').classList.add('off');relClearHighlights();}
 function relClearHighlights(){document.querySelectorAll('td.rel-ds-start,td.rel-ds-range').forEach(t=>{t.classList.remove('rel-ds-start','rel-ds-range');});relDsDragging=false;relDsStart=null;relDsEnd=null;}
@@ -3837,6 +3912,7 @@ Object.assign(window, {
   saveUsina, renderUsinaPanel,
   showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
   renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
+  relLicSave,
   adminDeleteEvent, adminDeleteDuplicates, adminOpenAddEvent,
   adminDiagSelectG, adminDiagMouseDown, adminDiagTouchStart, adminDiagApply, adminDiagDayClick, adminDiagAddLic,
 });
