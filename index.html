@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
 <style>
@@ -79,44 +80,39 @@ button, a, select, input, textarea, label,
    VARIABLES Y RESET
 ══════════════════════════════════════════════ */
 :root {
-  --font-ui: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, 'Courier New', monospace;
-  --bg: #0a0c0f;
-  --panel: #111418;
-  --border: #1e2530;
-  --amber: #f5a623;
-  --adim: #a06a10;
+  --bg: #f0f2f5;
+  --panel: #ffffff;
+  --border: #e4e8ef;
+  --amber: #3d6bff;
+  --adim: #b0bbc8;
   --aglow: rgba(245,166,35,.12);
-  --blue: #4a9eda;
-  --red: #e05252;
-  --green: #3dba78;
-  --t1: #5ba3d9;
-  --t2: #3dba78;
-  --t3: #ff8c42;
-  --t4: #b07ee8;
-  --text: #c8d0d8;
-  --tdim: #5a6270;
+  --blue: #3d6bff;
+  --red: #e53e3e;
+  --green: #00c37a;
+  --t1: #3d8fd9;
+  --t2: #00a86b;
+  --t3: #f5a623;
+  --t4: #8b5cf6;
+  --text: #1a1a2e;
+  --tdim: #7a8870;
   --tbright: #eef2f6;
-  --cell-bg: #0d1117;
+  --cell-bg: #f8fafc;
   --rec-color: #ff6b35;
 }
-body.light {
-  --bg: #f0f2f5; --panel: #ffffff; --border: #d0d8e4;
-  --adim: #b07010; --aglow: rgba(245,166,35,.15);
-  --text: #2a3040; --tdim: #8090a8; --tbright: #111827;
-  --cell-bg: #f8fafc;
-}
+
 body.light::before { display: none; }
-body.light select, body.light input[type=date], body.light input[type=text], body.light textarea { background: #f0f2f5; color: var(--tbright); }
-body.light .tscr { background: var(--cell-bg); }
-body.light table.gt th { background: var(--panel); color: var(--tdim); }
-body.light table.gt th.gn, body.light table.gt td.gn { background: var(--panel); }
-body.light table.gt td { background: #f8fafc; }
-body.light table.gt td.tf { background: #fff0f0; }
-body.light table.gt td.t1 { background: rgba(91,163,217,.08); }
-body.light table.gt td.t2 { background: rgba(61,186,120,.08); }
-body.light table.gt td.t3 { background: rgba(245,166,35,.08); }
-body.light table.gt td.t4 { background: rgba(176,126,232,.08); }
+
+
+
+
+
+
+
+
+
+
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -126,24 +122,29 @@ body {
   font-size: 16px;
   min-height: 100svh;
   -webkit-font-smoothing: antialiased;
+  font-size: 14px;
   -moz-osx-font-smoothing: grayscale;
 }
 body::before { display: none; }
 /* .wrap padding overridden by PWA safe-area block above — max-width kept here */
-.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; }
+.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding-top: 0; }
 
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-header { text-align: center; margin-bottom: 16px; padding: 14px 0 8px; }
-h1 { font-size: clamp(18px,4.5vw,32px); font-weight: 700; color: var(--tbright); letter-spacing: 2px; text-transform: uppercase; line-height: 1.15; }
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 9px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+h1 { font-size: 15px; font-weight: 800; color: var(--tbright); letter-spacing: .5px; line-height: 1.2; }
 h1 span { color: var(--amber); }
-.hsub { margin-top: 5px; font-size: 11px; color: var(--tdim); letter-spacing: 1px; }
-.header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
-.header-author { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 2px; }
-.header-author span { color: var(--amber); font-weight: 700; }
-.theme-btn { background: none; border: 1px solid var(--border); color: var(--tdim); font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all .2s; letter-spacing: 1px; }
-.theme-btn:hover { border-color: var(--amber); color: var(--amber); }
+.hsub { font-size: 10px; color: var(--tdim); margin-top: 1px; }
+.header-meta { display: none; }
+.header-author { display: none; }
+.theme-btn { display: none; }
 
 /* ══════════════════════════════════════════════
    SECCIONES PLEGABLES — estructura base
@@ -151,15 +152,15 @@ h1 span { color: var(--amber); }
 .section {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  margin-bottom: 8px;
   overflow: hidden;
 }
 .section-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -168,16 +169,16 @@ h1 span { color: var(--amber); }
   transition: background .15s;
 }
 .section-header:hover { background: rgba(255,255,255,.02); }
-.section-icon { font-size: 16px; flex-shrink: 0; }
-.section-title { font-family: var(--font-ui); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; flex: 1; }
+.section-icon { font-size: 15px; flex-shrink: 0; }
+.section-title { font-family: var(--font-ui); font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; flex: 1; }
 .section-badge { font-family: var(--font-mono); font-size: 9px; color: var(--tdim); }
 .section-arrow { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); transition: transform .2s; }
-.section-body { border-top: 1px solid var(--border); display: none; padding: 14px; }
+.section-body { border-top: 1px solid var(--border); display: none; padding: 10px 12px; }
 .section-body.open { display: block; }
 #sec-indicadores-body.open { padding: 0; overflow: hidden; }
 
 /* Colores de acento por sección */
-.section.s-user  { border-left: 3px solid var(--amber); }
+.section.s-user  { border-left: 3px solid var(--amber); border-radius: 12px; }
 .section.s-turno { border-left: 3px solid var(--blue); }
 .section.s-lic   { border-left: 3px solid var(--green); }
 .section.s-rec   { border-left: 3px solid var(--rec-color); }
@@ -269,10 +270,11 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .b-nol { background: rgba(74,158,218,.1); border: 1px solid var(--blue); color: var(--blue); }
 
 /* TABS */
-.tabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; margin-bottom: 9px; }
-.tab { flex: 1; padding: 6px 3px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.tab.on { background: var(--amber); color: #000; font-weight: 700; }
-.tab:hover:not(.on) { background: var(--border); color: var(--tbright); }
+.tabs { display: flex; gap: 3px; padding: 4px 0 6px; overflow-x: auto; scrollbar-width: none; margin-bottom: 4px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex-shrink:0; padding: 7px 14px; background: none; border: none; color: var(--tdim); font-family: var(--font-ui); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; cursor: pointer; border-radius: 20px; transition: all .15s; white-space: nowrap; min-height: 34px; -webkit-tap-highlight-color: transparent; }
+.tab.on { background: var(--amber); color: #111; font-weight: 700; }
+.tab:active { opacity: .7; }
 .tab-content { display: none; }
 .tab-content.on { display: block; }
 
@@ -320,8 +322,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
    SECCIÓN 3 & 4: LICENCIAS / RECARGOS (listas)
 ══════════════════════════════════════════════ */
 .ev-tabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; margin-bottom: 10px; }
-.ev-tab { flex: 1; padding: 5px 3px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.ev-tab.on { background: var(--green); color: #000; font-weight: 700; }
+.ev-tab { flex-shrink: 0; padding: 7px 14px; background: none; border: none; color: var(--tdim); font-family: var(--font-ui); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 20px; transition: all .15s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.ev-tab.on { background: var(--green); color: #111; font-weight: 700; }
 
 .ev-item { display: flex; align-items: center; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 4px; min-height: 44px; touch-action: manipulation; }
 .ev-item:hover { border-color: var(--tdim); }
@@ -364,9 +366,9 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .cal-lbl { font-family: var(--font-mono); font-size: 12px; color: var(--tbright); letter-spacing: 2px; }
 .cal-g-sel { background: var(--cell-bg); border: 1px solid var(--border); border-radius: 3px; color: var(--tbright); font-family: var(--font-mono); font-size: 11px; padding: 4px 8px; cursor: pointer; }
 .ctabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
-.ctab { padding: 4px 8px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.ctab.on { background: var(--t4); color: #000; font-weight: 700; }
-.ctab:hover:not(.on) { background: var(--border); color: var(--tbright); }
+.ctab { flex-shrink: 0; padding: 7px 14px; background: none; border: none; color: var(--tdim); font-family: var(--font-ui); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 20px; transition: all .15s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+.ctab.on { background: var(--t4); color: #111; font-weight: 700; }
+.ctab:active { opacity: .7; }
 .feriado-note { display: none; font-family: var(--font-mono); font-size: 9px; color: var(--tdim); background: rgba(74,158,218,.05); border: 1px solid rgba(74,158,218,.15); border-radius: 3px; padding: 5px 10px; margin-bottom: 8px; letter-spacing: .5px; }
 .feriado-note.show { display: block; }
 
@@ -404,8 +406,8 @@ table.gt td:not(.gn):hover { filter: brightness(1.35); transform: translateY(-1p
 .t4 { background: linear-gradient(145deg,rgba(176,126,232,.18) 0%,rgba(176,126,232,.06) 100%) !important; border-color: rgba(176,126,232,.2) !important; }
 .tf { background: linear-gradient(145deg,rgba(220,38,38,.22) 0%,rgba(220,38,38,.08) 100%) !important; border-color: rgba(220,38,38,.25) !important; }
 .tf .cn { color: #ff4444; font-size: 15px; font-weight: 900; letter-spacing: 0; text-shadow: 0 0 8px rgba(255,50,50,.4); }
-body.light .tf { background: rgba(220,38,38,.12) !important; }
-body.light .tf .cn { color: #cc0000; }
+
+
 table.gt td.cs .cn { color: rgba(245,166,35,.5); }
 /* Feriado: solo amarillo en el número del día del header */
 table.gt th.fc .dn { color: #f5d020; font-weight: 900; }
@@ -448,7 +450,7 @@ table.gt td.has-rec-franco { background: rgba(200,50,200,.22) !important; border
 
 /* REL turno picker */
 .rel-t-btn { background: var(--cell-bg); border: 2px solid; border-radius: 8px; padding: 12px 6px 8px; font-family: var(--font-ui); font-size: 22px; font-weight: 900; cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 3px; -webkit-tap-highlight-color: transparent; }
-body.light .rel-t-btn { background: #f0f4f8; }
+
 .rel-t-btn span { font-family: var(--font-mono); font-size: 7px; letter-spacing: .5px; opacity: .7; }
 .rel-t-btn:active, .rel-t-btn.sel { filter: brightness(1.3); transform: scale(.96); }
 
@@ -741,9 +743,11 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
      HEADER
 ════════════════════════════════════════ -->
 <header>
-  <h1>DIAGRAMA DE GUARDIA</h1>
-  <h2 style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin:3px 0 0">PLANTA DE AGUA PN</h2>
-  <div class="hsub">Creado por Joni Cimiotta</div>
+  <div>
+    <h1>Diagrama de Guardia</h1>
+    <div class="hsub">Planta de Agua · Puerto Nuevo</div>
+  </div>
+  <div style="width:32px;height:32px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-.5px;flex-shrink:0">DG</div>
 </header>
 
 <!-- ════════════════════════════════════════
@@ -1127,13 +1131,13 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
   </div>
   <div class="section-body" id="sec-audit-body">
     <!-- Tabs de administración -->
-    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on" style="flex:1;min-width:70px">👥 ACCESOS</button>
-      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab" style="flex:1;min-width:70px">📋 LICENCIAS</button>
-      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab" style="flex:1;min-width:70px">⭐ RELEVANTE</button>
-      <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab" style="flex:1;min-width:70px">🎨 APARIENCIA</button>
-      <button onclick="showAdminTab('historial')" id="atab-historial" class="tab" style="flex:1;min-width:70px">📜 HISTORIAL</button>
-      <button onclick="showAdminTab('exportar')" id="atab-exportar" class="tab" style="flex:1;min-width:70px">📤 EXPORTAR</button>
+    <div style="display:flex;gap:3px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
+      <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on">👥 ACCESOS</button>
+      <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab">📋 LICENCIAS</button>
+      <button onclick="showAdminTab('relevante')" id="atab-relevante" class="tab">⭐ RELEVANTE</button>
+      <button onclick="showAdminTab('apariencia')" id="atab-apariencia" class="tab">🎨 APARIENCIA</button>
+      <button onclick="showAdminTab('historial')" id="atab-historial" class="tab">📜 HISTORIAL</button>
+      <button onclick="showAdminTab('exportar')" id="atab-exportar" class="tab">📤 EXPORTAR</button>
     </div>
     <!-- Tab: Accesos -->
     <div id="admin-accesos">
@@ -1169,7 +1173,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 
 <!-- Botón tema — al pie de la página -->
 <div style="text-align:center;padding:20px 0 10px;border-top:1px solid var(--border);margin-top:8px">
-  <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" style="padding:8px 20px;font-size:11px">&#9728; CLARO / OSCURO</button>
+  <!-- theme-btn desactivado -->
   <div style="margin-top:8px;font-family:var(--font-mono);font-size:8px;color:var(--adim);letter-spacing:2px">DIAGRAMA DE GUARDIA · PLANTA DE AGUA PN</div>
 </div>
 
@@ -1640,11 +1644,7 @@ function showSection(id) {
   arrow.textContent = '▲';
   document.getElementById(id + '-body').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  document.getElementById('theme-btn').textContent = isLight ? '● OSCURO' : '☀ CLARO';
-  lsSet('gd-theme', isLight ? 'light' : 'dark');
-}
+function toggleTheme() { /* modo oscuro desactivado */ }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ALGORITHM
@@ -4939,11 +4939,7 @@ async function renderUsinaPanel() {
   }
 
   // ── 1. UI instantánea ──────────────────────────────────────────────────
-  const savedTheme = lsGet('gd-theme');
-  if (savedTheme==='light') {
-    document.body.classList.add('light');
-    const b = document.getElementById('theme-btn'); if(b) b.textContent='● OSCURO';
-  }
+  document.body.classList.add('light'); // forzar modo claro siempre
   const n = new Date();
   calDate = dk(n.getFullYear(), n.getMonth()+1, n.getDate());
   dsInit();
