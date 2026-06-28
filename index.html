@@ -127,7 +127,32 @@ body {
 }
 body::before { display: none; }
 /* .wrap padding overridden by PWA safe-area block above — max-width kept here */
-.wrap { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding-top: 0; }
+.wrap { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding-top: 0; }
+
+/* ── BOTTOM NAV ── */
+.bnav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: var(--panel); border-top: 1px solid var(--border);
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  max-width: 480px; margin: 0 auto;
+  left: 50%; transform: translateX(-50%);
+}
+.bnav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; padding: 8px 4px 6px;
+  background: none; border: none; cursor: pointer; color: var(--tdim);
+  font-family: var(--font-ui); font-size: 9px; font-weight: 600;
+  letter-spacing: .3px; transition: color .15s; min-height: 52px;
+  -webkit-tap-highlight-color: transparent;
+}
+.bnav-btn .bico { font-size: 18px; line-height: 1; }
+.bnav-btn.on { color: var(--amber); }
+.bnav-btn.on .bico { transform: scale(1.1); }
+
+/* ── VIEWS ── */
+.view { display: none; padding: 10px 10px 80px; }
+.view.on { display: block; }
 
 /* ══════════════════════════════════════════════
    HEADER
@@ -137,7 +162,6 @@ header {
   padding: 10px 14px 9px;
   background: var(--panel);
   border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
 }
 h1 { font-size: 15px; font-weight: 800; color: var(--tbright); letter-spacing: .5px; line-height: 1.2; }
 h1 span { color: var(--amber); }
@@ -739,88 +763,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <body>
 <div class="wrap">
 
-<!-- ════════════════════════════════════════
-     HEADER
-════════════════════════════════════════ -->
-<header>
-  <div>
-    <h1>Diagrama de Guardia</h1>
-    <div class="hsub">Planta de Agua · Puerto Nuevo</div>
-  </div>
-  <div style="width:32px;height:32px;background:var(--amber);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-.5px;flex-shrink:0">DG</div>
-</header>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 1: IDENTIFICACIÓN
-════════════════════════════════════════ -->
-<div class="section s-user">
-  <div class="section-header" onclick="toggleSection('sec-user')">
-    <span class="section-icon" style="color:var(--amber)">&#9673;</span>
-    <span class="section-title" id="sec-user-title">Identificación</span>
-    <span class="section-badge" id="user-section-badge">SIN IDENTIFICAR</span>
-    <span class="section-arrow" id="sec-user-arrow">&#9660;</span>
-  </div>
-  <div class="section-body open" id="sec-user-body">
-    <!-- Estado: sin usuario -->
-    <div id="no-user-state">
-      <p class="no-user-msg">&#9673; Tocá tu nombre para identificarte.</p>
-      <div id="user-grid" class="user-grid"></div>
-    </div>
-    <!-- Estado: con usuario -->
-    <div id="yes-user-state" style="display:none">
-      <div class="user-identified">
-        <div class="uav" id="u-av"></div>
-        <div>
-          <div class="unm" id="u-nm"></div>
-          <div class="ugd" id="u-gd"></div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="showSection('sec-lic')">&#9776; MIS LICENCIAS</button>
-      </div>
-      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
-        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
-          🏭 USINA DIGITAL
-        </a>
-        <button class="btn btn-danger" onclick="logout()">SALIR</button>
-      </div>
-      <!-- Panel relevante (solo si REL) -->
-      <div id="rel-panel" style="display:none">
-        <div class="rel-panel-inner">
-          <div class="rel-panel-hdr" onclick="toggleRelPanel()">
-            <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
-            <span id="rel-arr" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">&#9660;</span>
-          </div>
-          <div id="rel-body" class="rel-body">
-            <div style="margin-bottom:16px;">
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
-              <div id="rel-franco-stats"></div>
-            </div>
-            <div>
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
-              <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-              <button class="btn btn-outline" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Consultar Turno eliminado — el diagrama lo reemplaza -->
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 3: DIAGRAMA
-════════════════════════════════════════ -->
-<div class="section s-diag">
-  <div class="section-header" onclick="toggleSection('sec-diag')">
-    <span class="section-icon" style="color:var(--t4)">&#9635;</span>
-    <span class="section-title">Diagrama de Guardias</span>
-    <span class="section-badge" id="cal-lbl-badge"></span>
-    <span class="section-arrow" id="sec-diag-arrow">&#9650;</span>
-  </div>
-  <div class="section-body open" id="sec-diag-body">
+<!-- ── VIEW: DIAGRAMA (default) ── -->
+<div class="view on" id="view-diagrama">
+  <div id="sec-diag-body" style="padding:6px 0">
     <div class="cal-top">
       <div style="display:flex;align-items:center;gap:5px">
         <button class="nav-btn" onclick="calNav(-1)">&#9664;</button>
@@ -858,44 +803,68 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     </div>
     <div id="cal-body"></div>
   </div>
-</div>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 4: LICENCIAS
-════════════════════════════════════════ -->
-<div class="section s-lic" id="evp" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-lic')">
-    <span class="section-icon" style="color:var(--green)">&#9632;</span>
-    <span class="section-title">Licencias y Ausencias</span>
-    <span class="section-badge" id="evp-cnt"></span>
-    <span class="section-arrow" id="sec-lic-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-lic-body">
-    <div class="ev-tabs">
-      <button class="ev-tab on" data-e="mine" onclick="showET('mine')">MIS LICENCIAS</button>
-      <button class="ev-tab" data-e="all" onclick="showET('all')">TODAS</button>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:4px 6px">
-      <button onclick="evNavMonth(-1)" style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">◄</button>
-      <span id="ev-month-label" style="font-family:var(--font-mono);font-size:11px;color:var(--text);letter-spacing:2px;font-weight:700"></span>
-      <button onclick="evNavMonth(1)"  style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">►</button>
-    </div>
-    <div id="ev-list"></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SECCIÓN 5: USINA DIGITAL
-════════════════════════════════════════ -->
-<div class="section s-usina" id="sec-usina" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-usina')">
-    <span class="section-icon">🏭</span>
-    <span class="section-title">Usina Digital</span>
-    <span class="section-badge" id="usina-badge">SAP SF</span>
-    <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
+<!-- ── VIEW: USUARIO ── -->
+<div class="view" id="view-usuario">
+  <div class="section s-user" style="margin-top:8px">
+    <div class="section-body open" id="sec-user-body">
+      <!-- Estado: sin usuario -->
+    <div id="no-user-state">
+      <p class="no-user-msg">&#9673; Tocá tu nombre para identificarte.</p>
+      <div id="user-grid" class="user-grid"></div>
+    </div>
+    <!-- Estado: con usuario -->
+    <div id="yes-user-state" style="display:none">
+      <div class="user-identified">
+        <div class="uav" id="u-av"></div>
+        <div>
+          <div class="unm" id="u-nm"></div>
+          <div class="ugd" id="u-gd"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="switchView('licencias')">&#9776; MIS LICENCIAS</button>
+      </div>
+      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
+          🏭 USINA DIGITAL
+        </a>
+        <button class="btn btn-danger" onclick="logout()">SALIR</button>
+      </div>
+      <!-- Panel relevante (solo si REL) -->
+      <div id="rel-panel" style="display:none">
+        <div class="rel-panel-inner">
+          <div class="rel-panel-hdr" onclick="toggleRelPanel()">
+            <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
+            <span id="rel-arr" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">&#9660;</span>
+          </div>
+          <div id="rel-body" class="rel-body">
+            <div style="margin-bottom:16px;">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
+              <div id="rel-franco-stats"></div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
+              <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+              <button class="btn btn-outline" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="section-body" id="sec-usina-body">
-    <!-- Link SAP -->
+    </div>
+  </div>
+  <div class="section s-usina" id="sec-usina" style="margin-top:8px">
+    <div class="section-header" onclick="toggleSection('sec-usina')">
+      <span class="section-icon">🏭</span>
+      <span class="section-title">Usina Digital</span>
+      <span class="section-badge" id="usina-badge">SAP SF</span>
+      <span class="section-arrow" id="sec-usina-arrow">&#9660;</span>
+    </div>
+    <div class="section-body" id="sec-usina-body"><!-- Link SAP -->
     <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com"
        target="_blank" rel="noopener"
        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;background:rgba(74,158,218,.08);border:1px solid rgba(74,158,218,.25);border-radius:8px;text-decoration:none;margin-bottom:16px;transition:all .2s"
@@ -924,42 +893,92 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <input type="hidden" id="usina-dc">
     <input type="hidden" id="usina-peg">
     <input type="hidden" id="usina-pega">
+  </div></div>
+  </div>
+  <div class="section s-leg" style="margin-top:8px">
+    <div class="section-header" onclick="toggleSection('sec-leg')">
+      <span class="section-icon" style="color:var(--tdim)">&#9776;</span>
+      <span class="section-title">Leyendas</span>
+      <span class="section-arrow" id="sec-leg-arrow">&#9660;</span>
+    </div>
+    <div class="section-body" id="sec-leg-body"><div class="legend-body">
+      <div>
+        <div class="leg-group-title">TURNOS</div>
+        <div class="leg-items">
+          <div class="ll-item"><span class="t-dot" style="background:var(--t1)"></span><span class="ll-badge" style="background:var(--t1);color:#000">T1</span><span class="ll-name">00:00–05:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t2)"></span><span class="ll-badge" style="background:var(--t2);color:#000">T2</span><span class="ll-name">06:00–11:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t3)"></span><span class="ll-badge" style="background:var(--t3);color:#000">T3</span><span class="ll-name">12:00–17:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t4)"></span><span class="ll-badge" style="background:var(--t4);color:#000">T4</span><span class="ll-name">18:00–23:59</span></div>
+          <div class="ll-item"><span class="ll-badge" style="background:#1e2530;color:var(--tdim)">F</span><span class="ll-name">Franco</span></div>
+          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.2);color:#f5d020;font-weight:900">F</span><span class="ll-name">Franco — celda roja</span></div>
+          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.15);color:#f5d020">&#9632;</span><span class="ll-name">Feriado — número en amarillo</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="leg-group-title">RECARGOS</div>
+        <div class="leg-items">
+          <div class="ll-item"><span class="ll-badge rec-badge">R</span><span class="ll-name">Recargo en día trabajado — celda naranja</span></div>
+          <div class="ll-item"><span class="ll-badge rec-franco-badge">R</span><span class="ll-name">Recargo sobre franco — celda roja</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="leg-group-title">LICENCIAS</div>
+        <div class="leg-items" id="lic-leg"></div>
+      </div>
+      <div>
+        <div class="leg-group-title">GUARDIAS</div>
+        <div class="leg-items" id="guard-leg"></div>
+      </div>
+    </div>
+  </div></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SECCIÓN 6: RECARGOS
-════════════════════════════════════════ -->
-<div class="section s-rec" id="rec-panel" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-rec')">
-    <span class="section-icon" style="color:var(--rec-color)">&#9650;</span>
-    <span class="section-title">Recargos del Mes</span>
-    <span class="section-badge" id="rec-cnt-badge"></span>
-    <span class="section-arrow" id="sec-rec-arrow">&#9660;</span>
+<!-- ── VIEW: LICENCIAS ── -->
+<div class="view" id="view-licencias">
+  <div class="section s-lic" id="evp" style="margin-top:8px">
+    <div class="section-header" onclick="toggleSection('sec-lic')">
+      <span class="section-icon" style="color:var(--green)">&#9632;</span>
+      <span class="section-title">Licencias y Ausencias</span>
+      <span class="section-badge" id="evp-cnt"></span>
+      <span class="section-arrow" id="sec-lic-arrow">&#9660;</span>
+    </div>
+    <div class="section-body open" id="sec-lic-body"><div class="ev-tabs">
+      <button class="ev-tab on" data-e="mine" onclick="showET('mine')">MIS LICENCIAS</button>
+      <button class="ev-tab" data-e="all" onclick="showET('all')">TODAS</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:4px 6px">
+      <button onclick="evNavMonth(-1)" style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">◄</button>
+      <span id="ev-month-label" style="font-family:var(--font-mono);font-size:11px;color:var(--text);letter-spacing:2px;font-weight:700"></span>
+      <button onclick="evNavMonth(1)"  style="background:none;border:none;color:var(--amber);font-size:18px;cursor:pointer;padding:2px 8px;line-height:1">►</button>
+    </div>
+    <div id="ev-list"></div>
+  </div></div>
   </div>
-  <div class="section-body" id="sec-rec-body">
-    <div class="rec-month-nav">
+  <div class="section s-rec" id="rec-panel" style="margin-top:8px">
+    <div class="section-header" onclick="toggleSection('sec-rec')">
+      <span class="section-icon" style="color:var(--rec-color)">&#9650;</span>
+      <span class="section-title">Recargos del Mes</span>
+      <span class="section-badge" id="rec-cnt-badge"></span>
+      <span class="section-arrow" id="sec-rec-arrow">&#9660;</span>
+    </div>
+    <div class="section-body open" id="sec-rec-body"><div class="rec-month-nav">
       <button class="nav-btn" onclick="recNavMonth(-1)">&#9664;</button>
       <div class="rec-month-lbl" id="rec-month-lbl">—</div>
       <button class="nav-btn" onclick="recNavMonth(1)">&#9654;</button>
     </div>
     <div class="rec-summary" id="rec-summary"></div>
     <div id="rec-list"></div>
+  </div></div>
   </div>
-</div>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 6: ROTACIÓN DE VACACIONES
-════════════════════════════════════════ -->
-<div class="section s-vac">
-  <div class="section-header" onclick="toggleSection('sec-vac')">
-    <span class="section-icon" style="color:var(--green)">&#9728;</span>
-    <span class="section-title">Rotación de Vacaciones</span>
-    <span class="section-badge" id="vac-section-badge"></span>
-    <span class="section-arrow" id="sec-vac-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-vac-body">
-    <div class="vac-table-wrap">
+  <div class="section s-vac" style="margin-top:8px">
+    <div class="section-header" onclick="toggleSection('sec-vac')">
+      <span class="section-icon" style="color:var(--green)">&#9728;</span>
+      <span class="section-title">Rotación de Vacaciones</span>
+      <span class="section-badge" id="vac-section-badge"></span>
+      <span class="section-arrow" id="sec-vac-arrow">&#9660;</span>
+    </div>
+    <div class="section-body" id="sec-vac-body"><div class="vac-table-wrap">
       <table class="vac" id="vac-table">
         <thead>
           <tr>
@@ -999,138 +1018,14 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
       <div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">indicadores.centralpuerto.com · usuario: indicadores</div>
     </div>
     <span style="font-size:16px;color:var(--adim);flex-shrink:0">↗</span>
-  </a>
-</div>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN: HORARIO COMBI
-════════════════════════════════════════ -->
-<div class="section s-combi">
-  <div class="section-header" onclick="toggleSection('sec-combi')">
-    <span class="section-icon" style="color:#4fc3f7">🚌</span>
-    <span class="section-title">Horario Combi</span>
-    <span style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:1px;margin-left:auto;margin-right:8px">VIG. 16/03/26</span>
-    <span class="section-arrow" id="sec-combi-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-combi-body">
-    <div style="padding:4px 0 8px">
-
-      <!-- TABS -->
-      <div style="display:flex;gap:6px;margin-bottom:14px">
-        <button onclick="showCombiTab('lv')" id="ctab-lv" class="tab on" style="flex:1">LUN–VIE</button>
-        <button onclick="showCombiTab('sab')" id="ctab-sab" class="tab" style="flex:1">SÁB</button>
-        <button onclick="showCombiTab('dom')" id="ctab-dom" class="tab" style="flex:1">DOM/FER</button>
-      </div>
-
-      <!-- LUNES A VIERNES -->
-      <div id="combi-lv">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:var(--panel)">
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
-          </tr></thead>
-          <tbody id="combi-lv-body"></tbody>
-        </table>
-        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
-          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
-          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
-        </div>
-      </div>
-
-      <!-- SÁBADO -->
-      <div id="combi-sab" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:var(--panel)">
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
-          </tr></thead>
-          <tbody id="combi-sab-body"></tbody>
-        </table>
-        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
-          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
-          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
-        </div>
-      </div>
-
-      <!-- DOMINGO Y FERIADOS -->
-      <div id="combi-dom" style="display:none">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:var(--panel)">
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">N°</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HORA</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">DESDE</th>
-            <th style="padding:6px 4px;color:var(--adim);font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-align:center;border-bottom:1px solid var(--border)">HACIA</th>
-          </tr></thead>
-          <tbody id="combi-dom-body"></tbody>
-        </table>
-        <div style="margin-top:10px;font-size:10px;color:var(--tdim);line-height:1.6;font-style:italic">
-          (1) sigue viaje hacia PN/NP &nbsp;·&nbsp; (2) hace escala en Retiro<br>
-          (3) parada especial nocturna calle San Martín s/vereda Htl Sheraton, apenas pasando la rampa de ingreso al hotel.
-        </div>
-      </div>
-
-    </div>
+  </a></div>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     SECCIÓN 7: LEYENDAS
-════════════════════════════════════════ -->
-<div class="section s-leg">
-  <div class="section-header" onclick="toggleSection('sec-leg')">
-    <span class="section-icon" style="color:var(--tdim)">&#9776;</span>
-    <span class="section-title">Leyendas</span>
-    <span class="section-arrow" id="sec-leg-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-leg-body">
-    <div class="legend-body">
-      <div>
-        <div class="leg-group-title">TURNOS</div>
-        <div class="leg-items">
-          <div class="ll-item"><span class="t-dot" style="background:var(--t1)"></span><span class="ll-badge" style="background:var(--t1);color:#000">T1</span><span class="ll-name">00:00–05:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t2)"></span><span class="ll-badge" style="background:var(--t2);color:#000">T2</span><span class="ll-name">06:00–11:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t3)"></span><span class="ll-badge" style="background:var(--t3);color:#000">T3</span><span class="ll-name">12:00–17:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t4)"></span><span class="ll-badge" style="background:var(--t4);color:#000">T4</span><span class="ll-name">18:00–23:59</span></div>
-          <div class="ll-item"><span class="ll-badge" style="background:#1e2530;color:var(--tdim)">F</span><span class="ll-name">Franco</span></div>
-          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.2);color:#f5d020;font-weight:900">F</span><span class="ll-name">Franco — celda roja</span></div>
-          <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.15);color:#f5d020">&#9632;</span><span class="ll-name">Feriado — número en amarillo</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="leg-group-title">RECARGOS</div>
-        <div class="leg-items">
-          <div class="ll-item"><span class="ll-badge rec-badge">R</span><span class="ll-name">Recargo en día trabajado — celda naranja</span></div>
-          <div class="ll-item"><span class="ll-badge rec-franco-badge">R</span><span class="ll-name">Recargo sobre franco — celda roja</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="leg-group-title">LICENCIAS</div>
-        <div class="leg-items" id="lic-leg"></div>
-      </div>
-      <div>
-        <div class="leg-group-title">GUARDIAS</div>
-        <div class="leg-items" id="guard-leg"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════
-     PANEL ADMINISTRADOR (solo Jonatan)
-════════════════════════════════════════ -->
-<div class="section s-audit" id="sec-audit" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-audit')">
-    <span class="section-icon" style="color:var(--amber)">⚙️</span>
-    <span class="section-title">Administrador</span>
-    <span class="section-badge" id="audit-badge">—</span>
-    <span class="section-arrow" id="sec-audit-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-audit-body">
-    <!-- Tabs de administración -->
+<!-- ── VIEW: ADMIN ── -->
+<div class="view" id="view-admin">
+  <div class="section s-audit" id="sec-audit" style="margin-top:8px;display:block">
+    <div class="section-body open" id="sec-audit-body"><!-- Tabs de administración -->
     <div style="display:flex;gap:3px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
       <button onclick="showAdminTab('accesos')" id="atab-accesos" class="tab on">👥 ACCESOS</button>
       <button onclick="showAdminTab('licencias')" id="atab-licencias" class="tab">📋 LICENCIAS</button>
@@ -1168,252 +1063,27 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div id="admin-exportar" style="display:none">
       <div id="admin-export-content" style="padding:4px 0"></div>
     </div>
+  </div></div>
   </div>
-</div>
-
-<!-- Botón tema — al pie de la página -->
-<div style="text-align:center;padding:20px 0 10px;border-top:1px solid var(--border);margin-top:8px">
-  <!-- theme-btn desactivado -->
-  <div style="margin-top:8px;font-family:var(--font-mono);font-size:8px;color:var(--adim);letter-spacing:2px">DIAGRAMA DE GUARDIA · PLANTA DE AGUA PN</div>
 </div>
 
 </div><!-- /wrap -->
 
-<!-- ════════════════════════════════════════
-     MODALES Y BOTTOM SHEETS
-════════════════════════════════════════ -->
-
-<!-- Modal: Contraseña -->
-<div class="overlay off" id="m-password">
-  <div class="modal" style="max-width:340px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <div id="pwd-modal-avatar" style="width:36px;height:36px;border-radius:4px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0">?</div>
-      <div>
-        <div class="modal-title" style="margin:0;font-size:14px">IDENTIFICACIÓN</div>
-        <div id="pwd-modal-name" style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-top:2px">···</div>
-      </div>
-    </div>
-    <div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);background:var(--cell-bg);border-radius:4px;padding:8px 10px;margin-bottom:14px;line-height:1.5;border-left:3px solid var(--amber)">
-      &#9673; Este perfil tiene clave. Ingresá tu <strong style="color:var(--text)">número de legajo</strong>.
-    </div>
-    <div class="mfg">
-      <label>LEGAJO</label>
-      <input type="text" id="pwd-input"
-        placeholder="Ej: 70421"
-        onkeydown="if(event.key==='Enter')confirmPassword()"
-        style="background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:11px 12px;font-size:20px;color:var(--text);font-family:var(--font-mono);width:100%;box-sizing:border-box;outline:none;letter-spacing:3px"
-        autocomplete="off" inputmode="numeric">
-      <div class="pwd-error" id="pwd-error"></div>
-    </div>
-    <div class="mbtns">
-      <button class="mbtn cancel" onclick="closePwdModal()">CANCELAR</button>
-      <button class="mbtn ok" onclick="confirmPassword()">ENTRAR</button>
-    </div>
-    <div class="pwd-hint">&#9673; La sesión queda guardada en este dispositivo.</div>
-  </div>
-</div>
-
-
-<div class="overlay off" id="m-event">
-  <div class="modal green-top">
-    <div class="modal-title">&#9632; Registrar licencia</div>
-    <div id="ev-admin-target-banner" style="display:none;background:rgba(234,179,8,.12);border:1px solid var(--amber);border-radius:5px;padding:6px 10px;margin-bottom:10px"></div>
-    <div class="mfg">
-      <label>Tipo de licencia</label>
-      <div class="lic-type-grid" id="lic-type-grid"></div>
-    </div>
-    <div class="modal-row">
-      <div class="mfg"><label>Desde</label><input type="date" id="ev-from" min="2025-01-01" max="2030-12-31"></div>
-      <div class="mfg"><label>Hasta</label><input type="date" id="ev-to" min="2025-01-01" max="2030-12-31"></div>
-    </div>
-    <div class="mfg" id="dc-hours-row" style="display:none">
-      <label>Horas DC (1–6 por día)</label>
-      <input type="number" id="ev-dc-hours" min="1" max="6" value="6" style="font-size:15px;padding:9px 12px;">
-      <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:3px;letter-spacing:1px">Máx 6h/día · Mín 1h/día · No se aplica en días franco</div>
-    </div>
-    <div id="pega-hint" style="display:none;font-family:var(--font-mono);font-size:10px;color:#ff8c42;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.25);border-radius:6px;padding:8px 12px;margin-bottom:4px">
-      ⚠ El PEGA se toma de a 2 días. Seleccioná un período de 2, 4, 6… días.
-    </div>
-    <div class="mfg" id="ct-guardia-row" style="display:none">
-      <label>CON GUARDIA (la que cubre tu turno)</label>
-      <select id="ct-guardia" style="font-size:15px;padding:9px 12px;">
-        <option value="">— Seleccionar —</option>
-        <option value="A">GUARDIA A</option>
-        <option value="B">GUARDIA B</option>
-        <option value="C">GUARDIA C</option>
-        <option value="D">GUARDIA D</option>
-        <option value="E">GUARDIA E</option>
-        <option value="REL">RELEVANTE</option>
-      </select>
-    </div>
-    <div class="mfg"><label>Nota (opcional)</label><textarea id="ev-note" placeholder="Observación, motivo..."></textarea></div>
-    <div class="err-msg" id="ev-err"></div>
-    <div class="mbtns">
-      <button class="mbtn ok g" onclick="saveEvent()">GUARDAR</button>
-      <button class="mbtn cancel" onclick="_adminTargetUser=null;closeM('m-event')">CANCELAR</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom sheet: Drag-select license picker -->
-<div class="ds-picker off" id="ds-picker">
-  <div class="ds-sheet">
-    <div class="ds-range-lbl">&#9632; NUEVA LICENCIA</div>
-    <div class="ds-range-dates" id="ds-range-dates">—</div>
-    <div class="ds-lic-grid" id="ds-lic-grid"></div>
-    <div class="ds-dc-row" id="ds-dc-row">
-      <span class="ds-dc-lbl">HORAS DC / DÍA</span>
-      <div class="ds-dc-ctrl">
-        <button onclick="adjDCH(-1)">−</button>
-        <span class="ds-dc-val" id="ds-dc-val">6</span>
-        <button onclick="adjDCH(1)">+</button>
-      </div>
-    </div>
-    <div id="ds-ct-row" style="display:none;margin-bottom:12px">
-      <label style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;display:block;margin-bottom:5px">GUARDIA CON LA QUE SE HACE EL CAMBIO</label>
-      <select id="ds-ct-guardia" style="font-size:15px;padding:10px 12px;width:100%">
-        <option value="">— Seleccionar —</option>
-        <option value="A">GUARDIA A</option>
-        <option value="B">GUARDIA B</option>
-        <option value="C">GUARDIA C</option>
-        <option value="D">GUARDIA D</option>
-        <option value="E">GUARDIA E</option>
-        <option value="REL">RELEVANTE</option>
-      </select>
-    </div>
-    <textarea class="ds-note-inp" id="ds-note" placeholder="Nota opcional..."></textarea>
-    <div class="ds-btns">
-      <button class="ds-save" id="ds-save" onclick="dsSave()" disabled style="opacity:.4">GUARDAR</button>
-      <button class="ds-cancel" onclick="dsCancel()">CANCELAR</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom sheet: Recargo picker -->
-<div class="ds-picker off" id="rec-picker">
-  <div class="rec-sheet">
-    <div class="rec-title">&#9650; REGISTRAR RECARGO</div>
-    <div class="ds-range-dates" id="rec-picker-sub">—</div>
-    <div id="rec-franco-indicator"></div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-      <div class="mfg">
-        <label>Guardia recargada</label>
-        <select id="rec-guardia" style="font-size:16px;padding:10px 12px;">
-          <option value="">— Seleccionar —</option>
-          <option value="A">GUARDIA A</option><option value="B">GUARDIA B</option>
-          <option value="C">GUARDIA C</option><option value="D">GUARDIA D</option>
-          <option value="E">GUARDIA E</option>
-        </select>
-      </div>
-      <div class="mfg">
-        <label>Turno recargado</label>
-        <select id="rec-turno" style="font-size:16px;padding:10px 12px;">
-          <option value="">— Seleccionar —</option>
-          <option value="1">T1 · 00:00–05:59</option>
-          <option value="2">T2 · 06:00–11:59</option>
-          <option value="3">T3 · 12:00–17:59</option>
-          <option value="4">T4 · 18:00–23:59</option>
-        </select>
-      </div>
-      <div class="mfg">
-        <label>Nota (opcional)</label>
-        <textarea id="rec-note" placeholder="Motivo del recargo..." style="min-height:44px;font-size:14px;"></textarea>
-      </div>
-    </div>
-    <div class="err-msg" id="rec-err"></div>
-    <div class="ds-btns">
-      <button class="ds-save" onclick="saveRecargo()" style="background:var(--rec-color);">GUARDAR RECARGO</button>
-      <button class="ds-cancel" onclick="closeRecPicker()">CANCELAR</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom sheet: REL turno picker -->
-<div class="ds-picker off" id="rel-picker">
-  <div class="ds-sheet">
-    <div class="ds-range-lbl" style="color:#8a9ab5;">&#9679; RELEVANTE</div>
-    <div class="ds-range-dates" id="rel-picker-dates">—</div>
-
-    <!-- Sección: Asignar turno -->
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">ASIGNAR TURNO</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;" id="rel-turno-grid">
-      <button class="rel-t-btn" data-val="1" style="border-color:var(--t1);color:var(--t1)">T1<span>00:00–05:59</span></button>
-      <button class="rel-t-btn" data-val="2" style="border-color:var(--t2);color:var(--t2)">T2<span>06:00–11:59</span></button>
-      <button class="rel-t-btn" data-val="3" style="border-color:var(--t3);color:var(--t3)">T3<span>12:00–17:59</span></button>
-      <button class="rel-t-btn" data-val="4" style="border-color:var(--t4);color:var(--t4)">T4<span>18:00–23:59</span></button>
-      <button class="rel-t-btn" data-val="F" style="border-color:var(--red);color:var(--red)">F<span>Franco</span></button>
-      <button class="rel-t-btn" data-val="" style="border-color:var(--tdim);color:var(--tdim)">✕<span>Limpiar</span></button>
-    </div>
-
-    <!-- Separador -->
-    <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
-
-    <!-- Sección: Registrar licencia -->
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:8px">REGISTRAR LICENCIA</div>
-    <div id="rel-lic-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;max-height:200px;overflow-y:auto"></div>
-    <div id="rel-lic-note-row" style="display:none;margin-bottom:10px">
-      <input id="rel-lic-note" type="text" placeholder="Nota opcional..."
-        style="width:100%;box-sizing:border-box;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:var(--font-ui);font-size:13px;outline:none">
-    </div>
-    <button id="rel-lic-save" onclick="relLicSave()" disabled style="width:100%;background:var(--amber);border:none;border-radius:5px;padding:10px;font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;color:#111;opacity:.4;margin-bottom:10px">GUARDAR LICENCIA</button>
-
-    <div class="ds-btns">
-      <button class="ds-cancel" onclick="relPickerCancel()">CANCELAR</button>
-    </div>
-  </div>
-</div>
-
-<!-- Cell action sheet -->
-<div class="lic-popup-overlay off" id="lic-popup" onclick="if(event.target===this)closeLicPopup()">
-  <div class="lic-popup-card" id="lic-popup-card"></div>
-</div>
-<div class="cell-actions off" id="cell-actions">
-  <div class="ca-sheet" id="ca-sheet">
-    <div class="ca-date" id="ca-date">—</div>
-    <div id="ca-actions"></div>
-    <button class="ca-cancel" onclick="closeCellActions()">Cancelar</button>
-  </div>
-</div>
-
-<!-- Modal: Relevante coverage -->
-<div class="overlay off" id="m-rel-cov">
-  <div class="modal" style="border-top-color:#8a9ab5;">
-    <div class="modal-title">&#9679; Agregar cobertura</div>
-    <div class="mfg">
-      <label>Turno cubierto</label>
-      <select id="rc-turno" style="font-size:15px;padding:11px 12px;">
-        <option value="">— Seleccionar —</option>
-        <option value="1">T1 · 00:00–05:59</option>
-        <option value="2">T2 · 06:00–11:59</option>
-        <option value="3">T3 · 12:00–17:59</option>
-        <option value="4">T4 · 18:00–23:59</option>
-      </select>
-    </div>
-    <div class="mfg">
-      <label>Guardia ausente</label>
-      <select id="rc-guardia" style="font-size:15px;padding:11px 12px;">
-        <option value="">— Seleccionar —</option>
-        <option value="A">GUARDIA A</option><option value="B">GUARDIA B</option>
-        <option value="C">GUARDIA C</option><option value="D">GUARDIA D</option>
-        <option value="E">GUARDIA E</option>
-      </select>
-    </div>
-    <div class="mfg">
-      <label>Operario ausente (nombre)</label>
-      <input type="text" id="rc-quien" placeholder="Nombre del operario" style="font-size:15px;padding:11px 12px;">
-    </div>
-    <div class="modal-row">
-      <div class="mfg"><label>Desde</label><input type="date" id="rc-from" min="2025-01-01" max="2030-12-31"></div>
-      <div class="mfg"><label>Hasta</label><input type="date" id="rc-to" min="2025-01-01" max="2030-12-31"></div>
-    </div>
-    <div class="mfg"><label>Nota (opcional)</label><textarea id="rc-note" placeholder="Motivo, licencia cubierta..."></textarea></div>
-    <div class="err-msg" id="rc-err"></div>
-    <div class="mbtns">
-      <button class="mbtn ok" style="background:#8a9ab5;" onclick="saveRelCoverage()">GUARDAR</button>
-      <button class="mbtn cancel" onclick="closeM('m-rel-cov')">CANCELAR</button>
-    </div>
-  </div>
-</div>
+<!-- BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-btn on" id="bnav-diagrama" onclick="switchView('diagrama')">
+    <span class="bico">📅</span><span>Diagrama</span>
+  </button>
+  <button class="bnav-btn" id="bnav-licencias" onclick="switchView('licencias')">
+    <span class="bico">📋</span><span>Licencias</span>
+  </button>
+  <button class="bnav-btn" id="bnav-usuario" onclick="switchView('usuario')">
+    <span class="bico">👤</span><span>Usuario</span>
+  </button>
+  <button class="bnav-btn" id="bnav-admin" onclick="switchView('admin')" style="display:none">
+    <span class="bico">⚙️</span><span>Admin</span>
+  </button>
+</nav>
 
 <!-- Firebase SDK + App (todo en un solo módulo) -->
 <script type="module">
@@ -1637,12 +1307,30 @@ function toggleSection(id) {
   if (arrow) arrow.textContent = isOpen ? '▲' : '▼';
   // Cargar iframe de indicadores la primera vez que se abre
 }
+function switchView(name) {
+  ['diagrama','licencias','usuario','admin'].forEach(v => {
+    const view = document.getElementById('view-' + v);
+    const btn  = document.getElementById('bnav-' + v);
+    if (view) view.classList.toggle('on', v === name);
+    if (btn)  btn.classList.toggle('on',  v === name);
+  });
+  window.scrollTo(0, 0);
+  // Triggers específicos
+  if (name === 'licencias') { try { renderEvP(); } catch(_) {} }
+  if (name === 'admin')     { try { renderAuditPanel(); } catch(_) {} }
+}
+
 function showSection(id) {
-  const body = document.getElementById(id + '-body');
-  const arrow = document.getElementById(id + '-arrow');
-  body.classList.add('open');
-  arrow.textContent = '▲';
-  document.getElementById(id + '-body').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const viewMap = {
+    'sec-lic':'licencias','evp':'licencias','sec-rec':'licencias','rec-panel':'licencias','sec-vac':'licencias',
+    'sec-user':'usuario','sec-usina':'usuario','sec-leg':'usuario',
+    'sec-audit':'admin',
+  };
+  switchView(viewMap[id] || 'diagrama');
+  setTimeout(() => {
+    const body = document.getElementById(id + '-body');
+    if (body) { body.classList.add('open'); body.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  }, 60);
 }
 function toggleTheme() { /* modo oscuro desactivado */ }
 
@@ -2262,6 +1950,7 @@ async function selectUser(u) {
   await saveMe();
   await logAccess(u.name);
   updateUBar();
+  switchView('diagrama');
   renderEvP();
   renderCal();
   renderVacTable();
@@ -2272,7 +1961,8 @@ async function selectUser(u) {
 
 async function logout() {
   ME = null;
-  lsDel('gd-me-id');       // limpiar sesión guardada en este dispositivo
+  lsDel('gd-me-id');
+  switchView('diagrama');
   await saveMe();
   updateUBar();
   renderEvP();
@@ -2334,6 +2024,9 @@ function updateUBar() {
     }
     if (ME.guardia === 'REL') { document.getElementById('rel-panel').style.display = ''; renderRelPanel(); }
     else document.getElementById('rel-panel').style.display = 'none';
+    // Mostrar tab admin solo para Jonatan
+    const adminBtn = document.getElementById('bnav-admin');
+    if (adminBtn) adminBtn.style.display = ME.name === ADMIN_NAME ? '' : 'none';
   } else {
     nu.style.display = ''; yu.style.display = 'none';
     evp.style.display = 'none'; rp.style.display = 'none';
@@ -2342,6 +2035,8 @@ function updateUBar() {
     if (title) title.textContent = 'Identificación';
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = 'none';
+    const adminBtn2 = document.getElementById('bnav-admin');
+    if (adminBtn2) adminBtn2.style.display = 'none';
     buildUserGrid();
   }
 }
