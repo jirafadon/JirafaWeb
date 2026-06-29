@@ -1,7 +1,6 @@
-const CACHE = 'dg-pwa-v4';
+const CACHE = 'dg-pwa-v10';
 const OFFLINE_URLS = ['/'];
 
-// Instalación: cachear la página principal
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(
@@ -9,7 +8,6 @@ self.addEventListener('install', e => {
   );
 });
 
-// Activación: limpiar TODAS las caches viejas y tomar control inmediato
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -18,7 +16,6 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: network first, cache fallback
 self.addEventListener('fetch', e => {
   if (!e.request.url.startsWith(self.location.origin)) return;
   if (e.request.url.includes('firebase') || e.request.url.includes('googleapis')) return;
@@ -36,17 +33,11 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// ── Notificaciones push ───────────────────────────────────────────────────
 self.addEventListener('push', e => {
   let data = {};
   try { data = e.data ? e.data.json() : {}; } catch(_) {}
   const title = data.title || '📋 Nueva licencia';
-  const options = {
-    body: data.body || '',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    data: { url: '/' }
-  };
+  const options = { body: data.body || '', icon: '/icon-192.png', badge: '/icon-192.png', data: { url: '/' } };
   e.waitUntil(self.registration.showNotification(title, options));
 });
 

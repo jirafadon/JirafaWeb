@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
 <style>
@@ -79,33 +80,29 @@ button, a, select, input, textarea, label,
    VARIABLES Y RESET
 ══════════════════════════════════════════════ */
 :root {
-  --font-ui: 'DM Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, 'Courier New', monospace;
-  --bg: #0a0c0f;
-  --panel: #111418;
-  --border: #1e2530;
-  --amber: #f5a623;
-  --adim: #a06a10;
-  --aglow: rgba(245,166,35,.12);
-  --blue: #4a9eda;
-  --red: #e05252;
-  --green: #3dba78;
-  --t1: #5ba3d9;
-  --t2: #3dba78;
-  --t3: #ff8c42;
-  --t4: #b07ee8;
-  --text: #c8d0d8;
-  --tdim: #5a6270;
-  --tbright: #eef2f6;
-  --cell-bg: #0d1117;
-  --rec-color: #ff6b35;
+  --font-ui:   'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --bg:        #f1f5f9;
+  --panel:     #ffffff;
+  --border:    #e2e8f0;
+  --amber:     #3b5bdb;
+  --adim:      #94a3b8;
+  --aglow:     rgba(59,91,219,.10);
+  --blue:      #3b5bdb;
+  --red:       #ef4444;
+  --green:     #10b981;
+  --t1: #3b82f6;
+  --t2: #10b981;
+  --t3: #f59e0b;
+  --t4: #8b5cf6;
+  --text:      #0f172a;
+  --tdim:      #64748b;
+  --tbright:   #0f172a;
+  --cell-bg:   #f8fafc;
+  --rec-color: #f59e0b;
+  --rel-color: #94a3b5;
 }
-body.light {
-  --bg: #f0f2f5; --panel: #ffffff; --border: #d0d8e4;
-  --adim: #b07010; --aglow: rgba(245,166,35,.15);
-  --text: #2a3040; --tdim: #8090a8; --tbright: #111827;
-  --cell-bg: #f8fafc;
-}
+
 body.light::before { display: none; }
 body.light select, body.light input[type=date], body.light input[type=text], body.light textarea { background: #f0f2f5; color: var(--tbright); }
 body.light .tscr { background: var(--cell-bg); }
@@ -135,15 +132,20 @@ body::before { display: none; }
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-header { text-align: center; margin-bottom: 16px; padding: 14px 0 8px; }
-h1 { font-size: clamp(18px,4.5vw,32px); font-weight: 700; color: var(--tbright); letter-spacing: 2px; text-transform: uppercase; line-height: 1.15; }
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 var(--border);
+}
+h1 { font-size: 15px; font-weight: 800; color: var(--tbright); letter-spacing: -0.2px; line-height: 1.2; }
 h1 span { color: var(--amber); }
-.hsub { margin-top: 5px; font-size: 11px; color: var(--tdim); letter-spacing: 1px; }
-.header-meta { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
-.header-author { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 2px; }
-.header-author span { color: var(--amber); font-weight: 700; }
-.theme-btn { background: none; border: 1px solid var(--border); color: var(--tdim); font-family: var(--font-mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all .2s; letter-spacing: 1px; }
-.theme-btn:hover { border-color: var(--amber); color: var(--amber); }
+.hsub { font-size: 10px; color: var(--tdim); margin-top: 1px; }
+.header-meta { display: none; }
+.header-author { display: none; }
+.header-author span { display: none; }
+.theme-btn { display: none; }
 
 /* ══════════════════════════════════════════════
    SECCIONES PLEGABLES — estructura base
@@ -159,7 +161,7 @@ h1 span { color: var(--amber); }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 11px 14px;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -169,10 +171,10 @@ h1 span { color: var(--amber); }
 }
 .section-header:hover { background: rgba(255,255,255,.02); }
 .section-icon { font-size: 16px; flex-shrink: 0; }
-.section-title { font-family: var(--font-ui); font-size: 13px; letter-spacing: 3px; text-transform: uppercase; font-weight: 600; flex: 1; }
+.section-title { font-family: var(--font-ui); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 700; flex: 1; }
 .section-badge { font-family: var(--font-mono); font-size: 9px; color: var(--tdim); }
 .section-arrow { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); transition: transform .2s; }
-.section-body { border-top: 1px solid var(--border); display: none; padding: 14px; }
+.section-body { border-top: 1px solid var(--border); display: none; padding: 12px 14px; }
 .section-body.open { display: block; }
 #sec-indicadores-body.open { padding: 0; overflow: hidden; }
 
@@ -269,10 +271,11 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .b-nol { background: rgba(74,158,218,.1); border: 1px solid var(--blue); color: var(--blue); }
 
 /* TABS */
-.tabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; margin-bottom: 9px; }
-.tab { flex: 1; padding: 6px 3px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.tab.on { background: var(--amber); color: #000; font-weight: 700; }
-.tab:hover:not(.on) { background: var(--border); color: var(--tbright); }
+.tabs { display:flex; gap:3px; padding:2px 0 6px; overflow-x:auto; scrollbar-width:none; margin-bottom:4px; }
+.tabs::-webkit-scrollbar{display:none}
+.tab { flex-shrink:0; padding:6px 16px; background:none; border:none; color:var(--tdim); font-family:var(--font-ui); font-size:13px; font-weight:600; cursor:pointer; border-radius:20px; transition:all .15s; white-space:nowrap; -webkit-tap-highlight-color:transparent; }
+.tab.on { background:var(--amber); color:#fff; font-weight:700; }
+.tab:active { opacity:.75; }
 .tab-content { display: none; }
 .tab-content.on { display: block; }
 
@@ -320,8 +323,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
    SECCIÓN 3 & 4: LICENCIAS / RECARGOS (listas)
 ══════════════════════════════════════════════ */
 .ev-tabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; margin-bottom: 10px; }
-.ev-tab { flex: 1; padding: 5px 3px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.ev-tab.on { background: var(--green); color: #000; font-weight: 700; }
+.ev-tab { flex-shrink:0; padding:6px 16px; background:none; border:none; color:var(--tdim); font-family:var(--font-ui); font-size:13px; font-weight:600; cursor:pointer; border-radius:20px; transition:all .15s; white-space:nowrap; }
+.ev-tab.on { background:var(--green); color:#fff; font-weight:700; }
 
 .ev-item { display: flex; align-items: center; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 4px; min-height: 44px; touch-action: manipulation; }
 .ev-item:hover { border-color: var(--tdim); }
@@ -364,9 +367,9 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .cal-lbl { font-family: var(--font-mono); font-size: 12px; color: var(--tbright); letter-spacing: 2px; }
 .cal-g-sel { background: var(--cell-bg); border: 1px solid var(--border); border-radius: 3px; color: var(--tbright); font-family: var(--font-mono); font-size: 11px; padding: 4px 8px; cursor: pointer; }
 .ctabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
-.ctab { padding: 4px 8px; background: none; border: none; color: var(--tdim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; cursor: pointer; border-radius: 3px; transition: all .2s; }
-.ctab.on { background: var(--t4); color: #000; font-weight: 700; }
-.ctab:hover:not(.on) { background: var(--border); color: var(--tbright); }
+.ctab { flex-shrink:0; padding:6px 16px; background:none; border:none; color:var(--tdim); font-family:var(--font-ui); font-size:13px; font-weight:600; cursor:pointer; border-radius:20px; transition:all .15s; white-space:nowrap; }
+.ctab.on { background:var(--t4); color:#fff; font-weight:700; }
+.ctab:active { opacity:.75; }
 .feriado-note { display: none; font-family: var(--font-mono); font-size: 9px; color: var(--tdim); background: rgba(74,158,218,.05); border: 1px solid rgba(74,158,218,.15); border-radius: 3px; padding: 5px 10px; margin-bottom: 8px; letter-spacing: .5px; }
 .feriado-note.show { display: block; }
 
@@ -730,92 +733,66 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 /* ── Indicadores Central Puerto ─────────────────────────────────────── */
 .s-indicadores { border-left-color: #4a9eda; }
 @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+/* ── MAIN NAV (top, horizontal) ────────────────────────────────── */
+.main-nav {
+  display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none;
+  padding: 6px 10px 5px; background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 49px; z-index: 99;
+  box-shadow: 0 1px 0 var(--border);
+}
+.main-nav::-webkit-scrollbar { display: none; }
+.main-nav .mnav-btn {
+  flex-shrink: 0; display: flex; align-items: center; gap: 6px;
+  padding: 7px 16px; background: none; border: none;
+  color: var(--tdim); font-family: var(--font-ui); font-size: 13px;
+  font-weight: 600; cursor: pointer; border-radius: 20px;
+  transition: all .15s; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.main-nav .mnav-btn.on {
+  background: var(--amber); color: #fff; font-weight: 700;
+}
+.main-nav .mnav-btn:active { opacity: .75; }
+.main-nav .mnav-btn svg {
+  width: 15px; height: 15px; flex-shrink: 0;
+}
+
+/* ── VIEWS ──────────────────────────────────────────────────────── */
+.view { display: none; padding: 0 10px 30px; }
+.view.on { display: block; }
+
+/* ── WRAP compacto ──────────────────────────────────────────────── */
+.wrap { max-width: 480px; margin: 0 auto; }
 </style>
   <!-- Vercel Analytics — registra visitas reales en el dashboard de Vercel -->
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
+
+<!-- TOP NAV -->
+<nav class="main-nav" id="main-nav">
+  <button class="mnav-btn on" id="mnav-diagrama" onclick="switchView('diagrama')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Diagrama</button>
+  <button class="mnav-btn" id="mnav-licencias" onclick="switchView('licencias')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg> Licencias</button>
+  <button class="mnav-btn" id="mnav-usuario" onclick="switchView('usuario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Usuario</button>
+  <button class="mnav-btn" id="mnav-admin" onclick="switchView('admin')" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Admin</button>
+</nav>
+
 <div class="wrap">
 
-<!-- ════════════════════════════════════════
-     HEADER
-════════════════════════════════════════ -->
-<header>
-  <h1>DIAGRAMA DE GUARDIA</h1>
-  <h2 style="font-size:clamp(13px,3.5vw,20px);font-weight:700;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin:3px 0 0">PLANTA DE AGUA PN</h2>
-  <div class="hsub">Creado por Joni Cimiotta</div>
-</header>
+<!-- TOP NAV -->
+<nav class="main-nav">
+  <button class="mnav-btn on" id="mnav-diagrama" onclick="switchView('diagrama')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Diagrama</button>
+  <button class="mnav-btn" id="mnav-licencias" onclick="switchView('licencias')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg> Licencias</button>
+  <button class="mnav-btn" id="mnav-usuario" onclick="switchView('usuario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Usuario</button>
+  <button class="mnav-btn" id="mnav-admin" onclick="switchView('admin')" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Admin</button>
+</nav>
 
-<!-- ════════════════════════════════════════
-     SECCIÓN 1: IDENTIFICACIÓN
-════════════════════════════════════════ -->
-<div class="section s-user">
-  <div class="section-header" onclick="toggleSection('sec-user')">
-    <span class="section-icon" style="color:var(--amber)">&#9673;</span>
-    <span class="section-title" id="sec-user-title">Identificación</span>
-    <span class="section-badge" id="user-section-badge">SIN IDENTIFICAR</span>
-    <span class="section-arrow" id="sec-user-arrow">&#9660;</span>
-  </div>
-  <div class="section-body open" id="sec-user-body">
-    <!-- Estado: sin usuario -->
-    <div id="no-user-state">
-      <p class="no-user-msg">&#9673; Tocá tu nombre para identificarte.</p>
-      <div id="user-grid" class="user-grid"></div>
-    </div>
-    <!-- Estado: con usuario -->
-    <div id="yes-user-state" style="display:none">
-      <div class="user-identified">
-        <div class="uav" id="u-av"></div>
-        <div>
-          <div class="unm" id="u-nm"></div>
-          <div class="ugd" id="u-gd"></div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="showSection('sec-lic')">&#9776; MIS LICENCIAS</button>
-      </div>
-      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
-        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
-          🏭 USINA DIGITAL
-        </a>
-        <button class="btn btn-danger" onclick="logout()">SALIR</button>
-      </div>
-      <!-- Panel relevante (solo si REL) -->
-      <div id="rel-panel" style="display:none">
-        <div class="rel-panel-inner">
-          <div class="rel-panel-hdr" onclick="toggleRelPanel()">
-            <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
-            <span id="rel-arr" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">&#9660;</span>
-          </div>
-          <div id="rel-body" class="rel-body">
-            <div style="margin-bottom:16px;">
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
-              <div id="rel-franco-stats"></div>
-            </div>
-            <div>
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
-              <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-              <button class="btn btn-outline" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Consultar Turno eliminado — el diagrama lo reemplaza -->
-
+<div class="view on" id="view-diagrama">
 <!-- ════════════════════════════════════════
      SECCIÓN 3: DIAGRAMA
 ════════════════════════════════════════ -->
-<div class="section s-diag">
-  <div class="section-header" onclick="toggleSection('sec-diag')">
-    <span class="section-icon" style="color:var(--t4)">&#9635;</span>
-    <span class="section-title">Diagrama de Guardias</span>
-    <span class="section-badge" id="cal-lbl-badge"></span>
-    <span class="section-arrow" id="sec-diag-arrow">&#9650;</span>
-  </div>
+<div class="section s-diag" style="border-left:none;box-shadow:none;background:transparent">
   <div class="section-body open" id="sec-diag-body">
     <div class="cal-top">
       <div style="display:flex;align-items:center;gap:5px">
@@ -855,7 +832,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div id="cal-body"></div>
   </div>
 </div>
+</div>
 
+<div class="view" id="view-licencias">
 <!-- ════════════════════════════════════════
      SECCIÓN 4: LICENCIAS
 ════════════════════════════════════════ -->
@@ -879,7 +858,125 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div id="ev-list"></div>
   </div>
 </div>
+<!-- ════════════════════════════════════════
+     SECCIÓN 6: RECARGOS
+════════════════════════════════════════ -->
+<div class="section s-rec" id="rec-panel" style="display:none">
+  <div class="section-header" onclick="toggleSection('sec-rec')">
+    <span class="section-icon" style="color:var(--rec-color)">&#9650;</span>
+    <span class="section-title">Recargos del Mes</span>
+    <span class="section-badge" id="rec-cnt-badge"></span>
+    <span class="section-arrow" id="sec-rec-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-rec-body">
+    <div class="rec-month-nav">
+      <button class="nav-btn" onclick="recNavMonth(-1)">&#9664;</button>
+      <div class="rec-month-lbl" id="rec-month-lbl">—</div>
+      <button class="nav-btn" onclick="recNavMonth(1)">&#9654;</button>
+    </div>
+    <div class="rec-summary" id="rec-summary"></div>
+    <div id="rec-list"></div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════
+     SECCIÓN 6: ROTACIÓN DE VACACIONES
+════════════════════════════════════════ -->
+<div class="section s-vac">
+  <div class="section-header" onclick="toggleSection('sec-vac')">
+    <span class="section-icon" style="color:var(--green)">&#9728;</span>
+    <span class="section-title">Rotación de Vacaciones</span>
+    <span class="section-badge" id="vac-section-badge"></span>
+    <span class="section-arrow" id="sec-vac-arrow">&#9660;</span>
+  </div>
+  <div class="section-body" id="sec-vac-body">
+    <div class="vac-table-wrap">
+      <table class="vac" id="vac-table">
+        <thead>
+          <tr>
+            <th class="vac-period" rowspan="2">Período</th>
+            <th class="vac-group" colspan="7">Quincena</th>
+          </tr>
+          <tr>
+            <th>2° Dic</th>
+            <th>1° Ene</th>
+            <th>2° Ene</th>
+            <th>1° Feb</th>
+            <th>2° Feb</th>
+            <th>1° Mar</th>
+            <th>2° Mar</th>
+          </tr>
+        </thead>
+        <tbody id="vac-tbody"></tbody>
+      </table>
+    </div>
+    <div class="vac-legend">
+      <div class="vac-leg-item"><div class="vac-leg-dot" style="background:rgba(245,166,35,.3);border:1px solid var(--amber)"></div>Período actual</div>
+      <div class="vac-leg-item"><div class="vac-leg-dot" style="background:rgba(61,186,120,.3);border:1px solid var(--green)"></div>Tu quincena (identificado)</div>
+    </div>
+  </div>
+</div>
+</div>
 
+<div class="view" id="view-usuario">
+<!-- ════════════════════════════════════════
+     SECCIÓN 1: IDENTIFICACIÓN
+════════════════════════════════════════ -->
+<div class="section s-user">
+  <div class="section-header" onclick="toggleSection('sec-user')">
+    <span class="section-icon" style="color:var(--amber)">&#9673;</span>
+    <span class="section-title" id="sec-user-title">Identificación</span>
+    <span class="section-badge" id="user-section-badge">SIN IDENTIFICAR</span>
+    <span class="section-arrow" id="sec-user-arrow">&#9660;</span>
+  </div>
+  <div class="section-body open" id="sec-user-body">
+    <!-- Estado: sin usuario -->
+    <div id="no-user-state">
+      <p class="no-user-msg">&#9673; Tocá tu nombre para identificarte.</p>
+      <div id="user-grid" class="user-grid"></div>
+    </div>
+    <!-- Estado: con usuario -->
+    <div id="yes-user-state" style="display:none">
+      <div class="user-identified">
+        <div class="uav" id="u-av"></div>
+        <div>
+          <div class="unm" id="u-nm"></div>
+          <div class="ugd" id="u-gd"></div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="switchView('licencias')">&#9776; MIS LICENCIAS</button>
+      </div>
+      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
+          🏭 USINA DIGITAL
+        </a>
+        <button class="btn btn-danger" onclick="logout()">SALIR</button>
+      </div>
+      <!-- Panel relevante (solo si REL) -->
+      <div id="rel-panel" style="display:none">
+        <div class="rel-panel-inner">
+          <div class="rel-panel-hdr" onclick="toggleRelPanel()">
+            <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
+            <span id="rel-arr" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">&#9660;</span>
+          </div>
+          <div id="rel-body" class="rel-body">
+            <div style="margin-bottom:16px;">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
+              <div id="rel-franco-stats"></div>
+            </div>
+            <div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
+              <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+              <button class="btn btn-outline" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Consultar Turno eliminado — el diagrama lo reemplaza -->
 <!-- ════════════════════════════════════════
      SECCIÓN 5: USINA DIGITAL
 ════════════════════════════════════════ -->
@@ -922,67 +1019,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <input type="hidden" id="usina-pega">
   </div>
 </div>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 6: RECARGOS
-════════════════════════════════════════ -->
-<div class="section s-rec" id="rec-panel" style="display:none">
-  <div class="section-header" onclick="toggleSection('sec-rec')">
-    <span class="section-icon" style="color:var(--rec-color)">&#9650;</span>
-    <span class="section-title">Recargos del Mes</span>
-    <span class="section-badge" id="rec-cnt-badge"></span>
-    <span class="section-arrow" id="sec-rec-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-rec-body">
-    <div class="rec-month-nav">
-      <button class="nav-btn" onclick="recNavMonth(-1)">&#9664;</button>
-      <div class="rec-month-lbl" id="rec-month-lbl">—</div>
-      <button class="nav-btn" onclick="recNavMonth(1)">&#9654;</button>
-    </div>
-    <div class="rec-summary" id="rec-summary"></div>
-    <div id="rec-list"></div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════
-     SECCIÓN 6: ROTACIÓN DE VACACIONES
-════════════════════════════════════════ -->
-<div class="section s-vac">
-  <div class="section-header" onclick="toggleSection('sec-vac')">
-    <span class="section-icon" style="color:var(--green)">&#9728;</span>
-    <span class="section-title">Rotación de Vacaciones</span>
-    <span class="section-badge" id="vac-section-badge"></span>
-    <span class="section-arrow" id="sec-vac-arrow">&#9660;</span>
-  </div>
-  <div class="section-body" id="sec-vac-body">
-    <div class="vac-table-wrap">
-      <table class="vac" id="vac-table">
-        <thead>
-          <tr>
-            <th class="vac-period" rowspan="2">Período</th>
-            <th class="vac-group" colspan="7">Quincena</th>
-          </tr>
-          <tr>
-            <th>2° Dic</th>
-            <th>1° Ene</th>
-            <th>2° Ene</th>
-            <th>1° Feb</th>
-            <th>2° Feb</th>
-            <th>1° Mar</th>
-            <th>2° Mar</th>
-          </tr>
-        </thead>
-        <tbody id="vac-tbody"></tbody>
-      </table>
-    </div>
-    <div class="vac-legend">
-      <div class="vac-leg-item"><div class="vac-leg-dot" style="background:rgba(245,166,35,.3);border:1px solid var(--amber)"></div>Período actual</div>
-      <div class="vac-leg-item"><div class="vac-leg-dot" style="background:rgba(61,186,120,.3);border:1px solid var(--green)"></div>Tu quincena (identificado)</div>
-    </div>
-  </div>
-</div>
-
-
 <!-- ════════════════════════════════════════
      SECCIÓN: INDICADORES CENTRAL PUERTO
 ════════════════════════════════════════ -->
@@ -997,7 +1033,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <span style="font-size:16px;color:var(--adim);flex-shrink:0">↗</span>
   </a>
 </div>
-
 <!-- ════════════════════════════════════════
      SECCIÓN: HORARIO COMBI
 ════════════════════════════════════════ -->
@@ -1072,7 +1107,6 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     </div>
   </div>
 </div>
-
 <!-- ════════════════════════════════════════
      SECCIÓN 7: LEYENDAS
 ════════════════════════════════════════ -->
@@ -1114,7 +1148,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     </div>
   </div>
 </div>
+</div>
 
+<div class="view" id="view-admin">
 <!-- ════════════════════════════════════════
      PANEL ADMINISTRADOR (solo Jonatan)
 ════════════════════════════════════════ -->
@@ -1174,6 +1210,7 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 </div><!-- /wrap -->
+</div>
 
 <!-- ════════════════════════════════════════
      MODALES Y BOTTOM SHEETS
@@ -1634,17 +1671,19 @@ function toggleSection(id) {
   // Cargar iframe de indicadores la primera vez que se abre
 }
 function showSection(id) {
-  const body = document.getElementById(id + '-body');
-  const arrow = document.getElementById(id + '-arrow');
-  body.classList.add('open');
-  arrow.textContent = '▲';
-  document.getElementById(id + '-body').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const map = {
+    'sec-lic':'licencias', 'evp':'licencias',
+    'sec-rec':'licencias', 'rec-panel':'licencias', 'sec-vac':'licencias',
+    'sec-user':'usuario',  'sec-usina':'usuario',
+    'sec-audit':'admin',
+  };
+  if (typeof switchView === 'function') switchView(map[id] || 'diagrama');
+  setTimeout(() => {
+    const b = document.getElementById(id + '-body');
+    if (b) b.classList.add('open');
+  }, 60);
 }
-function toggleTheme() {
-  const isLight = document.body.classList.toggle('light');
-  document.getElementById('theme-btn').textContent = isLight ? '● OSCURO' : '☀ CLARO';
-  lsSet('gd-theme', isLight ? 'light' : 'dark');
-}
+function toggleTheme() { /* desactivado */ }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ALGORITHM
@@ -2262,6 +2301,7 @@ async function selectUser(u) {
   await saveMe();
   await logAccess(u.name);
   updateUBar();
+  if (typeof switchView === 'function') switchView('diagrama');
   renderEvP();
   renderCal();
   renderVacTable();
@@ -2334,6 +2374,8 @@ function updateUBar() {
     }
     if (ME.guardia === 'REL') { document.getElementById('rel-panel').style.display = ''; renderRelPanel(); }
     else document.getElementById('rel-panel').style.display = 'none';
+    const _ab = document.getElementById('mnav-admin');
+    if (_ab) _ab.style.display = ME.name === ADMIN_NAME ? '' : 'none';
   } else {
     nu.style.display = ''; yu.style.display = 'none';
     evp.style.display = 'none'; rp.style.display = 'none';
@@ -2342,6 +2384,8 @@ function updateUBar() {
     if (title) title.textContent = 'Identificación';
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = 'none';
+    const _ab2 = document.getElementById('mnav-admin');
+    if (_ab2) _ab2.style.display = 'none';
     buildUserGrid();
   }
 }
@@ -3893,8 +3937,22 @@ function renderVacTable() {
 // ═══════════════════════════════════════════════════════════════════════════
 // EXPONER FUNCIONES AL HTML (necesario en type="module")
 // ═══════════════════════════════════════════════════════════════════════════
+
+// ── NAVEGACIÓN ENTRE VISTAS ──────────────────────────────────────────────
+function switchView(name) {
+  ['diagrama','licencias','usuario','admin'].forEach(v => {
+    const el  = document.getElementById('view-' + v);
+    const btn = document.getElementById('mnav-' + v);
+    if (el)  el.classList.toggle('on', v === name);
+    if (btn) btn.classList.toggle('on', v === name);
+  });
+  window.scrollTo(0, 0);
+  if (name === 'licencias') { try { renderEvP(); } catch(_) {} }
+  if (name === 'admin')     { try { renderAuditPanel(); } catch(_) {} }
+}
+
 Object.assign(window, {
-  showSection, toggleSection, toggleTheme,
+  switchView, showSection, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
@@ -4933,18 +4991,15 @@ async function renderUsinaPanel() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
+  document.body.classList.add('light'); // siempre modo claro
   // ── 0. Registrar Service Worker (PWA + notificaciones push) ──────────
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
   // ── 1. UI instantánea ──────────────────────────────────────────────────
-  const savedTheme = lsGet('gd-theme');
-  if (savedTheme==='light') {
-    document.body.classList.add('light');
-    const b = document.getElementById('theme-btn'); if(b) b.textContent='● OSCURO';
-  }
-  const n = new Date();
+  // modo oscuro desactivado
+    const n = new Date();
   calDate = dk(n.getFullYear(), n.getMonth()+1, n.getDate());
   dsInit();
   initCombi();
