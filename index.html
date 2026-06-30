@@ -122,6 +122,21 @@ button, a, select, input, textarea, label,
   --green-dim: #d1fae5;
 }
 
+body.dark {
+  --bg:        #0d1117;
+  --panel:     #161b22;
+  --border:    #21262d;
+  --border2:   #30363d;
+  --cell-bg:   #0d1117;
+  --text:      #e6edf3;
+  --tdim:      #8b949e;
+  --tbright:   #f0f6fc;
+  --adim:      #484f58;
+  --accent-dim:#1f2d3d;
+  --accent-txt:#58a6ff;
+  --green-dim: #0d2318;
+}
+
 body.light::before { display: none; }
 body.light select, body.light input[type=date], body.light input[type=text], body.light textarea { background: #f0f2f5; color: var(--tbright); }
 body.light .tscr { background: var(--cell-bg); }
@@ -747,6 +762,10 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 /* ── Indicadores Central Puerto ─────────────────────────────────────── */
 .s-indicadores { border-left-color: #4a9eda; }
 @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+body.dark header { background: #161b22; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+body.dark .main-nav { background: var(--panel); }
+body.dark #admin-fab { background: var(--panel); border-color: var(--border); }
+
 /* ── MAIN NAV ───────────────────────────────────────────────────── */
 .main-nav {
   display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
@@ -783,25 +802,23 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 <body>
 <header>
   <div style="display:flex;align-items:center;gap:10px">
-    <div style="width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;color:#fff;letter-spacing:-.5px;flex-shrink:0;border:1px solid rgba(255,255,255,.3)">DG</div>
+    <div style="width:34px;height:34px;background:rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-.5px;flex-shrink:0;border:1px solid rgba(255,255,255,.28)">DG</div>
     <div>
       <h1>Diagrama de Guardia</h1>
       <div class="hsub">Planta de Agua · Puerto Nuevo</div>
     </div>
   </div>
-  <div id="pwa-install-btn" onclick="triggerInstall()" style="display:none;align-items:center;gap:5px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:5px 12px;cursor:pointer;-webkit-tap-highlight-color:transparent">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    <span style="font-size:12px;font-weight:700;color:#fff;font-family:var(--font-ui)">Instalar</span>
-  </div>
+  <button id="theme-toggle-btn" onclick="toggleTheme()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;-webkit-tap-highlight-color:transparent;flex-shrink:0">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
 </header>
 
 <div class="wrap">
 
 <nav class="main-nav">
+  <button class="mnav-btn" id="mnav-usuario" onclick="switchView('usuario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Usuario</button>
   <button class="mnav-btn on" id="mnav-diagrama" onclick="switchView('diagrama')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> Diagrama</button>
   <button class="mnav-btn" id="mnav-licencias" onclick="switchView('licencias')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg> Licencias</button>
-  <button class="mnav-btn" id="mnav-usuario" onclick="switchView('usuario')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Usuario</button>
-  <button class="mnav-btn" id="mnav-admin" onclick="switchView('admin')" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Admin</button>
 </nav>
 
 <!-- ════ VIEW: DIAGRAMA ════ -->
@@ -850,6 +867,12 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
     <div id="cal-body"></div>
   
   </div>
+</div>
+
+<!-- ADMIN FAB — solo visible para Jonatan -->
+<div id="admin-fab" onclick="switchView('admin')" style="display:none;position:fixed;bottom:24px;right:16px;z-index:150;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.12);-webkit-tap-highlight-color:transparent;max-width:480px">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <span style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--font-ui)">Administrador</span>
 </div>
 
 <!-- ════ VIEW: LICENCIAS ════ -->
@@ -1224,6 +1247,15 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 </div>
 
 </div><!-- /wrap -->
+
+<!-- INSTALL BANNER -->
+<div id="install-banner" style="display:none;padding:12px 16px 24px;max-width:480px;margin:0 auto">
+  <button onclick="triggerInstall()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:#fff;border:none;border-radius:16px;padding:16px;font-family:var(--font-ui);font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35);-webkit-tap-highlight-color:transparent">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+    Instalar aplicación
+  </button>
+  <p style="text-align:center;font-size:11px;color:var(--tdim);margin:8px 0 0;font-family:var(--font-ui)">Acceso rápido desde tu pantalla de inicio</p>
+</div>
 
 <!-- Modal: Contraseña -->
 <div class="overlay off" id="m-password">
@@ -1690,7 +1722,15 @@ function showSection(id) {
   if (typeof switchView === 'function') switchView(map[id] || 'diagrama');
   setTimeout(() => { const b = document.getElementById(id+'-body'); if(b) b.classList.add('open'); }, 60);
 }
-function toggleTheme() { /* desactivado */ }
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.body.classList.toggle('light', !isDark);
+  lsSet('gd-theme', isDark ? 'dark' : 'light');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.innerHTML = isDark
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ALGORITHM
@@ -2382,7 +2422,9 @@ function updateUBar() {
     if (ME.guardia === 'REL') { document.getElementById('rel-panel').style.display = ''; renderRelPanel(); }
     else document.getElementById('rel-panel').style.display = 'none';
     const _ab = document.getElementById('mnav-admin');
-    if (_ab) _ab.style.display = ME.name === ADMIN_NAME ? '' : 'none';
+    if (_ab) _ab.style.display = 'none'; // admin siempre oculto en nav
+    const _adminFab = document.getElementById('admin-fab');
+    if (_adminFab) _adminFab.style.display = ME.name === ADMIN_NAME ? 'flex' : 'none';
   } else {
     nu.style.display = ''; yu.style.display = 'none';
     evp.style.display = 'none'; rp.style.display = 'none';
@@ -2392,6 +2434,8 @@ function updateUBar() {
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = 'none';
     const _ab2 = document.getElementById('mnav-admin'); if (_ab2) _ab2.style.display = 'none';
+    const _adminFab2 = document.getElementById('admin-fab');
+    if (_adminFab2) _adminFab2.style.display = 'none';
     buildUserGrid();
   }
 }
@@ -3954,6 +3998,7 @@ function switchView(name) {
   window.scrollTo(0, 0);
   if (name === 'licencias') { try { renderEvP(); } catch(_) {} }
   if (name === 'admin')     { try { renderAuditPanel(); } catch(_) {} }
+  if (name === 'diagrama')  { try { renderCal(); } catch(_) {} }
 }
 
 
@@ -3964,10 +4009,14 @@ window.addEventListener('beforeinstallprompt', e => {
   _deferredPrompt = e;
   const btn = document.getElementById('pwa-install-btn');
   if (btn) btn.style.display = 'flex';
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.style.display = '';
 });
 window.addEventListener('appinstalled', () => {
-  const btn = document.getElementById('pwa-install-btn');
-  if (btn) btn.style.display = 'none';
+  const btn2 = document.getElementById('pwa-install-btn');
+  if (btn2) btn2.style.display = 'none';
+  const banner2 = document.getElementById('install-banner');
+  if (banner2) banner2.style.display = 'none';
   _deferredPrompt = null;
 });
 function triggerInstall() {
@@ -3978,7 +4027,7 @@ function triggerInstall() {
 }
 
 Object.assign(window, {
-  switchView, showSection, triggerInstall, toggleSection, toggleTheme,
+  switchView, showSection, triggerInstall, toggleTheme, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
@@ -4565,8 +4614,6 @@ function renderAdminLicencias() {
   const div = document.getElementById('admin-lic-content');
   if (!div) return;
   const sorted = [...EVENTS].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
-  if (sorted.length === 0) { div.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:8px 0">Sin licencias registradas.</div>'; return; }
-
   // Detectar duplicados: mismo usuario, mismo tipo, misma fecha de inicio
   const seen = {};
   const dupIds = new Set();
@@ -4597,10 +4644,10 @@ function renderAdminLicencias() {
 
   PRESET_USERS.forEach(p => {
     const evs = byUser[p.name] || [];
-    if (!evs.length) return;
     const col = G_COLORS[p.guardia]||'#8a9ab5';
+    const countLabel = evs.length ? `${evs.length} licencia${evs.length>1?'s':''}` : 'Sin licencias';
     html += `<div style="margin-bottom:14px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${evs.length} licencia${evs.length>1?'s':''}</div>`;
+      <div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${countLabel}</div>`;
     evs.forEach(ev => {
       const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
       const desc = ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '';
@@ -5017,7 +5064,12 @@ async function renderUsinaPanel() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
-  document.body.classList.add('light');
+  const _theme = lsGet('gd-theme') || 'light';
+  document.body.classList.add(_theme);
+  const _tbtn = document.getElementById('theme-toggle-btn');
+  if (_tbtn) _tbtn.innerHTML = _theme === 'dark'
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
   // ── 0. Registrar Service Worker (PWA + notificaciones push) ──────────
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
@@ -5330,7 +5382,15 @@ function showSection(id) {
   arrow.textContent = '▲';
   document.getElementById(id + '-body').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
-function toggleTheme() { /* desactivado */ }
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  document.body.classList.toggle('light', !isDark);
+  lsSet('gd-theme', isDark ? 'dark' : 'light');
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.innerHTML = isDark
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ALGORITHM
