@@ -393,7 +393,7 @@ textarea:focus { outline: none; border-color: var(--amber); }
    SECCIÓN 5: DIAGRAMA (tabla)
 ══════════════════════════════════════════════ */
 .cal-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.cal-lbl { font-family: var(--font-mono); font-size: 12px; color: var(--tbright); letter-spacing: 2px; }
+.cal-lbl { font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: var(--tbright); letter-spacing: -.2px; }
 .cal-g-sel { background: var(--cell-bg); border: 1px solid var(--border); border-radius: 3px; color: var(--tbright); font-family: var(--font-mono); font-size: 11px; padding: 4px 8px; cursor: pointer; }
 .ctabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
 .ctab { flex-shrink:0; padding:6px 16px; background:none; border:none; color:var(--tdim); font-family:var(--font-ui); font-size:13px; font-weight:600; cursor:pointer; border-radius:20px; transition:all .15s; white-space:nowrap; }
@@ -410,19 +410,19 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .tscr::-webkit-scrollbar-track { background: var(--cell-bg); }
 .tscr::-webkit-scrollbar-thumb { background: var(--border); }
 table.gt { border-collapse: collapse; min-width: max-content; }
-table.gt th { padding: 8px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 52px; border-radius: 6px; }
-table.gt th.gn { min-width: 70px; width: 70px; position: sticky; left: 0; z-index: 5; border-right: 1px solid var(--border2,#c8d4e3); }
+table.gt th { padding: 8px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 56px; border-radius: 6px; }
+table.gt th.gn { min-width: 74px; width: 74px; font-family: var(--font-ui); position: sticky; left: 0; z-index: 5; border-right: 1px solid var(--border2,#c8d4e3); }
 table.gt th .dd { font-size: 7px; color: var(--tdim); }
-table.gt th .dn { font-size: 15px; font-weight: 800; color: var(--tbright); letter-spacing: -.3px; }
+table.gt th .dn { font-family: var(--font-ui); font-size: 16px; font-weight: 800; color: var(--tbright); letter-spacing: -.3px; }
 table.gt th .fd2 { width: 4px; height: 4px; background: var(--red); border-radius: 50%; margin: 1px auto 0; }
 table.gt th.sc .dn { color: var(--amber); } table.gt th.sc { border-color: var(--amber) !important; background: rgba(245,166,35,.06) !important; }
 table.gt th.th-today { border-color: var(--green) !important; background: rgba(61,186,120,.06) !important; }
 table.gt th.th-today .dn { color: var(--green); }
 .today-dot { width: 4px; height: 4px; background: var(--green); border-radius: 50%; margin: 1px auto 0; }
-table.gt td.gn { font-size: 10px; font-weight: 800; color: var(--tdim); letter-spacing: .3px; padding: 4px 8px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
+table.gt td.gn { font-family: var(--font-ui); font-size: 11px; font-weight: 800; color: var(--tdim); letter-spacing: .2px; padding: 4px 10px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
 table.gt tr.gs td.gn { color: var(--amber); border-left: 2px solid var(--amber); }
 table.gt tr.srow td.gn { color: var(--blue); border-left: 2px solid var(--blue); }
-table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 52px; height: 56px; position: relative; vertical-align: middle;
+table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 56px; height: 62px; position: relative; vertical-align: middle;
   border-radius: 8px;
   transition: all .15s ease;
 }
@@ -3095,7 +3095,8 @@ function buildTable(days, selDate, selG, fmap, title, isCurrent, filterG) {
   rowsHtml += '<tr class="spec-row op-row">';
   rowsHtml += `<td class="gn"><span style="font-size:9px;color:var(--t2);font-weight:700">OP</span><br><span style="font-size:7px;color:var(--tdim)">Operador</span></td>`;
   days.forEach(date => {
-    const turno = getTurno('D', date);
+    const turnoD = getTurno('D', date);
+    const turno = turnoD === 'F' ? 'F' : 2;  // francos de D, pero siempre T2 al trabajar
     const isSel = date===selDate, isFer = !!fmap[date];
     const dayEvs = getEvsByDateAndG(date, 'OP');
     let cls = turno==='F'?'tf':(turno?`t${turno}`:'');
@@ -3996,9 +3997,32 @@ function switchView(name) {
     if (btn) btn.classList.toggle('on', v === name);
   });
   window.scrollTo(0, 0);
-  if (name === 'licencias') { try { renderEvP(); } catch(_) {} }
-  if (name === 'admin')     { try { renderAuditPanel(); } catch(_) {} }
-  if (name === 'diagrama')  { try { renderCal(); } catch(_) {} }
+
+  if (name === 'licencias') {
+    // Abrir licencias y recargos automáticamente
+    ['sec-lic-body','sec-rec-body'].forEach(id => {
+      const b = document.getElementById(id);
+      const arrow = document.getElementById(id.replace('-body','-arrow'));
+      if (b && !b.classList.contains('open')) {
+        b.classList.add('open');
+        if (arrow) arrow.textContent = '▲';
+      }
+    });
+    try { renderEvP(); } catch(_) {}
+  }
+
+  if (name === 'usuario') {
+    // Abrir identificación automáticamente
+    const b = document.getElementById('sec-user-body');
+    const arrow = document.getElementById('sec-user-arrow');
+    if (b && !b.classList.contains('open')) {
+      b.classList.add('open');
+      if (arrow) arrow.textContent = '▲';
+    }
+  }
+
+  if (name === 'admin')    { try { renderAuditPanel(); } catch(_) {} }
+  if (name === 'diagrama') { try { renderCal(); } catch(_) {} }
 }
 
 
