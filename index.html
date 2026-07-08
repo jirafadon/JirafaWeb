@@ -795,6 +795,93 @@ body.dark #admin-fab { background: var(--panel); border-color: var(--border); }
 #view-diagrama .section-body { padding: 10px 10px 0; }
 #view-licencias, #view-usuario, #view-admin { padding: 10px 12px 32px; }
 
+
+/* ── CALENDAR GRID (vista guardia individual) ───────────────────── */
+.cg-wrap { padding: 0 4px 16px; }
+.cg-selector {
+  display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none;
+  padding: 10px 8px 8px; 
+}
+.cg-selector::-webkit-scrollbar { display: none; }
+.cg-g-btn {
+  flex-shrink: 0; width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel); border: 2px solid var(--border);
+  border-radius: 14px; font-family: var(--font-ui); font-size: 16px;
+  font-weight: 800; cursor: pointer; transition: all .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cg-g-btn.on {
+  border-color: currentColor;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.cg-title {
+  font-family: var(--font-ui); font-size: 11px; font-weight: 600;
+  color: var(--tdim); letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 4px 10px 12px; text-align: center;
+}
+.cg-month-label {
+  font-family: var(--font-ui); font-size: 13px; font-weight: 800;
+  color: var(--accent); letter-spacing: .5px; text-transform: uppercase;
+  padding: 14px 10px 8px; text-align: left;
+}
+.cg-month-label:first-child { padding-top: 4px; }
+.cg-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  padding: 0 4px;
+}
+.cg-dow {
+  text-align: center; font-family: var(--font-ui); font-size: 11px;
+  font-weight: 700; color: var(--tdim); padding: 4px 0 6px;
+}
+.cg-dow.sun, .cg-dow.sat { color: var(--red); opacity: .7; }
+.cg-cell {
+  aspect-ratio: 1; border-radius: 12px; display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: 3px; cursor: pointer; transition: transform .1s;
+  -webkit-tap-highlight-color: transparent; position: relative;
+  background: var(--panel); border: 1.5px solid var(--border);
+}
+.cg-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+.cg-cell.cg-today { border-color: var(--accent) !important; border-width: 2px; }
+.cg-cell.cg-tf { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
+.cg-cell.cg-t1 { background: rgba(59,130,246,.12); border-color: rgba(59,130,246,.2); }
+.cg-cell.cg-t2 { background: rgba(16,185,129,.12); border-color: rgba(16,185,129,.2); }
+.cg-cell.cg-t3 { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.2); }
+.cg-cell.cg-t4 { background: rgba(139,92,246,.12); border-color: rgba(139,92,246,.2); }
+.cg-cell.cg-lic { border-width: 2px; }
+.cg-cell.cg-fer::after {
+  content: ''; position: absolute; bottom: 4px;
+  width: 4px; height: 4px; border-radius: 50%; background: var(--accent); opacity: .6;
+}
+.cg-day-num {
+  font-family: var(--font-ui); font-size: 10px; font-weight: 600;
+  color: var(--tdim); line-height: 1; margin-bottom: 1px;
+  align-self: flex-start; padding-left: 5px; width: 100%;
+}
+.cg-cell.cg-today .cg-day-num { color: var(--accent); font-weight: 800; }
+.cg-turno {
+  font-family: var(--font-ui); font-size: 22px; font-weight: 900;
+  line-height: 1; letter-spacing: -.5px;
+}
+.cg-cell.cg-tf .cg-turno { color: var(--red); }
+.cg-cell.cg-t1 .cg-turno { color: var(--t1); }
+.cg-cell.cg-t2 .cg-turno { color: var(--t2); }
+.cg-cell.cg-t3 .cg-turno { color: var(--t3); }
+.cg-cell.cg-t4 .cg-turno { color: var(--t4); }
+.cg-lic-code {
+  font-family: var(--font-ui); font-size: 13px; font-weight: 800; line-height: 1;
+}
+.cg-empty-dot {
+  font-size: 18px; color: var(--border); font-weight: 900; line-height: 1;
+}
+body.dark .cg-cell { background: var(--panel); border-color: var(--border); }
+body.dark .cg-cell.cg-tf { background: rgba(239,68,68,.15); }
+body.dark .cg-cell.cg-t1 { background: rgba(59,130,246,.15); }
+body.dark .cg-cell.cg-t2 { background: rgba(16,185,129,.15); }
+body.dark .cg-cell.cg-t3 { background: rgba(245,158,11,.15); }
+body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
+
 </style>
   <!-- Vercel Analytics — registra visitas reales en el dashboard de Vercel -->
   <script defer src="/_vercel/insights/script.js"></script>
@@ -2947,6 +3034,21 @@ async function renderCal(){
   else{const t=`AÑO ${y}`;lbl.textContent=t;badge.textContent=t;}
   const body=document.getElementById('cal-body');body.innerHTML='';
   const selDate=S?S.f:calDate,selG=g||(S?S.g:'A'),filterG=g;
+
+  // Si hay guardia seleccionada → vista grid tipo calendario
+  if (filterG) {
+    body.innerHTML = buildGuardiaView(filterG, y, m);
+    // Scroll a hoy si vista año
+    if (CT === 'anio') {
+      requestAnimationFrame(() => {
+        const todayCell = body.querySelector('.cg-today');
+        if (todayCell) todayCell.scrollIntoView({ block: 'center' });
+      });
+    }
+    return;
+  }
+
+  // Sin guardia → tabla horizontal original
   if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true,filterG));}
   else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true,filterG));}
   else{const scr=el('div','yscr','');let cur=null;for(let mm=1;mm<=12;mm++){const isCur=mm===m;const sec=buildTable(getMonthDays(y,mm),selDate,selG,allFer([y]),`${MES_L[mm].toUpperCase()} ${y}`,isCur,filterG);if(isCur)cur=sec;scr.appendChild(sec);}body.appendChild(scr);if(cur)requestAnimationFrame(()=>cur.scrollIntoView({block:'start'}));}
@@ -4050,8 +4152,219 @@ function triggerInstall() {
   }
 }
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUILD CALENDAR GRID — vista tipo calendario para guardia individual
+// ═══════════════════════════════════════════════════════════════════════════
+function buildCalGrid(y, m, g, fmap, selDate) {
+  const today = dk(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
+  const days = getMonthDays(y, m);
+  const col = G_COLORS[g] || '#8a9ab5';
+
+  // Calcular turno efectivo para la guardia
+  function getCellInfo(date) {
+    if (g === 'REL') {
+      const sched = REL_SCHEDULE[date];
+      const dayEvs = getEvsByDateAndG(date, 'REL').filter(e => e.type !== 'CT');
+      if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+      if (sched === 'F') return { type: 'F' };
+      if (sched) return { type: 'T', turno: sched };
+      return { type: 'empty' };
+    }
+    if (g === 'OP') {
+      const turnoD = getTurno('D', date);
+      const turno = turnoD === 'F' ? 'F' : 2;
+      const dayEvs = getEvsByDateAndG(date, 'OP').filter(e => e.type !== 'CT');
+      if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+      if (turno === 'F') return { type: 'F' };
+      return { type: 'T', turno };
+    }
+    // A-E
+    const turnoBase = getTurno(g, date);
+    const ctSwap = findCTSwap(g, date);
+    const turno = ctSwap ? ctSwap.swappedTurno : turnoBase;
+    const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
+    if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+    if (turno === 'F') return { type: 'F' };
+    if (turno) return { type: 'T', turno };
+    return { type: 'empty' };
+  }
+
+  // Días de la semana: D L M M J V S
+  const DOW_LABELS = [
+    {l:'D',cls:'sun'},{l:'L',cls:''},{l:'M',cls:''},{l:'M',cls:''},
+    {l:'J',cls:''},{l:'V',cls:''},{l:'S',cls:'sat'}
+  ];
+
+  let html = '<div class="cg-grid">';
+  // Cabecera días
+  DOW_LABELS.forEach(({l,cls}) => {
+    html += `<div class="cg-dow ${cls}">${l}</div>`;
+  });
+
+  // Celdas vacías iniciales
+  const firstDow = new Date(y, m-1, 1).getDay(); // 0=D
+  for (let i = 0; i < firstDow; i++) {
+    html += '<div class="cg-cell empty"></div>';
+  }
+
+  // Celdas de días
+  days.forEach(date => {
+    const {d} = pd(date);
+    const isToday = date === today;
+    const isFer = !!fmap[date];
+    const info = getCellInfo(date);
+
+    let cellCls = 'cg-cell';
+    let innerHtml = `<div class="cg-day-num">${d}</div>`;
+
+    if (info.type === 'F') {
+      cellCls += ' cg-tf';
+      innerHtml += `<div class="cg-turno" style="color:var(--red)">F</div>`;
+    } else if (info.type === 'T') {
+      cellCls += ` cg-t${info.turno}`;
+      const tColor = `var(--t${info.turno})`;
+      innerHtml += `<div class="cg-turno" style="color:${tColor}">${info.turno}</div>`;
+    } else if (info.type === 'lic') {
+      const li = LIC[info.ev.type] || { name: info.ev.type, color: '#8a9ab5' };
+      cellCls += ' cg-lic';
+      innerHtml += `<div class="cg-lic-code" style="color:${li.color}">${info.ev.type}</div>`;
+    } else {
+      // empty = REL sin asignar
+      innerHtml += `<div class="cg-empty-dot">·</div>`;
+    }
+
+    if (isToday) cellCls += ' cg-today';
+    if (isFer) cellCls += ' cg-fer';
+
+    html += `<div class="${cellCls}" onclick="handleDayClick('${date}','${g}')">${innerHtml}</div>`;
+  });
+
+  html += '</div>';
+  return html;
+}
+
+// Construye la vista completa del grid para una guardia (semana, mes o año)
+function buildGuardiaView(g, y, m) {
+  const col = G_COLORS[g] || '#8a9ab5';
+  const userName = PRESET_USERS.find(p => p.guardia === g)?.name || USERS.find(u => u.guardia === g)?.name || g;
+  const fmap = allFer([y]);
+
+  // Selector de guardia arriba
+  const GUARDIAS_ALL = ['A','B','C','D','E','OP','REL'];
+  let sel = '<div class="cg-selector">';
+  GUARDIAS_ALL.forEach(gx => {
+    const colx = G_COLORS[gx] || '#8a9ab5';
+    const isOn = gx === g;
+    sel += `<button class="cg-g-btn${isOn?' on':''}" style="color:${colx};${isOn?`border-color:${colx};background:${colx}18`:'border-color:var(--border)'}" onclick="selectGuardiaGrid('${gx}')">${gx}</button>`;
+  });
+  sel += '</div>';
+
+  // Título
+  let titleText = '';
+  if (CT === 'sem') {
+    const w = getWeek(calDate);
+    const p0 = pd(w[0]), p6 = pd(w[6]);
+    titleText = `${userName} · ${G_LABEL[g]||g} · ${p0.d} ${MES_S[p0.m]} – ${p6.d} ${MES_S[p6.m]} ${p6.y}`;
+  } else if (CT === 'mes') {
+    titleText = `${userName} · ${G_LABEL[g]||g} · ${MES_L[m]} ${y}`;
+  } else {
+    titleText = `${userName} · ${G_LABEL[g]||g} · ${y}`;
+  }
+  const title = `<div class="cg-title" style="color:${col}">${titleText.toUpperCase()}</div>`;
+
+  // Contenido según modo
+  let content = '';
+  if (CT === 'sem') {
+    const week = getWeek(calDate);
+    const weekFmap = allFer([...new Set(week.map(x => +x.split('-')[0]))]);
+    // Semana: solo 7 días en una fila
+    const DOW_LABELS = [
+      {l:'D',cls:'sun'},{l:'L',cls:''},{l:'M',cls:''},{l:'M',cls:''},
+      {l:'J',cls:''},{l:'V',cls:''},{l:'S',cls:'sat'}
+    ];
+    let grid = '<div class="cg-grid">';
+    DOW_LABELS.forEach(({l,cls}) => { grid += `<div class="cg-dow ${cls}">${l}</div>`; });
+    // Para semana, mostrar los 7 días en orden
+    week.forEach(date => {
+      const {d} = pd(date);
+      const isToday = date === dk(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
+      const isFer = !!weekFmap[date];
+      const info = getCellInfoForG(g, date);
+      let cellCls = 'cg-cell'; let innerHtml = `<div class="cg-day-num">${d}</div>`;
+      if (info.type==='F') { cellCls+=' cg-tf'; innerHtml+=`<div class="cg-turno" style="color:var(--red)">F</div>`; }
+      else if (info.type==='T') { cellCls+=` cg-t${info.turno}`; innerHtml+=`<div class="cg-turno" style="color:var(--t${info.turno})">${info.turno}</div>`; }
+      else if (info.type==='lic') { const li=LIC[info.ev.type]||{color:'#8a9ab5'}; cellCls+=' cg-lic'; innerHtml+=`<div class="cg-lic-code" style="color:${li.color}">${info.ev.type}</div>`; }
+      else { innerHtml+=`<div class="cg-empty-dot">·</div>`; }
+      if (isToday) cellCls+=' cg-today';
+      if (isFer) cellCls+=' cg-fer';
+      grid += `<div class="${cellCls}" onclick="handleDayClick('${date}','${g}')">${innerHtml}</div>`;
+    });
+    grid += '</div>';
+    content = grid;
+  } else if (CT === 'mes') {
+    content = buildCalGrid(y, m, g, fmap, calDate);
+  } else {
+    // Año: 12 meses
+    const yfmap = allFer([y]);
+    for (let mm = 1; mm <= 12; mm++) {
+      content += `<div class="cg-month-label">${MES_L[mm]} ${y}</div>`;
+      content += buildCalGrid(y, mm, g, yfmap, calDate);
+    }
+  }
+
+  return `<div class="cg-wrap">${sel}${title}${content}</div>`;
+}
+
+// Helper para obtener info de celda — usado en semana también
+function getCellInfoForG(g, date) {
+  if (g === 'REL') {
+    const sched = REL_SCHEDULE[date];
+    const dayEvs = getEvsByDateAndG(date, 'REL').filter(e => e.type !== 'CT');
+    if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+    if (sched === 'F') return { type: 'F' };
+    if (sched) return { type: 'T', turno: sched };
+    return { type: 'empty' };
+  }
+  if (g === 'OP') {
+    const turnoD = getTurno('D', date);
+    const turno = turnoD === 'F' ? 'F' : 2;
+    const dayEvs = getEvsByDateAndG(date, 'OP').filter(e => e.type !== 'CT');
+    if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+    if (turno === 'F') return { type: 'F' };
+    return { type: 'T', turno };
+  }
+  const turnoBase = getTurno(g, date);
+  const ctSwap = findCTSwap(g, date);
+  const turno = ctSwap ? ctSwap.swappedTurno : turnoBase;
+  const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
+  if (dayEvs.length > 0) return { type: 'lic', ev: dayEvs[0] };
+  if (turno === 'F') return { type: 'F' };
+  if (turno) return { type: 'T', turno };
+  return { type: 'empty' };
+}
+
+// Al tocar una celda del grid
+function handleDayClick(date, g) {
+  // Setear la fecha seleccionada y abrir el picker de licencias
+  calDate = date;
+  if (ME && (ME.guardia === g || (ME.name === ADMIN_NAME))) {
+    // Abrir ds-picker para ese día
+    dsInit();
+    dsOpen(date, date, g);
+  }
+}
+
+// Cambiar guardia desde el selector del grid
+function selectGuardiaGrid(g) {
+  document.getElementById('cal-g').value = g;
+  renderCal();
+}
+
+
 Object.assign(window, {
-  switchView, showSection, triggerInstall, toggleTheme, toggleSection, toggleTheme,
+  switchView, showSection, triggerInstall, toggleTheme,
+  selectGuardiaGrid, handleDayClick, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
