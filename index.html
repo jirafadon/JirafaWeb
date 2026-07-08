@@ -3021,7 +3021,20 @@ function calNav(dir){
   else{const ny=y+dir;if(ny<2025||ny>new Date().getFullYear()+6)return;calDate=dk(ny,m,d);}
   renderCal();
 }
-function calGoToday(){const n=new Date();calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());renderCal();}
+function calGoToday(){
+  const n=new Date();
+  calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
+  renderCal().then(()=>{
+    // Si estamos en vista año con guardia, scroll adicional al mes actual
+    if(CT==='anio' && document.getElementById('cal-g').value){
+      setTimeout(()=>{
+        const body2=document.getElementById('cal-body');
+        const todayCell=body2&&body2.querySelector('.cg-today');
+        if(todayCell) todayCell.scrollIntoView({block:'center',behavior:'smooth'});
+      },120);
+    }
+  }).catch(()=>{});
+}
 async function renderCal(){
   const{y,m}=pd(calDate);const g=document.getElementById('cal-g').value;
   const yrs=CT==='sem'?[...new Set(getWeek(calDate).map(x=>+x.split('-')[0]))]:[y];
@@ -3038,12 +3051,25 @@ async function renderCal(){
   // Si hay guardia seleccionada → vista grid tipo calendario
   if (filterG) {
     body.innerHTML = buildGuardiaView(filterG, y, m);
-    // Scroll a hoy si vista año
+    // Scroll a hoy si vista año — doble RAF para esperar layout completo
     if (CT === 'anio') {
-      requestAnimationFrame(() => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
         const todayCell = body.querySelector('.cg-today');
-        if (todayCell) todayCell.scrollIntoView({ block: 'center' });
-      });
+        if (todayCell) {
+          todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        } else {
+          // Fallback: scroll al mes actual por label
+          const labels = body.querySelectorAll('.cg-month-label');
+          const n = new Date();
+          const curMonth = MES_L[n.getMonth()+1];
+          for (const lbl of labels) {
+            if (lbl.textContent.startsWith(curMonth)) {
+              lbl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+              break;
+            }
+          }
+        }
+      }));
     }
     return;
   }
