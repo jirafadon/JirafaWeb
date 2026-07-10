@@ -3024,16 +3024,8 @@ function calNav(dir){
 function calGoToday(){
   const n=new Date();
   calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
-  renderCal().then(()=>{
-    // Si estamos en vista año con guardia, scroll adicional al mes actual
-    if(CT==='anio' && document.getElementById('cal-g').value){
-      setTimeout(()=>{
-        const body2=document.getElementById('cal-body');
-        const todayCell=body2&&body2.querySelector('.cg-today');
-        if(todayCell) todayCell.scrollIntoView({block:'center',behavior:'smooth'});
-      },120);
-    }
-  }).catch(()=>{});
+  renderCal();
+  if(CT==='anio') setTimeout(()=>scrollToCurrentMonth(), 120);
 }
 async function renderCal(){
   const{y,m}=pd(calDate);const g=document.getElementById('cal-g').value;
@@ -3051,25 +3043,9 @@ async function renderCal(){
   // Si hay guardia seleccionada → vista grid tipo calendario
   if (filterG) {
     body.innerHTML = buildGuardiaView(filterG, y, m);
-    // Scroll a hoy si vista año — doble RAF para esperar layout completo
+    // Vista año: scroll al mes actual después de que el DOM esté listo
     if (CT === 'anio') {
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        const todayCell = body.querySelector('.cg-today');
-        if (todayCell) {
-          todayCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
-        } else {
-          // Fallback: scroll al mes actual por label
-          const labels = body.querySelectorAll('.cg-month-label');
-          const n = new Date();
-          const curMonth = MES_L[n.getMonth()+1];
-          for (const lbl of labels) {
-            if (lbl.textContent.startsWith(curMonth)) {
-              lbl.scrollIntoView({ block: 'start', behavior: 'smooth' });
-              break;
-            }
-          }
-        }
-      }));
+      setTimeout(() => scrollToCurrentMonth(), 80);
     }
     return;
   }
@@ -4382,6 +4358,25 @@ function handleDayClick(date, g) {
 }
 
 // Cambiar guardia desde el selector del grid
+
+function scrollToCurrentMonth() {
+  const body = document.getElementById('cal-body');
+  if (!body) return;
+  const n = new Date();
+  const curMonthLabel = MES_L[n.getMonth() + 1];
+  // Buscar el label del mes actual
+  const labels = body.querySelectorAll('.cg-month-label');
+  for (const lbl of labels) {
+    if (lbl.textContent.trim().startsWith(curMonthLabel)) {
+      // Calcular posición absoluta del label en la página
+      const rect = lbl.getBoundingClientRect();
+      const scrollTop = window.pageYOffset + rect.top - (window.innerHeight / 2) + (rect.height / 2);
+      window.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+      return;
+    }
+  }
+}
+
 function selectGuardiaGrid(g) {
   document.getElementById('cal-g').value = g;
   renderCal();
