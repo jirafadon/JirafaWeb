@@ -3021,11 +3021,11 @@ function calNav(dir){
   else{const ny=y+dir;if(ny<2025||ny>new Date().getFullYear()+6)return;calDate=dk(ny,m,d);}
   renderCal();
 }
-function calGoToday(){
+async function calGoToday(){
   const n=new Date();
   calDate=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
-  renderCal();
-  if(CT==='anio') setTimeout(()=>scrollToCurrentMonth(), 120);
+  await renderCal();
+  if(CT==='anio') scrollToCurrentMonth();
 }
 async function renderCal(){
   const{y,m}=pd(calDate);const g=document.getElementById('cal-g').value;
@@ -3043,9 +3043,10 @@ async function renderCal(){
   // Si hay guardia seleccionada → vista grid tipo calendario
   if (filterG) {
     body.innerHTML = buildGuardiaView(filterG, y, m);
-    // Vista año: scroll al mes actual después de que el DOM esté listo
+    // Vista año: scroll al mes actual — DOM ya está listo porque asignamos innerHTML sincrónicamente
     if (CT === 'anio') {
-      setTimeout(() => scrollToCurrentMonth(), 80);
+      // Doble rAF para garantizar que el layout esté calculado
+      requestAnimationFrame(() => requestAnimationFrame(() => scrollToCurrentMonth()));
     }
     return;
   }
@@ -4364,14 +4365,14 @@ function scrollToCurrentMonth() {
   if (!body) return;
   const n = new Date();
   const curMonthLabel = MES_L[n.getMonth() + 1];
-  // Buscar el label del mes actual
   const labels = body.querySelectorAll('.cg-month-label');
   for (const lbl of labels) {
     if (lbl.textContent.trim().startsWith(curMonthLabel)) {
-      // Calcular posición absoluta del label en la página
-      const rect = lbl.getBoundingClientRect();
-      const scrollTop = window.pageYOffset + rect.top - (window.innerHeight / 2) + (rect.height / 2);
-      window.scrollTo({ top: Math.max(0, scrollTop), behavior: 'smooth' });
+      // offsetTop da la posición real respecto al documento
+      let el = lbl, top = 0;
+      while (el) { top += el.offsetTop || 0; el = el.offsetParent; }
+      const targetY = top - (window.innerHeight / 3);
+      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
       return;
     }
   }
