@@ -3029,6 +3029,8 @@ async function calGoToday(){
 }
 async function renderCal(){
   const{y,m}=pd(calDate);const g=document.getElementById('cal-g').value;
+  // Guardar preferencias
+  try { localStorage.setItem('dg-pref-g', g); localStorage.setItem('dg-pref-ct', CT); } catch(_) {}
   const yrs=CT==='sem'?[...new Set(getWeek(calDate).map(x=>+x.split('-')[0]))]:[y];
   await Promise.all([...new Set(yrs)].filter(y=>y>=2025&&y<=2030).map(getFeriados));
   document.getElementById('fn').classList.toggle('show',y>2026);
@@ -3043,10 +3045,9 @@ async function renderCal(){
   // Si hay guardia seleccionada → vista grid tipo calendario
   if (filterG) {
     body.innerHTML = buildGuardiaView(filterG, y, m);
-    // Vista año: scroll al mes actual — DOM ya está listo porque asignamos innerHTML sincrónicamente
     if (CT === 'anio') {
-      // Doble rAF para garantizar que el layout esté calculado
-      requestAnimationFrame(() => requestAnimationFrame(() => scrollToCurrentMonth()));
+      // El browser necesita tiempo real para calcular layout de 12 meses
+      setTimeout(() => scrollToCurrentMonth(), 150);
     }
     return;
   }
@@ -5439,6 +5440,13 @@ async function renderUsinaPanel() {
   calDate = dk(n.getFullYear(), n.getMonth()+1, n.getDate());
   dsInit();
   initCombi();
+  // Restaurar guardia y modo seleccionados
+  try {
+    const savedG  = localStorage.getItem('dg-pref-g');
+    const savedCT = localStorage.getItem('dg-pref-ct');
+    if (savedG)  { const sel = document.getElementById('cal-g'); if (sel) sel.value = savedG; }
+    if (savedCT) { CT = savedCT; ['dia','semana','mes','anio'].forEach(t => document.getElementById('t-'+t)?.classList.toggle('on', t===savedCT)); }
+  } catch(_) {}
 
   // ── 2. Skeleton mientras carga ────────────────────────────────────────
   const calBody = document.getElementById('cal-body');
