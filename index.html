@@ -4369,10 +4369,9 @@ function scrollToCurrentMonth() {
   const labels = body.querySelectorAll('.cg-month-label');
   for (const lbl of labels) {
     if (lbl.textContent.trim().startsWith(curMonthLabel)) {
-      // offsetTop da la posición real respecto al documento
-      let el = lbl, top = 0;
-      while (el) { top += el.offsetTop || 0; el = el.offsetParent; }
-      const targetY = top - (window.innerHeight / 3);
+      const rect = lbl.getBoundingClientRect();
+      const absoluteTop = rect.top + window.scrollY;
+      const targetY = absoluteTop - 100;
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
       return;
     }
