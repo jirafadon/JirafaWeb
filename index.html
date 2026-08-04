@@ -164,10 +164,55 @@ body::before { display: none; }
 /* .wrap padding overridden by PWA safe-area block above — max-width kept here */
 .wrap { position:relative; z-index:1; max-width:480px; margin:0 auto; }
 
+/* ── RESPONSIVE DESKTOP ─────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .wrap { max-width: 100%; padding: 0 16px; }
+  header { max-width: 100%; }
+  .main-nav { max-width: 100%; top: 52px; }
+  #cg-sticky { max-width: 100%; }
+
+  /* En desktop el diagrama horizontal se expande */
+  table.gt { width: 100%; }
+  table.gt th, table.gt td { min-width: 38px; }
+
+  /* Grid anual: más columnas visibles, celdas más pequeñas */
+  .cg-grid { gap: 6px; }
+  .cg-cell { border-radius: 10px; }
+  .cg-turno { font-size: 18px; }
+
+  /* Layout de año: dos meses por fila en desktop */
+  #cg-content.year-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+    padding: 0 8px 24px;
+  }
+  #cg-content.year-layout .cg-month-label {
+    grid-column: 1 / -1;
+  }
+  #cg-content.year-layout .cg-grid-wrap {
+    /* cada mes ocupa una columna */
+  }
+
+  /* Limitar modales a ancho razonable en desktop */
+  .modal { max-width: 480px !important; }
+  .ds-sheet { max-width: 480px; margin: 0 auto; }
+  .rel-body { max-width: 480px; margin: 0 auto; }
+
+  /* Admin FAB más alejado del borde */
+  #admin-fab { right: calc(50% - 240px + 16px); }
+}
+
+@media (min-width: 900px) {
+  .wrap { padding: 0 32px; }
+  table.gt th, table.gt td { min-width: 44px; }
+  .cg-turno { font-size: 20px; }
+}
+
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-header { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:52px; background:var(--accent); position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(37,99,235,.35); }
+header { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:52px; background:var(--accent); position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(37,99,235,.35); width:100%; box-sizing:border-box; }
 h1 { font-size: 13px; font-weight: 800; color: #fff; letter-spacing: -.2px; line-height: 1.2; }
 h1 span { color: var(--amber); }
 .hsub { font-size: 9px; color: rgba(255,255,255,.7); margin-top: 1px; }
@@ -773,6 +818,7 @@ body.dark #admin-fab { background: var(--panel); border-color: var(--border); }
   border-bottom: 1px solid var(--border);
   position: sticky; top: 52px; z-index: 99;
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  width: 100%; box-sizing: border-box;
 }
 .main-nav::-webkit-scrollbar { display: none; }
 .mnav-btn {
@@ -797,6 +843,18 @@ body.dark #admin-fab { background: var(--panel); border-color: var(--border); }
 
 
 /* ── CALENDAR GRID (vista guardia individual) ───────────────────── */
+/* Sticky header del grid — se queda fijo mientras el calendario scrollea */
+#cg-sticky {
+  position: sticky;
+  top: 100px; /* header(52) + nav(48) */
+  z-index: 90;
+  background: var(--bg);
+  padding: 0 4px 4px;
+}
+/* Contenido scrolleable del grid */
+#cg-content {
+  padding: 0 4px 24px;
+}
 .cg-wrap { padding: 0 4px 16px; }
 .cg-selector {
   display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none;
@@ -935,7 +993,7 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <div class="ctabs">
         <button class="ctab" data-c="sem" onclick="showCT('sem')">SEM</button>
         <button class="ctab on" data-c="mes" onclick="showCT('mes')">MES</button>
-        <button class="ctab" data-c="ano" onclick="showCT('ano')">A&Ntilde;O</button>
+        <button class="ctab" data-c="anio" onclick="showCT('anio')">A&Ntilde;O</button>
       </div>
     </div>
     <div class="feriado-note" id="fn">&#9432; 2027–2030: feriados inamovibles + Semana Santa. Los días puente se confirman cada año.</div>
@@ -951,6 +1009,7 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <div class="tabs" id="rtabs"><button class="tab on" data-t="dia" onclick="showRT('dia')">DÍA</button><button class="tab" data-t="semana" onclick="showRT('semana')">SEMANA</button><button class="tab" data-t="mes" onclick="showRT('mes')">MES</button><button class="tab" data-t="anio" onclick="showRT('anio')">AÑO</button></div>
       <div class="tab-content on" id="t-dia"></div><div class="tab-content" id="t-semana"></div><div class="tab-content" id="t-mes"></div><div class="tab-content" id="t-anio"></div>
     </div>
+    <div id="cg-sticky" style="display:none"></div>
     <div id="cal-body"></div>
   
   </div>
@@ -3052,6 +3111,10 @@ async function renderCal(){
     return;
   }
 
+  // Sin guardia — ocultar sticky del grid
+  const _sticky = document.getElementById('cg-sticky');
+  if (_sticky) { _sticky.style.display = 'none'; _sticky.innerHTML = ''; }
+
   // Sin guardia → tabla horizontal original
   if(CT==='sem'){const w=getWeek(calDate);const fmap=allFer([...new Set(w.map(x=>+x.split('-')[0]))]);const p0=pd(w[0]),p6=pd(w[6]);body.appendChild(buildTable(w,selDate,selG,fmap,`SEMANA ${p0.d} ${MES_S[p0.m]}–${p6.d} ${MES_S[p6.m]} ${p6.y}`,true,filterG));}
   else if(CT==='mes'){body.appendChild(buildTable(getMonthDays(y,m),selDate,selG,allFer([y]),`${MES_L[m].toUpperCase()} ${y}`,true,filterG));}
@@ -4317,7 +4380,14 @@ function buildGuardiaView(g, y, m) {
     }
   }
 
-  return `<div class="cg-wrap">${sel}${title}${content}</div>`;
+  // Separar: header sticky (selector + título) del contenido (meses)
+  const stickyEl = document.getElementById('cg-sticky');
+  if (stickyEl) {
+    stickyEl.style.display = '';
+    stickyEl.innerHTML = sel + title;
+  }
+  // El contenido va en cal-body directamente (sin cg-wrap)
+  return `<div id="cg-content">${content}</div>`;
 }
 
 // Helper para obtener info de celda — usado en semana también
@@ -4369,9 +4439,12 @@ function scrollToCurrentMonth() {
   const labels = body.querySelectorAll('.cg-month-label');
   for (const lbl of labels) {
     if (lbl.textContent.trim().startsWith(curMonthLabel)) {
+      // Posición absoluta del label en el documento
       const rect = lbl.getBoundingClientRect();
       const absoluteTop = rect.top + window.scrollY;
-      const targetY = absoluteTop - 100;
+      // Restar header(52) + nav(48) + sticky-grid(~100) = ~200px
+      const stickyH = (document.getElementById('cg-sticky')?.offsetHeight || 0);
+      const targetY = absoluteTop - 52 - 48 - stickyH - 8;
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
       return;
     }
@@ -4384,9 +4457,197 @@ function selectGuardiaGrid(g) {
 }
 
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EXPORTAR DIAGRAMA → ICS (Google Calendar / Samsung / Apple)
+// ═══════════════════════════════════════════════════════════════════════════
+function exportarICS(g, anio) {
+  const TURNO_HORA = { 1: ['00','06'], 2: ['06','12'], 3: ['12','18'], 4: ['18','24'] };
+  const TURNO_NOMBRE = { 1: 'Turno 0-6 hs', 2: 'Turno 6-12 hs', 3: 'Turno 12-18 hs', 4: 'Turno 18-24 hs' };
+  const G_NOMBRE = { A:'Guardia A', B:'Guardia B', C:'Guardia C', D:'Guardia D', E:'Guardia E', OP:'Operador', REL:'Relevante' };
+  const userName = PRESET_USERS.find(p => p.guardia === g)?.name
+    || USERS.find(u => u.guardia === g)?.name || g;
+
+  let events = [];
+
+  for (let m = 1; m <= 12; m++) {
+    const days = getMonthDays(anio, m);
+    days.forEach(date => {
+      const info = getCellInfoForG(g, date);
+      if (info.type === 'F' || info.type === 'empty') return;
+
+      const {y, m: mm, d} = pd(date);
+      const dateStr = `${y}${String(mm).padStart(2,'0')}${String(d).padStart(2,'0')}`;
+
+      if (info.type === 'lic') {
+        const li = LIC[info.ev.type] || { name: info.ev.type };
+        events.push({
+          uid: `lic-${date}-${g}@dg`,
+          dtstart: `${dateStr}`,
+          dtend: `${dateStr}`,
+          summary: `${li.name} — ${userName}`,
+          description: `Licencia: ${info.ev.type}`,
+          allday: true,
+        });
+      } else if (info.type === 'T') {
+        const t = info.turno;
+        const horas = TURNO_HORA[t];
+        if (!horas) return;
+        const [hStart, hEnd] = horas;
+        // Si turno 4 (18-24), la hora de fin es al día siguiente 00:00
+        const dtstart = `${dateStr}T${hStart}0000`;
+        let dtend;
+        if (hEnd === '24') {
+          const nextDay = new Date(y, mm-1, d+1);
+          const nd = `${nextDay.getFullYear()}${String(nextDay.getMonth()+1).padStart(2,'0')}${String(nextDay.getDate()).padStart(2,'0')}`;
+          dtend = `${nd}T000000`;
+        } else {
+          dtend = `${dateStr}T${hEnd}0000`;
+        }
+        events.push({
+          uid: `turno-${date}-${g}@dg`,
+          dtstart,
+          dtend,
+          summary: `${TURNO_NOMBRE[t]} — ${G_NOMBRE[g] || g}`,
+          description: `${userName} · ${G_NOMBRE[g] || g}`,
+          allday: false,
+        });
+      }
+    });
+  }
+
+  // Construir ICS
+  const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Diagrama de Guardia//PN//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `X-WR-CALNAME:${G_NOMBRE[g] || g} ${anio} — ${userName}`,
+    'X-WR-TIMEZONE:America/Argentina/Buenos_Aires',
+  ];
+
+  events.forEach(ev => {
+    ics.push('BEGIN:VEVENT');
+    ics.push(`UID:${ev.uid}`);
+    ics.push(`DTSTAMP:${now}`);
+    if (ev.allday) {
+      ics.push(`DTSTART;VALUE=DATE:${ev.dtstart}`);
+      ics.push(`DTEND;VALUE=DATE:${ev.dtend}`);
+    } else {
+      ics.push(`DTSTART;TZID=America/Argentina/Buenos_Aires:${ev.dtstart}`);
+      ics.push(`DTEND;TZID=America/Argentina/Buenos_Aires:${ev.dtend}`);
+    }
+    ics.push(`SUMMARY:${ev.summary}`);
+    ics.push(`DESCRIPTION:${ev.description}`);
+    ics.push('END:VEVENT');
+  });
+
+  ics.push('END:VCALENDAR');
+
+  const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `diagrama-${g}-${anio}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  logChange('config', `Exportó ICS Guardia ${g} año ${anio}`);
+}
+
+function renderAdminExportar() {
+  const div = document.getElementById('admin-export-content');
+  if (!div) return;
+  const anioActual = new Date().getFullYear();
+  const GUARDIAS_EXP = ['A','B','C','D','E','OP','REL'];
+  const G_NOMBRE_EXP = { A:'Guardia A', B:'Guardia B', C:'Guardia C', D:'Guardia D', E:'Guardia E', OP:'Operador', REL:'Relevante' };
+
+  div.innerHTML = `
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:14px">EXPORTAR DIAGRAMA → CALENDARIO</div>
+
+    <div style="background:var(--accent-dim,#dbeafe);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--accent-txt,#1d4ed8);line-height:1.5">
+      📅 Generá un archivo <strong>.ics</strong> para importar el diagrama de turno en <strong>Google Calendar</strong>, <strong>Samsung Calendar</strong> o <strong>Apple Calendar</strong>.<br>
+      <span style="opacity:.8;font-size:11px">El archivo incluye todos los turnos del año seleccionado.</span>
+    </div>
+
+    <div style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--tbright);margin-bottom:10px">Guardia</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px" id="exp-g-sel">
+      ${GUARDIAS_EXP.map(g => {
+        const col = G_COLORS[g] || '#8a9ab5';
+        return `<button onclick="expSelG('${g}')" id="exp-btn-${g}"
+          style="padding:8px 16px;border:2px solid var(--border);border-radius:20px;
+                 background:none;font-family:var(--font-ui);font-size:13px;font-weight:700;
+                 color:${col};cursor:pointer;transition:all .15s">
+          ${g} <span style="font-weight:400;font-size:11px;color:var(--tdim)">${G_NOMBRE_EXP[g]}</span>
+        </button>`;
+      }).join('')}
+    </div>
+
+    <div style="font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--tbright);margin-bottom:10px">Año</div>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      ${[anioActual-1, anioActual, anioActual+1].map(y =>
+        `<button onclick="expSelY(${y})" id="exp-btn-y${y}"
+          style="flex:1;padding:10px;border:2px solid var(--border);border-radius:12px;
+                 background:none;font-family:var(--font-ui);font-size:14px;font-weight:700;
+                 color:var(--tbright);cursor:pointer;transition:all .15s">
+          ${y}
+        </button>`
+      ).join('')}
+    </div>
+
+    <button onclick="doExportICS()"
+      style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:14px;
+             padding:14px;font-family:var(--font-ui);font-size:15px;font-weight:700;
+             cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.3);margin-bottom:8px">
+      📥 Descargar archivo .ics
+    </button>
+    <div id="exp-msg" style="text-align:center;font-size:11px;color:var(--tdim);font-family:var(--font-ui);min-height:18px"></div>
+  `;
+
+  // Seleccionar por defecto guardia del usuario logueado y año actual
+  _expG = ME ? ME.guardia : 'A';
+  _expY = anioActual;
+  expSelG(_expG);
+  expSelY(_expY);
+}
+
+let _expG = 'A', _expY = new Date().getFullYear();
+
+function expSelG(g) {
+  _expG = g;
+  const col = G_COLORS[g] || '#8a9ab5';
+  document.querySelectorAll('[id^="exp-btn-"]:not([id^="exp-btn-y"])').forEach(btn => {
+    btn.style.borderColor = 'var(--border)';
+    btn.style.background = 'none';
+  });
+  const btn = document.getElementById('exp-btn-' + g);
+  if (btn) { btn.style.borderColor = col; btn.style.background = col + '18'; }
+}
+
+function expSelY(y) {
+  _expY = y;
+  [new Date().getFullYear()-1, new Date().getFullYear(), new Date().getFullYear()+1].forEach(yr => {
+    const btn = document.getElementById('exp-btn-y' + yr);
+    if (btn) { btn.style.borderColor = 'var(--border)'; btn.style.background = 'none'; btn.style.color = 'var(--tbright)'; }
+  });
+  const btn = document.getElementById('exp-btn-y' + y);
+  if (btn) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; }
+}
+
+function doExportICS() {
+  const msg = document.getElementById('exp-msg');
+  if (!_expG) { if(msg) msg.textContent = 'Seleccioná una guardia'; return; }
+  exportarICS(_expG, _expY);
+  if (msg) { msg.textContent = `✓ Descargando diagrama-${_expG}-${_expY}.ics`; setTimeout(()=>{ if(msg) msg.textContent=''; }, 3000); }
+}
+
+
 Object.assign(window, {
   switchView, showSection, triggerInstall, toggleTheme,
-  selectGuardiaGrid, handleDayClick, toggleSection, toggleTheme,
+  selectGuardiaGrid, handleDayClick,
+  exportarICS, renderAdminExportar, expSelG, expSelY, doExportICS, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   handleCardClick, confirmPassword, closePwdModal, adminSavePwd,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
