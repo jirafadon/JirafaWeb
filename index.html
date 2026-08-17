@@ -937,6 +937,10 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
         <button class="ctab on" data-c="mes" onclick="showCT('mes')">MES</button>
         <button class="ctab" data-c="anio" onclick="showCT('anio')">A&Ntilde;O</button>
       </div>
+      <button class="nav-btn" onclick="icsOpen()" title="Exportar a calendario (.ics)" style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:1px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14l2.5 2.5L16 11"/></svg>
+        ICS
+      </button>
     </div>
     <div class="feriado-note" id="fn">&#9432; 2027–2030: feriados inamovibles + Semana Santa. Los días puente se confirman cada año.</div>
     <!-- Elementos requeridos por JS (antes en Consultar Turno) -->
@@ -9125,5 +9129,252 @@ async function renderUsinaPanel() {
     </div>
   </div>
 </div>
+
+<!-- ── Modal: Exportar diagrama a .ics ──────────────────────── -->
+<div class="overlay off" id="m-ics">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-title">&#128197; Exportar a calendario (.ics)</div>
+    <div class="mfg">
+      <label>Guardia</label>
+      <select id="ics-guardia" style="font-size:15px;padding:9px 12px;">
+        <option value="A">Guardia A</option>
+        <option value="B">Guardia B</option>
+        <option value="C">Guardia C</option>
+        <option value="D">Guardia D</option>
+        <option value="E">Guardia E</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <div class="mfg"><label>Desde</label><input type="date" id="ics-from"></div>
+      <div class="mfg"><label>Hasta</label><input type="date" id="ics-to"></div>
+    </div>
+    <div class="mfg" style="display:flex;align-items:center;gap:8px;flex-direction:row;">
+      <input type="checkbox" id="ics-alarm" checked style="width:16px;height:16px;margin:0;">
+      <label style="margin:0" for="ics-alarm">Alarma 1 hora antes del ingreso (al inicio de cada bloque)</label>
+    </div>
+    <div class="err-msg" id="ics-err"></div>
+    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);background:var(--cell-bg);border-radius:4px;padding:8px 10px;margin:6px 0 4px;line-height:1.5;border-left:3px solid var(--blue)">
+      &#9432; Los días consecutivos del mismo turno se agrupan en un solo evento (ej. un bloque de 6 días de Turno 1 = 1 evento, desde el ingreso del primer día hasta la salida del último). Los francos consecutivos también se agrupan en un solo evento de todo el día. Cada evento lleva la ubicación de la planta y el color de su turno. Nota: el color solo se ve en algunos calendarios (ej. Apple, Google); por eso además cada evento arranca con un círculo de color 🔵🟢🟠🟣🔴 que se ve en cualquier app.
+    </div>
+    <div class="mbtns">
+      <button class="mbtn ok g" onclick="icsGenerate()">&#128190; DESCARGAR .ICS</button>
+      <button class="mbtn cancel" onclick="icsClose()">CANCELAR</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// EXPORTACIÓN A .ICS — copia autocontenida del algoritmo de rotación
+// (independiente de los módulos de arriba para no interferir con su lógica)
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+  const ICS_REF_DATE = new Date('2025-12-01T12:00:00');
+  const ICS_REF_POS  = { A: 1, B: 3, C: 5, D: 6, E: 0 };
+  const ICS_CYCLES = {
+    A: [[2,6],['F',1],[3,6],['F',1],[4,6],['F',2],[1,6],['F',2]],
+    B: [[1,6],['F',2],[2,6],['F',1],[3,6],['F',1],[4,6],['F',2]],
+    C: [[4,6],['F',2],[1,6],['F',2],[2,6],['F',1],[3,6],['F',1]],
+    D: [[3,6],['F',1],[4,6],['F',2],[1,6],['F',2],[2,6],['F',1]],
+    E: [[3,6],['F',1],[4,6],['F',2],[1,6],['F',2],[2,6],['F',1]],
+  };
+  function icsGetTurno(g, ds) {
+    const d = new Date(ds + 'T12:00:00');
+    const diff = Math.round((d - ICS_REF_DATE) / 86400000);
+    const cp = ((ICS_REF_POS[g] + diff) % 30 + 30) % 30;
+    let p = 0;
+    for (const [st, cnt] of ICS_CYCLES[g]) { if (cp < p + cnt) return st; p += cnt; }
+    return 'F';
+  }
+  // Horario de inicio de cada turno (hora, minuto) — cada turno dura 6hs
+  const ICS_TSTART = { 1: [0,0], 2: [6,0], 3: [12,0], 4: [18,0] };
+  const ICS_GLABEL = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D', E: 'Guardia E' };
+  // Colores básicos de un solo nombre CSS (más compatibles con apps como Samsung/Google Calendar
+  // que con nombres compuestos tipo "royalblue" o "mediumslateblue")
+  const ICS_COLOR = { 1: 'blue', 2: 'green', 3: 'orange', 4: 'purple', F: 'red' };
+  const ICS_DOT    = { 1: '🔵', 2: '🟢', 3: '🟠', 4: '🟣', F: '🔴' };
+  const ICS_LOCATION = 'Av. Tomás Alva Edison 2701, Dársena E, Puerto de Buenos Aires (C1104BAB), CABA, Argentina';
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function icsDt(y, mo, d, h, mi) {
+    return `${y}${pad(mo)}${pad(d)}T${pad(h)}${pad(mi)}00`;
+  }
+  function icsEscape(s) {
+    return String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+  }
+
+  function icsOpen() {
+    const g = document.getElementById('ics-guardia');
+    const calSel = document.getElementById('cal-g');
+    if (calSel && calSel.value) g.value = calSel.value;
+    const from = document.getElementById('ics-from');
+    const to = document.getElementById('ics-to');
+    if (!from.value || !to.value) {
+      const n = new Date();
+      const y = n.getFullYear(), m = n.getMonth();
+      const first = new Date(y, m, 1);
+      const last = new Date(y, m + 3, 0);
+      const f = dd => `${dd.getFullYear()}-${pad(dd.getMonth()+1)}-${pad(dd.getDate())}`;
+      from.value = f(first);
+      to.value = f(last);
+    }
+    document.getElementById('ics-err').textContent = '';
+    document.getElementById('m-ics').classList.remove('off');
+  }
+  function icsClose() {
+    document.getElementById('m-ics').classList.add('off');
+  }
+
+  function icsGenerate() {
+    const err = document.getElementById('ics-err');
+    err.textContent = '';
+    const g = document.getElementById('ics-guardia').value;
+    const fromStr = document.getElementById('ics-from').value;
+    const toStr = document.getElementById('ics-to').value;
+    const withAlarm = document.getElementById('ics-alarm').checked;
+    if (!fromStr || !toStr) { err.textContent = '⚠ Elegí fecha de inicio y fin.'; return; }
+    const start = new Date(fromStr + 'T12:00:00');
+    const end = new Date(toStr + 'T12:00:00');
+    if (end < start) { err.textContent = '⚠ La fecha "Hasta" debe ser posterior a "Desde".'; return; }
+    const maxDays = 366 * 3;
+    const totalDays = Math.round((end - start) / 86400000) + 1;
+    if (totalDays > maxDays) { err.textContent = '⚠ Rango demasiado extenso (máx ~3 años).'; return; }
+
+    let vevents = '';
+    const dtstampUTC = (() => {
+      const n = new Date();
+      return `${n.getUTCFullYear()}${pad(n.getUTCMonth()+1)}${pad(n.getUTCDate())}T${pad(n.getUTCHours())}${pad(n.getUTCMinutes())}${pad(n.getUTCSeconds())}Z`;
+    })();
+
+    // 1) Recorremos día a día y armamos la lista de turnos.
+    const days = [];
+    {
+      let cur = new Date(start);
+      while (cur <= end) {
+        const y = cur.getFullYear(), mo = cur.getMonth() + 1, d = cur.getDate();
+        const ds = `${y}-${pad(mo)}-${pad(d)}`;
+        days.push({ y, mo, d, ds, turno: icsGetTurno(g, ds) });
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+
+    // 2) Agrupamos días consecutivos con el mismo turno en un solo bloque
+    //    (ej: 6 días de Turno 1 → un solo evento; 2 días de Franco → un solo evento).
+    const blocks = [];
+    for (const day of days) {
+      const last = blocks[blocks.length - 1];
+      if (last && last.turno === day.turno) {
+        last.last = day;
+      } else {
+        blocks.push({ turno: day.turno, first: day, last: day });
+      }
+    }
+
+    let count = 0;
+    for (const block of blocks) {
+      const { turno, first, last } = block;
+      const colorKey = turno === 'F' ? 'F' : turno;
+      const dot = ICS_DOT[colorKey];
+      const colorName = ICS_COLOR[colorKey];
+      const dsFirst = first.ds, dsLast = last.ds;
+
+      if (turno === 'F') {
+        // Bloque de Franco — evento de todo el día que abarca todo el rango consecutivo, sin alarma.
+        const nextD = new Date(last.y, last.mo - 1, last.d + 1);
+        const dtStart = `${first.y}${pad(first.mo)}${pad(first.d)}`;
+        const dtEnd = `${nextD.getFullYear()}${pad(nextD.getMonth()+1)}${pad(nextD.getDate())}`;
+        const uid = `dg-${g}-${dsFirst}_${dsLast}-tF@diagrama-guardia`;
+        const rango = dsFirst === dsLast ? '' : ` (${dsFirst} a ${dsLast})`;
+        vevents += [
+          'BEGIN:VEVENT',
+          `UID:${uid}`,
+          `DTSTAMP:${dtstampUTC}`,
+          `DTSTART;VALUE=DATE:${dtStart}`,
+          `DTEND;VALUE=DATE:${dtEnd}`,
+          `SUMMARY:${icsEscape(dot + ' Franco')}`,
+          `DESCRIPTION:${icsEscape('Días francos · ' + (ICS_GLABEL[g]||g) + ' · Planta de Agua · Puerto Nuevo' + rango)}`,
+          `LOCATION:${icsEscape(ICS_LOCATION)}`,
+          `COLOR:${colorName}`,
+          'STATUS:CONFIRMED',
+          'TRANSP:TRANSPARENT',
+        ].join('\r\n') + '\r\n';
+        vevents += 'END:VEVENT\r\n';
+        count++;
+      } else {
+        // Bloque de Turno — un solo evento de punta a punta: desde el ingreso del primer
+        // día hasta la salida del último día (ocupa "todo" el bloque, ej. 6 días seguidos).
+        const [sh, sm] = ICS_TSTART[turno];
+        const startDt = new Date(first.y, first.mo - 1, first.d, sh, sm, 0);
+        const lastDayEntry = new Date(last.y, last.mo - 1, last.d, sh, sm, 0);
+        const endDt = new Date(lastDayEntry.getTime() + 6 * 3600000);
+        const dtStart = icsDt(startDt.getFullYear(), startDt.getMonth()+1, startDt.getDate(), startDt.getHours(), startDt.getMinutes());
+        const dtEnd = icsDt(endDt.getFullYear(), endDt.getMonth()+1, endDt.getDate(), endDt.getHours(), endDt.getMinutes());
+        const uid = `dg-${g}-${dsFirst}_${dsLast}-t${turno}@diagrama-guardia`;
+        vevents += [
+          'BEGIN:VEVENT',
+          `UID:${uid}`,
+          `DTSTAMP:${dtstampUTC}`,
+          `DTSTART;TZID=America/Argentina/Buenos_Aires:${dtStart}`,
+          `DTEND;TZID=America/Argentina/Buenos_Aires:${dtEnd}`,
+          `SUMMARY:${icsEscape(dot + ' T' + turno)}`,
+          `DESCRIPTION:${icsEscape('Turno ' + turno + ' · ' + (ICS_GLABEL[g]||g) + ' · Planta de Agua · Puerto Nuevo · ' + dsFirst + ' a ' + dsLast)}`,
+          `LOCATION:${icsEscape(ICS_LOCATION)}`,
+          `COLOR:${colorName}`,
+          'STATUS:CONFIRMED',
+          'TRANSP:OPAQUE',
+        ].join('\r\n') + '\r\n';
+        if (withAlarm) {
+          vevents += [
+            'BEGIN:VALARM',
+            'ACTION:DISPLAY',
+            `DESCRIPTION:${icsEscape('Ingreso de turno en 1 hora')}`,
+            'TRIGGER:-PT1H',
+            'END:VALARM',
+          ].join('\r\n') + '\r\n';
+        }
+        vevents += 'END:VEVENT\r\n';
+        count++;
+      }
+    }
+
+    if (count === 0) {
+      err.textContent = '⚠ No se generaron turnos en ese rango (¿todo franco?).';
+      return;
+    }
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Diagrama de Guardia//Planta de Agua Puerto Nuevo//ES',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VTIMEZONE',
+      'TZID:America/Argentina/Buenos_Aires',
+      'BEGIN:STANDARD',
+      'DTSTART:19700101T000000',
+      'TZOFFSETFROM:-0300',
+      'TZOFFSETTO:-0300',
+      'TZNAME:-03',
+      'END:STANDARD',
+      'END:VTIMEZONE',
+      vevents.trimEnd(),
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `diagrama-guardia-${g}-${fromStr}_a_${toStr}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    icsClose();
+  }
+
+  Object.assign(window, { icsOpen, icsClose, icsGenerate });
+})();
+</script>
 </body>
 </html>
