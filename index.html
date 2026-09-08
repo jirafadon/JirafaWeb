@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Diagrama de Guardia · Planta de Agua PN</title>
 <style>
 /* ══════════════════════════════════════════════
@@ -81,75 +81,74 @@ button, a, select, input, textarea, label,
 :root {
   --font-ui:     'Inter', system-ui, -apple-system, sans-serif;
   --font-mono:   'JetBrains Mono', ui-monospace, monospace;
-  --font-disp:   'Big Shoulders Display', var(--font-ui);
+  --font-disp:   var(--font-ui);
 
-  /* Paleta modo claro — variante clara del panel de control */
-  --bg:        #eef2f7;
+  /* Paleta corporativa — modo claro (default) */
+  --bg:        #f3f5f8;
   --panel:     #ffffff;
-  --panel2:    #f7f9fc;
-  --border:    #dde4ee;
-  --border2:   #c9d3e2;
+  --panel2:    #f8f9fb;
+  --border:    #e1e5eb;
+  --border2:   #ccd3dc;
 
-  /* Ámbar — identidad / señal de alerta */
-  --accent:    #d98f1e;
-  --accent-dim:#fbe8c8;
-  --accent-txt:#a8650e;
-  --amber:     #d98f1e;
+  /* Azul institucional — identidad principal (reemplaza al ámbar anterior) */
+  --accent:    #2456a6;
+  --accent-dim:#e4ecf7;
+  --accent-txt:#173a70;
+  --amber:     #2456a6;
 
   /* Semánticos */
-  --red:       #d64545;
-  --green:     #1f9d63;
-  --orange:    #d98f1e;
-  --purple:    #7c5cd6;
+  --red:       #c0293b;
+  --green:     #1f7a4d;
+  --orange:    #a9691f;
+  --purple:    #5b4b8a;
 
-  /* Turnos — luces de estado */
-  --t1: #2f7fd1;
-  --t2: #1f9d63;
-  --t3: #d98f1e;
-  --t4: #7c5cd6;
+  /* Turnos — colores sobrios, sin brillo */
+  --t1: #34618f;
+  --t2: #1f7a4d;
+  --t3: #a9691f;
+  --t4: #5b4b8a;
 
   /* Texto */
-  --text:      #101823;
+  --text:      #1a2230;
   --tdim:      #5c6b80;
-  --tbright:   #0b1420;
-  --adim:      #8393a8;
-  --aglow:     rgba(217,143,30,.16);
+  --tbright:   #0f1720;
+  --adim:      #8a94a3;
+  --aglow:     rgba(36,86,166,.10);
 
   /* Superficies */
-  --cell-bg:   #f4f7fb;
-  --blue:      #2f7fd1;
-  --rec-color: #d98f1e;
-  --rel-color: #7d93ac;
-  --green-dim: #d9f2e6;
+  --cell-bg:   #eef1f5;
+  --blue:      #34618f;
+  --rec-color: #a9691f;
+  --rel-color: #7d8ba0;
+  --green-dim: #e1f0e7;
 }
 
 body.dark {
-  --bg:        #0a121c;
-  --panel:     #111d2c;
-  --panel2:    #0d1826;
-  --border:    #1e2f44;
-  --border2:   #223349;
-  --cell-bg:   #0d1826;
-  --text:      #eaf0f7;
-  --tdim:      #7d93ac;
-  --tbright:   #eaf0f7;
-  --adim:      #4d6178;
-  --accent-dim:#2a2010;
-  --accent-txt:#f5b342;
-  --green-dim: #0d2318;
+  --bg:        #12161d;
+  --panel:     #1a1f28;
+  --panel2:    #161b23;
+  --border:    #2a313d;
+  --border2:   #38404e;
+  --cell-bg:   #161b23;
+  --text:      #dbe2ea;
+  --tdim:      #8a94a3;
+  --tbright:   #eef2f6;
+  --adim:      #5b6472;
+  --accent-dim:#1c2b42;
+  --accent-txt:#7fa8dd;
+  --green-dim: #16281f;
 
-  /* En modo oscuro los "LED" brillan más fuerte */
-  --amber:     #f5b342;
-  --accent:    #f5b342;
-  --red:       #ef5b5b;
-  --green:     #3ecf8e;
-  --t1: #4ea1e8;
-  --t2: #3ecf8e;
-  --t3: #f0a336;
-  --t4: #a480e8;
-  --blue: #4ea1e8;
-  --orange: #f0a336;
-  --purple: #a480e8;
+  --amber:     #5b8fd6;
+  --accent:    #5b8fd6;
+  --red:       #cf6270;
+  --green:     #4a9973;
+  --t1: #5b8fd6;
+  --t2: #4a9973;
+  --t3: #c99a52;
+  --t4: #8f7ec2;
+  --blue: #5b8fd6;
+  --orange: #c99a52;
+  --purple: #8f7ec2;
 }
 
 body.light::before { display: none; }
@@ -183,14 +182,12 @@ header {
   position:sticky; top:0; z-index:100;
 }
 .h-mark {
-  width:30px; height:30px; border-radius:8px; flex-shrink:0; position:relative; overflow:hidden;
-  background:linear-gradient(155deg, var(--cell-bg), var(--panel2, var(--panel)));
-  border:1px solid var(--border2);
+  width:30px; height:30px; border-radius:6px; flex-shrink:0; position:relative; overflow:hidden;
+  background: var(--accent);
   display:flex; align-items:center; justify-content:center;
 }
 .h-mark::after {
-  content:''; width:10px; height:10px; border-radius:50%; background:var(--amber);
-  box-shadow:0 0 10px 2px var(--aglow);
+  content:''; width:12px; height:12px; border-radius:2px; background:#fff; opacity:.92;
 }
 .h-title { flex:1; min-width:0; }
 h1 { font-size: 10px; font-weight: 800; color: var(--adim); letter-spacing: 1.6px; line-height: 1.2; text-transform:uppercase; }
@@ -201,7 +198,7 @@ h1 span { color: var(--amber); }
   border-radius:100px; padding:4px 10px 4px 4px; flex-shrink:0;
 }
 .h-idchip.on { display:flex; }
-.h-idchip .av { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#04131f; flex-shrink:0; }
+.h-idchip .av { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex-shrink:0; }
 .h-idchip .tx { font-size:11px; font-weight:600; color:var(--tdim); white-space:nowrap; }
 .h-idchip .tx b { color:var(--tbright); }
 .header-meta { display:none; }
@@ -260,12 +257,12 @@ h1 span { color: var(--amber); }
 ══════════════════════════════════════════════ */
 .no-user-msg { font-family: var(--font-mono); font-size: 10px; color: var(--tdim); letter-spacing: 2px; margin-bottom: 10px; }
 .user-identified { display: flex; align-items: center; gap: 10px; }
-.uav { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: #000; flex-shrink: 0; }
+.uav { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: #fff; flex-shrink: 0; }
 .unm { font-size: 15px; font-weight: 700; color: var(--tbright); letter-spacing: 1px; }
 .ugd { font-family: var(--font-mono); font-size: 9px; color: var(--adim); letter-spacing: 2px; }
 .btn-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
-.btn { padding: 0 16px; height: 44px; min-height: 44px; background: var(--amber); border: none; border-radius: 3px; color: #000; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.btn:hover { background: #ffc04a; }
+.btn { padding: 0 16px; height: 44px; min-height: 44px; background: var(--amber); border: none; border-radius: 3px; color: #fff; font-family: var(--font-ui); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.btn:hover { background: color-mix(in srgb, var(--amber) 85%, white); }
 .btn.btn-outline { background: none; border: 1px solid var(--border); color: var(--tdim); }
 .btn.btn-outline:hover { border-color: var(--amber); color: var(--amber); }
 .btn.btn-danger { background: none; border: 1px solid rgba(224,82,82,.3); color: var(--red); }
@@ -278,7 +275,7 @@ h1 span { color: var(--amber); }
 .usr-card { background: var(--cell-bg); border: 2px solid var(--border); border-radius: 4px; padding: 10px 7px; text-align: center; cursor: pointer; transition: all .2s; position: relative; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .usr-card:hover { border-color: var(--amber); transform: translateY(-1px); }
 .usr-card.sel { border-color: var(--amber); background: var(--aglow); }
-.usr-av2 { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #000; margin: 0 auto 5px; }
+.usr-av2 { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; color: #fff; margin: 0 auto 5px; }
 .usr-nm { font-size: 12px; font-weight: 700; color: var(--tbright); margin-bottom: 1px; }
 .usr-gd { font-family: var(--font-mono); font-size: 8px; color: var(--adim); letter-spacing: 1px; }
 .usr-del { position: absolute; top: 4px; right: 4px; background: none; border: none; color: #3a4a5a; font-size: 11px; cursor: pointer; padding: 2px 4px; border-radius: 2px; line-height: 1; }
@@ -428,33 +425,30 @@ textarea:focus { outline: none; border-color: var(--amber); }
    CARD "HOY" — estado del turno actual, de un vistazo
 ══════════════════════════════════════════════ */
 .hoy-card {
-  background: linear-gradient(160deg, var(--panel) 0%, var(--panel2, var(--cell-bg)) 100%);
-  border: 1px solid var(--border); border-radius: 14px;
-  padding: 14px 16px 13px; margin-bottom: 10px; position: relative; overflow: hidden;
-}
-.hoy-card::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(220px 140px at 90% -10%, var(--hoy-glow, transparent), transparent 70%);
+  background: var(--panel);
+  border: 1px solid var(--border); border-left: 3px solid var(--hoy-color, var(--accent));
+  border-radius: 8px;
+  padding: 14px 16px 13px; margin-bottom: 10px; position: relative;
 }
 .hoy-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; }
 .hoy-date { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; color: var(--tdim); font-weight: 600; text-transform: uppercase; }
-.hoy-badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .5px; padding: 4px 9px; border-radius: 100px; white-space: nowrap; }
+.hoy-badge { font-family: var(--font-ui); font-size: 10px; font-weight: 700; letter-spacing: .3px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
 .hoy-readout { display: flex; align-items: flex-end; gap: 14px; margin-top: 8px; position: relative; }
 .hoy-led {
-  width: 50px; height: 50px; border-radius: 13px; flex-shrink: 0;
-  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.22), transparent 60%) , var(--hoy-color, var(--adim));
-  box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 22px -4px var(--hoy-color, transparent);
+  width: 46px; height: 46px; border-radius: 8px; flex-shrink: 0;
+  background: color-mix(in srgb, var(--hoy-color, var(--adim)) 14%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--hoy-color, var(--adim)) 35%, var(--border));
   display: flex; align-items: center; justify-content: center;
 }
-.hoy-led span { font-family: var(--font-disp); font-weight: 800; font-size: 28px; color: #fff; line-height: 1; text-shadow: 0 1px 3px rgba(0,0,0,.3); }
-.hoy-txt h2 { font-family: var(--font-disp); font-size: 22px; font-weight: 800; letter-spacing: .3px; color: var(--tbright); }
+.hoy-led span { font-family: var(--font-ui); font-weight: 800; font-size: 22px; color: var(--hoy-color, var(--tbright)); line-height: 1; }
+.hoy-txt h2 { font-family: var(--font-ui); font-size: 19px; font-weight: 700; letter-spacing: 0; color: var(--tbright); }
 .hoy-txt .rng { font-size: 11.5px; color: var(--tdim); margin-top: 2px; }
 .hoy-txt .rng b { color: var(--tbright); font-weight: 700; font-family: var(--font-mono); }
 .hoy-foot { display: flex; gap: 14px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); position: relative; flex-wrap: wrap; }
 .hoy-foot .hf-item { min-width: 72px; }
 .hoy-foot .hf-item .k { font-size: 8.5px; letter-spacing: 1.2px; color: var(--adim); font-weight: 700; text-transform: uppercase; }
 .hoy-foot .hf-item .v { font-size: 12.5px; font-weight: 700; color: var(--tbright); margin-top: 2px; }
-.hoy-foot .hf-item .v.amber { color: var(--amber); }
+.hoy-foot .hf-item .v.amber { color: var(--accent); }
 
 /* ══════════════════════════════════════════════
    SECCIÓN 5: DIAGRAMA (tabla)
@@ -495,20 +489,18 @@ table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); m
 }
 table.gt td:not(.gn):hover { filter: brightness(1.1); transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index: 1; }
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
-.cn { font-family: var(--font-mono); font-size: 15px; font-weight: 800; line-height: 1; letter-spacing: 0; }
-.t1 .cn, .t2 .cn, .t3 .cn, .t4 .cn { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
-.t1 { background: var(--t1) !important; border-color: rgba(0,0,0,.35) !important; border-color: color-mix(in srgb, var(--t1) 55%, black) !important; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 14px -3px var(--t1) !important; }
-.t2 { background: var(--t2) !important; border-color: rgba(0,0,0,.35) !important; border-color: color-mix(in srgb, var(--t2) 55%, black) !important; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 14px -3px var(--t2) !important; }
-.t3 { background: var(--t3) !important; border-color: rgba(0,0,0,.35) !important; border-color: color-mix(in srgb, var(--t3) 55%, black) !important; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 14px -3px var(--t3) !important; }
-.t4 { background: var(--t4) !important; border-color: rgba(0,0,0,.35) !important; border-color: color-mix(in srgb, var(--t4) 55%, black) !important; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 0 14px -3px var(--t4) !important; }
-.tf { background: rgba(239,91,91,.12) !important; border: 1.5px solid var(--red) !important; }
-.tf .cn { color: var(--red); font-size: 14px; font-weight: 900; letter-spacing: 0; text-shadow: none; }
-body.light .tf { background: rgba(214,69,69,.08) !important; }
-body.light .tf .cn { color: var(--red); }
-table.gt td.cs .cn { color: rgba(245,166,35,.5); }
+.cn { font-family: var(--font-ui); font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0; }
+.t1 { background: color-mix(in srgb, var(--t1) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t1) !important; }
+.t2 { background: color-mix(in srgb, var(--t2) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t2) !important; }
+.t3 { background: color-mix(in srgb, var(--t3) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t3) !important; }
+.t4 { background: color-mix(in srgb, var(--t4) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t4) !important; }
+.t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
+.tf { background: color-mix(in srgb, var(--red) 8%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--red) !important; }
+.tf .cn { color: var(--red); font-size: 13px; font-weight: 800; letter-spacing: 0; }
+table.gt td.cs .cn { color: color-mix(in srgb, var(--accent) 55%, var(--adim)); }
 /* Feriado: solo amarillo en el número del día del header */
-table.gt th.fc .dn { color: #f5d020; font-weight: 900; }
-table.gt th.fc { border-color: rgba(245,208,32,.4) !important; background: rgba(245,208,32,.04) !important; }
+table.gt th.fc .dn { color: #b8860b; font-weight: 800; }
+table.gt th.fc { border-color: rgba(184,134,11,.35) !important; background: rgba(184,134,11,.04) !important; }
 table.gt th.fc .fd2 { background: #f5d020; }
 table.gt td.rs { background: rgba(245,166,35,.03); }
 table.gt td.ix { background: rgba(245,166,35,.15) !important; border: 1px solid rgba(245,166,35,.4); }
@@ -847,7 +839,7 @@ body.light .main-nav { background: rgba(255,255,255,.94); }
   -webkit-tap-highlight-color: transparent;
 }
 .mnav-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-.mnav-btn.on { color: var(--amber); background: var(--aglow); font-weight: 700; }
+.mnav-btn.on { color: var(--accent); background: var(--accent-dim); font-weight: 700; }
 .mnav-btn:active { opacity: .7; }
 
 /* ── VIEWS ─────────────────────────────────────────────────────────── */
@@ -1219,104 +1211,14 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
   </div>
   <div class="section-body open" id="sec-user-body">
     <!-- Estado: sin usuario — nadie ve el nombre de nadie más: o entra con su nombre+contraseña, o se da de alta -->
-    <div id="no-user-state">
-      <div style="display:flex;gap:8px;margin-bottom:16px">
-        <button id="ident-tab-login" class="tab on" onclick="identShowTab('login')" style="flex:1">INGRESAR</button>
-        <button id="ident-tab-reg" class="tab" onclick="identShowTab('register')" style="flex:1">SOY NUEVO/A</button>
-      </div>
-
-      <!-- INGRESAR (usuario ya registrado, en un dispositivo nuevo) -->
-      <div id="ident-login">
-        <p class="no-user-msg">&#9673; Ingresá con tu nombre y tu contraseña.</p>
-        <div class="mfg"><label>Nombre</label>
-          <input type="text" id="li-name" placeholder="Tu nombre y apellido" autocomplete="username">
-        </div>
-        <div class="mfg"><label>Contraseña</label>
-          <div class="pwd-input-wrap">
-            <input type="password" id="li-pwd" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')identLogin()">
-          </div>
-        </div>
-        <div class="err-msg" id="li-err"></div>
-        <button class="btn" style="width:100%;margin-top:6px" onclick="identLogin()">INGRESAR</button>
-      </div>
-
-      <!-- SOY NUEVO/A (alta única, primera vez) -->
-      <div id="ident-register" style="display:none">
-        <p class="no-user-msg">&#9673; Es la única vez que te va a pedir estos datos.</p>
-        <div class="mfg"><label>Nombre y apellido</label>
-          <input type="text" id="rg-name" placeholder="Ej: Ezequiel Torres" autocomplete="name">
-        </div>
-        <div class="modal-row">
-          <div class="mfg"><label>Usina</label>
-            <select id="rg-usina" onchange="rgOnUsinaChange()"></select>
-          </div>
-          <div class="mfg"><label>Sector</label>
-            <select id="rg-sector" onchange="rgOnSectorChange()"></select>
-          </div>
-        </div>
-        <div class="modal-row">
-          <div class="mfg" id="rg-puesto-wrap"><label>Puesto</label>
-            <select id="rg-puesto"></select>
-          </div>
-          <div class="mfg"><label>Guardia</label>
-            <select id="rg-guardia"></select>
-          </div>
-        </div>
-        <div id="rg-puesto-note" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
-          &#9432; Este sector todavía no tiene puestos habilitados — quedás sin puesto asignado.
-        </div>
-        <div class="modal-row">
-          <div class="mfg"><label>Contraseña</label>
-            <div class="pwd-input-wrap"><input type="password" id="rg-pwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
-          </div>
-          <div class="mfg"><label>Repetir contraseña</label>
-            <div class="pwd-input-wrap"><input type="password" id="rg-pwd2" placeholder="Repetir" autocomplete="new-password" onkeydown="if(event.key==='Enter')identRegister()"></div>
-          </div>
-        </div>
-        <div class="err-msg" id="rg-err"></div>
-        <button class="btn" style="width:100%;margin-top:6px" onclick="identRegister()">CREAR MI ACCESO</button>
-      </div>
-    </div>
+    <div id="no-user-state"></div>
 
     <!-- Estado: con usuario -->
     <div id="yes-user-state" style="display:none">
-      <div class="user-identified">
-        <div class="uav" id="u-av"></div>
-        <div>
-          <div class="unm" id="u-nm"></div>
-          <div class="ugd" id="u-gd"></div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-outline" onclick="switchView('licencias')">&#9776; MIS LICENCIAS</button>
-      </div>
-      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
-        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
-          🏭 USINA DIGITAL
-        </a>
-        <button class="btn btn-outline" onclick="openChangePwd()">🔑 CONTRASEÑA</button>
-        <button class="btn btn-danger" onclick="logout()">SALIR</button>
-      </div>
-      <!-- Panel relevante (solo si REL) -->
-      <div id="rel-panel" style="display:none">
-        <div class="rel-panel-inner">
-          <div class="rel-panel-hdr" onclick="toggleRelPanel()">
-            <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
-            <span id="rel-arr" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">&#9660;</span>
-          </div>
-          <div id="rel-body" class="rel-body">
-            <div style="margin-bottom:16px;">
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
-              <div id="rel-franco-stats"></div>
-            </div>
-            <div>
-              <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
-              <div id="rel-coverage-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-              <button class="btn btn-outline" onclick="openAddRelCoverage()" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="profile-vue-root"></div>
+      <!-- Panel relevante (solo si REL) — queda fuera de Vue a propósito: tiene su
+           propia lógica de listas/toggle que no hace falta tocar ahora. -->
+      <div id="rel-panel" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -1422,10 +1324,10 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <div>
         <div class="leg-group-title">TURNOS</div>
         <div class="leg-items">
-          <div class="ll-item"><span class="t-dot" style="background:var(--t1)"></span><span class="ll-badge" style="background:var(--t1);color:#000">T1</span><span class="ll-name">00:00–05:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t2)"></span><span class="ll-badge" style="background:var(--t2);color:#000">T2</span><span class="ll-name">06:00–11:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t3)"></span><span class="ll-badge" style="background:var(--t3);color:#000">T3</span><span class="ll-name">12:00–17:59</span></div>
-          <div class="ll-item"><span class="t-dot" style="background:var(--t4)"></span><span class="ll-badge" style="background:var(--t4);color:#000">T4</span><span class="ll-name">18:00–23:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t1)"></span><span class="ll-badge" style="background:var(--t1);color:#fff">T1</span><span class="ll-name">00:00–05:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t2)"></span><span class="ll-badge" style="background:var(--t2);color:#fff">T2</span><span class="ll-name">06:00–11:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t3)"></span><span class="ll-badge" style="background:var(--t3);color:#fff">T3</span><span class="ll-name">12:00–17:59</span></div>
+          <div class="ll-item"><span class="t-dot" style="background:var(--t4)"></span><span class="ll-badge" style="background:var(--t4);color:#fff">T4</span><span class="ll-name">18:00–23:59</span></div>
           <div class="ll-item"><span class="ll-badge" style="background:#1e2530;color:var(--tdim)">F</span><span class="ll-name">Franco</span></div>
           <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.2);color:#f5d020;font-weight:900">F</span><span class="ll-name">Franco — celda roja</span></div>
           <div class="ll-item"><span class="ll-badge" style="background:rgba(245,208,32,.15);color:#f5d020">&#9632;</span><span class="ll-name">Feriado — número en amarillo</span></div>
@@ -1484,14 +1386,7 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <button onclick="showAdminTab('exportar')" id="atab-exportar" class="tab">📤 EXPORTAR</button>
     </div>
     <!-- Tab: Accesos -->
-    <div id="admin-accesos">
-      <div id="audit-content" style="padding:4px 0"></div>
-      <!-- Contraseñas por usuario -->
-      <div class="pwd-admin-section">
-        <div class="pwd-admin-title">🔐 CONTRASEÑAS DE ACCESO</div>
-        <div id="admin-pwd-list"></div>
-      </div>
-    </div>
+    <div id="admin-accesos"></div>
     <!-- Tab: Alta de usuario -->
     <div id="admin-usuarios" style="display:none">
       <div id="admin-users-content" style="padding:4px 0"></div>
@@ -1703,7 +1598,7 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <input id="rel-lic-note" type="text" placeholder="Nota opcional..."
         style="width:100%;box-sizing:border-box;background:var(--cell-bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:var(--font-ui);font-size:13px;outline:none">
     </div>
-    <button id="rel-lic-save" onclick="relLicSave()" disabled style="width:100%;background:var(--amber);border:none;border-radius:5px;padding:10px;font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;color:#111;opacity:.4;margin-bottom:10px">GUARDAR LICENCIA</button>
+    <button id="rel-lic-save" onclick="relLicSave()" disabled style="width:100%;background:var(--amber);border:none;border-radius:5px;padding:10px;font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;color:#fff;opacity:.4;margin-bottom:10px">GUARDAR LICENCIA</button>
 
     <div class="ds-btns">
       <button class="ds-cancel" onclick="relPickerCancel()">CANCELAR</button>
@@ -1921,7 +1816,7 @@ const LIC = {
   DP: { name: 'Día Personal',          color: '#8a9ab5', icon: '🗓️' },
 };
 
-const G_COLORS = { A: '#f0a336', B: '#3ecf8e', C: '#4ea1e8', D: '#a480e8', E: '#ef5b5b', OP: '#5ab8a8', REL: '#8a9ab5' };
+const G_COLORS = { A: '#a9691f', B: '#1f7a4d', C: '#34618f', D: '#5b4b8a', E: '#c0293b', OP: '#3f7d72', REL: '#7d8ba0' };
 const G_LABEL  = { A: 'Guardia A', B: 'Guardia B', C: 'Guardia C', D: 'Guardia D', E: 'Guardia E', OP: 'Operador', REL: 'Relevante' };
 
 // ─── Build license legend ───
@@ -2411,96 +2306,77 @@ async function sha256Hex(str) {
 async function hashPwd(name, pwd) {
   return sha256Hex(name.trim().toLowerCase() + '::' + pwd);
 }
-
-function identShowTab(tab) {
-  document.getElementById('ident-tab-login').classList.toggle('on', tab === 'login');
-  document.getElementById('ident-tab-reg').classList.toggle('on', tab === 'register');
-  document.getElementById('ident-login').style.display = tab === 'login' ? '' : 'none';
-  document.getElementById('ident-register').style.display = tab === 'register' ? '' : 'none';
-  if (tab === 'register') rgInit();
+// Mismo hash que la contraseña, pero con una sal distinta — así un legajo
+// filtrado no sirve para deducir nada de la contraseña real, ni al revés.
+async function hashLegajo(name, legajo) {
+  return sha256Hex(name.trim().toLowerCase() + '::legajo::' + String(legajo).trim());
 }
 
-function rgInit() {
-  const usinaSel = document.getElementById('rg-usina');
-  if (usinaSel.options.length === 0) {
-    usinaSel.innerHTML = USINAS.map(u => `<option value="${u}">${u}</option>`).join('');
-  }
-  rgOnUsinaChange();
-}
-function rgOnUsinaChange() {
-  const usina = document.getElementById('rg-usina').value;
-  const sectorSel = document.getElementById('rg-sector');
-  sectorSel.innerHTML = nuSectorOptions(usina).map(s => `<option value="${s}">${s}</option>`).join('');
-  rgOnSectorChange();
-}
-// Arma las opciones del select de Guardia según usina/sector — "OP" (Operador)
-// solo aparece como guardia en Planta de Agua · PN, el resto de sectores solo
-// tienen A-E + Relevante.
-function guardiaOptionsHtml(usina, sector) {
+// ── API expuesta para el componente Vue de Ingresar/Registro ──────────────
+// El módulo hace el trabajo (validar, hashear, guardar en Firestore); Vue
+// solo junta los datos del formulario y llama a estas funciones.
+function identGetUsinas() { return USINAS; }
+function identGetSectores(usina) { return nuSectorOptions(usina); }
+function identGetPuestos(usina, sector) { return puestosDeSector(usina, sector); }
+// "OP" (Operador, la guardia) solo existe como opción en Planta de Agua · PN.
+function identGetGuardias(usina, sector) {
   const letters = grupoTieneOP({ usina, sector }) ? ['A','B','C','D','E','OP','REL'] : ['A','B','C','D','E','REL'];
-  return letters.map(g => `<option value="${g}">${G_LABEL[g]||g}</option>`).join('');
+  return letters.map(g => ({ g, label: G_LABEL[g] || g }));
 }
 
-function rgOnSectorChange() {
-  const usina = document.getElementById('rg-usina').value;
-  const sector = document.getElementById('rg-sector').value;
-  const puestos = puestosDeSector(usina, sector);
-  document.getElementById('rg-puesto-wrap').style.display = puestos.length ? '' : 'none';
-  document.getElementById('rg-puesto-note').style.display = puestos.length ? 'none' : '';
-  document.getElementById('rg-puesto').innerHTML = puestos.map(p => `<option value="${p}">${p}</option>`).join('');
-  document.getElementById('rg-guardia').innerHTML = guardiaOptionsHtml(usina, sector);
-}
-
-async function identLogin() {
-  const name = (document.getElementById('li-name').value || '').trim();
-  const pwd = document.getElementById('li-pwd').value;
-  const err = document.getElementById('li-err');
-  err.textContent = ''; err.classList.remove('show');
-
-  if (!name || !pwd) { err.textContent = '⚠ Completá nombre y contraseña.'; err.classList.add('show'); return; }
+async function identLoginCore(name, pwd) {
+  name = (name || '').trim();
+  if (!name || !pwd) return { error: '⚠ Completá nombre y contraseña.' };
   const u = USERS.find(x => x.name.toLowerCase() === name.toLowerCase());
-  if (!u) { err.textContent = '⚠ No encontramos ese usuario. ¿Sos nuevo/a? Usá la otra pestaña.'; err.classList.add('show'); return; }
-  if (!u.pwdHash) { err.textContent = '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.'; err.classList.add('show'); return; }
-
+  if (!u) return { error: '⚠ No encontramos ese usuario. ¿Sos nuevo/a? Usá la otra pestaña.' };
+  if (!u.pwdHash) return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
   const hash = await hashPwd(u.name, pwd);
-  if (hash !== u.pwdHash) {
-    err.textContent = '✕ Contraseña incorrecta.'; err.classList.add('show');
-    document.getElementById('li-pwd').value = '';
-    return;
-  }
-  document.getElementById('li-pwd').value = '';
+  if (hash !== u.pwdHash) return { error: '✕ Contraseña incorrecta.' };
   await selectUser(u);
+  return { ok: true };
 }
 
-async function identRegister() {
-  const name = (document.getElementById('rg-name').value || '').trim();
-  const usina = document.getElementById('rg-usina').value;
-  const sector = document.getElementById('rg-sector').value;
-  const puestos = puestosDeSector(usina, sector);
-  const puesto = puestos.length ? document.getElementById('rg-puesto').value : '';
-  const guardia = document.getElementById('rg-guardia').value;
-  const pwd = document.getElementById('rg-pwd').value;
-  const pwd2 = document.getElementById('rg-pwd2').value;
-  const err = document.getElementById('rg-err');
-  err.textContent = ''; err.classList.remove('show');
-
-  if (!name) { err.textContent = '⚠ Ingresá tu nombre y apellido.'; err.classList.add('show'); return; }
+async function identRegisterCore({ name, usina, sector, puesto, guardia, pwd, pwd2, legajo }) {
+  name = (name || '').trim();
+  if (!name) return { error: '⚠ Ingresá tu nombre y apellido.' };
   if (USERS.find(u => u.name.toLowerCase() === name.toLowerCase())) {
-    err.textContent = '⚠ Ya existe un usuario con ese nombre. Si sos vos, usá "INGRESAR".'; err.classList.add('show'); return;
+    return { error: '⚠ Ya existe un usuario con ese nombre. Si sos vos, usá "INGRESAR".' };
   }
-  if (!pwd || pwd.length < 4) { err.textContent = '⚠ La contraseña debe tener al menos 4 caracteres.'; err.classList.add('show'); return; }
-  if (pwd !== pwd2) { err.textContent = '⚠ Las contraseñas no coinciden.'; err.classList.add('show'); return; }
+  if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
+  if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
+  legajo = (legajo || '').trim();
+  if (!legajo || legajo.length < 3) return { error: '⚠ Ingresá tu número de legajo (lo vas a necesitar si te olvidás la contraseña).' };
 
   const pwdHash = await hashPwd(name, pwd);
+  const legajoHash = await hashLegajo(name, legajo);
   const id = 'u_' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'') + '_' + Date.now().toString(36);
-  const u = { id, name, guardia, usina, sector, puesto, pwdHash, pwdUpdatedBy: 'registro', pwdUpdatedAt: new Date().toISOString(), preset: false, createdAt: new Date().toISOString() };
+  const u = { id, name, guardia, usina, sector, puesto, pwdHash, legajoHash, pwdUpdatedBy: 'registro', pwdUpdatedAt: new Date().toISOString(), preset: false, createdAt: new Date().toISOString() };
   USERS.push(u);
   await fbSet('users', id, u);
   logChange('config', `Alta de usuario (autoregistro): ${name} (${groupLabel(u)} · ${G_LABEL[guardia]||guardia})`);
-
-  document.getElementById('rg-pwd').value = '';
-  document.getElementById('rg-pwd2').value = '';
   await selectUser(u);
+  return { ok: true };
+}
+
+// Recuperar contraseña con nombre + legajo — sin necesitar al administrador.
+async function identRecoverCore({ name, legajo, pwd, pwd2 }) {
+  name = (name || '').trim();
+  if (!name || !legajo) return { error: '⚠ Completá tu nombre y tu legajo.' };
+  const u = USERS.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (!u) return { error: '⚠ No encontramos ese usuario.' };
+  if (!u.legajoHash) return { error: '⚠ Este usuario no tiene un legajo cargado — pedile al administrador que te resetee la contraseña.' };
+  const legajoHashEntered = await hashLegajo(u.name, legajo);
+  if (legajoHashEntered !== u.legajoHash) return { error: '✕ El legajo no coincide.' };
+  if (!pwd || pwd.length < 4) return { error: '⚠ La nueva contraseña debe tener al menos 4 caracteres.' };
+  if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
+
+  u.pwdHash = await hashPwd(u.name, pwd);
+  u.pwdUpdatedBy = 'recuperacion';
+  u.pwdUpdatedAt = new Date().toISOString();
+  await fbSet('users', u.id, u);
+  logChange('config', `Contraseña recuperada con legajo: ${u.name}`);
+  await selectUser(u);
+  return { ok: true };
 }
 
 // ── Barra "ver servicio" (selector Usina/Sector/Puesto) para el admin ──────
@@ -2705,27 +2581,28 @@ function closePwdModal() {
 }
 
 // Resetear la contraseña de otro usuario, solo desde el panel Admin
-async function adminResetPwd(name) {
+async function adminResetPwdCore(name, val) {
   const u = USERS.find(x => x.name === name);
-  if (!u) return;
-  const inp = document.getElementById('admin-pwd-inp-' + name.toLowerCase());
-  const msg = document.getElementById('admin-pwd-msg-' + name.toLowerCase());
-  const val = (inp.value || '').trim();
-  if (!val || val.length < 4) {
-    msg.style.color = '#e05252';
-    msg.textContent = '⚠ Mínimo 4 caracteres.';
-    setTimeout(() => { msg.textContent = ''; }, 2500);
-    return;
-  }
+  if (!u) return { error: 'Usuario no encontrado.' };
+  val = (val || '').trim();
+  if (!val || val.length < 4) return { error: '⚠ Mínimo 4 caracteres.' };
   u.pwdHash = await hashPwd(u.name, val);
   u.pwdUpdatedBy = 'admin';
   u.pwdUpdatedAt = new Date().toISOString();
   await fbSet('users', u.id, u);
   logChange('config', `Contraseña de ${name} reseteada por el administrador`);
-  inp.value = '';
-  msg.style.color = 'var(--green)';
-  msg.textContent = '✓ Nueva contraseña guardada.';
-  setTimeout(() => { msg.textContent = ''; renderAdminPwdList(); }, 900);
+  return { ok: true };
+}
+
+async function adminSetLegajoCore(name, val) {
+  const u = USERS.find(x => x.name === name);
+  if (!u) return { error: 'Usuario no encontrado.' };
+  val = (val || '').trim();
+  if (!val || val.length < 3) return { error: '⚠ Mínimo 3 caracteres.' };
+  u.legajoHash = await hashLegajo(u.name, val);
+  await fbSet('users', u.id, u);
+  logChange('config', `Legajo de ${name} cargado/actualizado por el administrador`);
+  return { ok: true };
 }
 
 
@@ -2764,6 +2641,18 @@ async function ensurePresetUsers() {
   }
   if (toMigratePwd.length > 0) {
     await Promise.all(toMigratePwd.map(u => fbSet('users', u.id, u)));
+  }
+  // Los 7 usuarios originales también usan ese mismo número como legajo de
+  // recuperación — es el dato que siempre usaron para identificarse.
+  const toMigrateLegajo = [];
+  for (const u of USERS) {
+    if (!u.legajoHash && DEFAULT_PWDS[u.name]) {
+      u.legajoHash = await hashLegajo(u.name, DEFAULT_PWDS[u.name]);
+      toMigrateLegajo.push(u);
+    }
+  }
+  if (toMigrateLegajo.length > 0) {
+    await Promise.all(toMigrateLegajo.map(u => fbSet('users', u.id, u)));
   }
 }
 
@@ -2810,7 +2699,7 @@ async function clearUserLogs(userName) {
   for (const d of snap.docs) {
     if (d.data().userName === userName) await fbDel('access-log', d.id);
   }
-  renderAuditPanel();
+  if (window.AdminAccesosApp) window.AdminAccesosApp.refresh();
 }
 
 async function unlinkDevice(userId, deviceId) {
@@ -2819,15 +2708,12 @@ async function unlinkDevice(userId, deviceId) {
   if (!confirm(`¿Desvincular este dispositivo de ${u.name}?`)) return;
   const ids = (u.deviceIds || (u.deviceId ? [u.deviceId] : [])).filter(d => d !== deviceId);
   await fbSet('users', u.id, { ...u, deviceIds: ids, deviceId: ids[0] || null });
-  renderAuditPanel();
   buildUserGrid();
+  if (window.AdminAccesosApp) window.AdminAccesosApp.refresh();
 }
 
-async function renderAuditPanel() {
-  if (!ME || ME.name !== ADMIN_NAME) return;
-  const sec = document.getElementById('sec-audit');
-  sec.style.display = '';
-
+// ── API expuesta para el componente Vue de Admin > Accesos ─────────────────
+async function getAuditData() {
   const snap = await getDocs(fbCol('access-log'));
   const myGroupNames = new Set(usersInMyGroup().map(u => u.name));
   const logs = [];
@@ -2837,9 +2723,6 @@ async function renderAuditPanel() {
   const counts = {};
   logs.forEach(l => { counts[l.userName] = (counts[l.userName]||0)+1; });
 
-  document.getElementById('audit-badge').textContent = logs.length + ' accesos';
-
-  // Resumir user-agent a algo legible
   function parseUA(ua='') {
     if (!ua) return '?';
     if (/iPhone|iPad/.test(ua))   return '📱 iOS';
@@ -2849,119 +2732,53 @@ async function renderAuditPanel() {
     if (/Linux/.test(ua))         return '🖥 Linux';
     return '🌐 Web';
   }
-
   function geoStr(l) {
     const parts = [l.city, l.region, l.country].filter(Boolean);
     return parts.length ? parts.join(', ') : (l.ip || '—');
   }
 
-  const div = document.getElementById('audit-content');
-
-  // ── Resumen global ───────────────────────────────────────────────────────
   const last24h = logs.filter(l => (Date.now() - new Date(l.ts)) < 86400000).length;
   const uniqueUsers = new Set(logs.map(l=>l.userName)).size;
-  let summaryHtml = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:22px;font-weight:700;color:var(--amber)">${logs.length}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Total accesos</div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:22px;font-weight:700;color:var(--green)">${last24h}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Últimas 24hs</div>
-    </div>
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:22px;font-weight:700;color:var(--blue,#4a9eda)">${uniqueUsers}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase">Usuarios</div>
-    </div>
-  </div>`;
 
-  // ── Tarjetas por usuario (ultimas 5 conexiones) ───────────────────────────
-  let html = summaryHtml + '<div style="display:flex;flex-direction:column;gap:14px">';
-
-  usersInMyGroup().forEach(p => {
+  const cards = usersInMyGroup().map(p => {
     const u = USERS.find(x => x.name === p.name);
     const c = counts[p.name] || 0;
-    const col = G_COLORS[p.guardia] || '#8a9ab5';
     const ids = u ? (u.deviceIds || (u.deviceId ? [u.deviceId] : [])) : [];
-    const userLogs = logs.filter(l => l.userName === p.name).slice(0, 1); // ultima conexion
-
-    let devicesHtml = ids.length
-      ? ids.map(did => {
-          const isMe = did === DEVICE_ID;
-          return `<span style="font-size:8px;font-family:var(--font-mono);background:var(--bg);border:1px solid ${isMe?'var(--green)':'var(--border)'};color:${isMe?'var(--green)':'var(--tdim)'};border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center;gap:4px">
-            ···${did.slice(-6)} ${isMe?'(este)':''}
-            <button onclick="unlinkDevice('${u.id}','${did}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:0 0 0 3px;line-height:1" title="Desvincular">✕</button>
-          </span>`;
-        }).join(' ')
-      : `<span style="font-size:8px;font-family:var(--font-mono);color:var(--tdim)">SIN VINCULAR</span>`;
-
-    let logsHtml = userLogs.length
-      ? userLogs.map(l => `
-          <div style="display:grid;grid-template-columns:auto auto 1fr auto;gap:6px;align-items:center;font-size:10px;padding:5px 0;border-bottom:1px solid var(--border)">
-            <span style="color:var(--tbright)">${l.date}</span>
-            <span style="color:var(--tdim)">${l.time}</span>
-            <span style="color:var(--adim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${geoStr(l)}">${geoStr(l)}</span>
-            <span style="color:var(--tdim);white-space:nowrap">${parseUA(l.ua)}</span>
-          </div>`)
-        .join('')
-      : `<div style="font-size:10px;color:var(--tdim);padding:4px 0">Sin accesos registrados</div>`;
-
-    html += `<div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid ${col};border-radius:8px;padding:12px 14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-weight:700;font-size:14px;color:${col}">${p.name}</span>
-          <span style="font-size:10px;color:var(--tdim)">${G_LABEL[p.guardia]||p.guardia}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:20px;font-weight:700;color:${col}">${c}</span>
-          ${c > 0 ? `<button onclick="clearUserLogs('${p.name}')" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:2px 8px;font-size:9px;cursor:pointer;font-family:var(--font-mono)">🗑 BORRAR</button>` : ''}
-        </div>
-      </div>
-      <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:4px">${devicesHtml}</div>
-      <div style="font-size:9px;color:var(--tdim);text-transform:uppercase;margin-bottom:4px;letter-spacing:.5px">Última conexión</div>
-      <div>${logsHtml}</div>
-    </div>`;
+    const lastLog = logs.filter(l => l.userName === p.name)[0] || null;
+    return {
+      userId: u ? u.id : null, name: p.name,
+      guardiaLabel: G_LABEL[p.guardia]||p.guardia, color: G_COLORS[p.guardia] || '#8a9ab5', count: c,
+      devices: ids.map(did => ({ id: did, isMe: did === DEVICE_ID, shortId: did.slice(-6) })),
+      lastLog: lastLog ? { date: lastLog.date, time: lastLog.time, geo: geoStr(lastLog), ua: parseUA(lastLog.ua) } : null,
+    };
   });
 
-  html += '</div>';
-  div.innerHTML = html;
-  renderAdminPwdList();
+  const badgeTxt = logs.length + ' accesos';
+  const b = document.getElementById('audit-badge');
+  if (b) b.textContent = badgeTxt;
+  const sec = document.getElementById('sec-audit');
+  if (sec) sec.style.display = '';
+
+  return { totalAccesos: logs.length, last24h, uniqueUsers, cards };
 }
 
-function renderAdminPwdList() {
-  const container = document.getElementById('admin-pwd-list');
-  if (!container) return;
-  let html = '';
+function getPwdListData() {
   const pwdOrigenLabel = {
     migracion: '⚠ Clave original (nunca cambiada)',
     registro:  '✓ Creada por el usuario al registrarse',
     self:      '🔒 Cambiada por el usuario',
     admin:     '🔧 Fijada por vos (admin)',
+    recuperacion: '🔁 Recuperada por el usuario con su legajo',
   };
-  usersInMyGroup().forEach(p => {
-    const name   = p.name;
-    const nameLc = name.toLowerCase();
+  return usersInMyGroup().map(p => {
+    const name = p.name;
     const u = USERS.find(x => x.name === name);
     const hasPwd = !!(u && u.pwdHash);
+    const hasLegajo = !!(u && u.legajoHash);
     const origen = u && u.pwdUpdatedBy ? (pwdOrigenLabel[u.pwdUpdatedBy] || '') : '';
     const fecha = u && u.pwdUpdatedAt ? new Date(u.pwdUpdatedAt).toLocaleDateString('es-AR') : '';
-    html += `
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <div style="width:28px;height:28px;border-radius:3px;background:${G_COLORS[p.guardia]||'#8a9ab5'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${name.charAt(0)}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text);letter-spacing:1px">${name.toUpperCase()} ${hasPwd ? '<span style="color:var(--green)">● CON CONTRASEÑA</span>' : '<span style="color:var(--tdim)">○ SIN CONTRASEÑA</span>'}</div>
-        ${origen ? `<div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:2px">${origen}${fecha ? ' · ' + fecha : ''}</div>` : ''}
-        <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
-          <input id="admin-pwd-inp-${nameLc}" type="text" placeholder="${hasPwd ? 'Nueva contraseña...' : 'Crear contraseña...'}"
-            style="flex:1;min-width:0;background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;color:var(--amber);font-family:var(--font-mono);outline:none"
-            onkeydown="if(event.key==='Enter')adminResetPwd('${name}')">
-          <button onclick="adminResetPwd('${name}')" style="background:var(--amber);border:none;border-radius:3px;padding:5px 10px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#111;white-space:nowrap">${hasPwd ? 'RESETEAR' : 'CREAR'}</button>
-        </div>
-        <div id="admin-pwd-msg-${nameLc}" style="font-family:var(--font-mono);font-size:9px;min-height:12px;margin-top:3px;letter-spacing:1px"></div>
-      </div>
-    </div>`;
+    return { name, guardiaColor: G_COLORS[p.guardia]||'#8a9ab5', hasPwd, hasLegajo, origen, fecha };
   });
-  container.innerHTML = html;
 }
 
 async function selectUser(u) {
@@ -2995,7 +2812,7 @@ async function selectUser(u) {
   renderEvP();
   renderCal();
   renderVacTable();
-  if (u.name === ADMIN_NAME) renderAuditPanel();
+  if (u.name === ADMIN_NAME && window.AdminAccesosApp) window.AdminAccesosApp.refresh();
   // Activar notificaciones push para Jonatan y Lucas
   initNotifications();
 }
@@ -3040,10 +2857,12 @@ function updateUBar() {
   const title = document.getElementById('sec-user-title');
   if (ME) {
     nu.style.display = 'none'; yu.style.display = '';
-    document.getElementById('u-av').textContent = ME.name.charAt(0).toUpperCase();
-    document.getElementById('u-av').style.background = G_COLORS[ME.guardia]||'#8a9ab5';
-    document.getElementById('u-nm').textContent = ME.name.toUpperCase();
-    document.getElementById('u-gd').textContent = G_LABEL[ME.guardia]||ME.guardia;
+    if (window.ProfileApp) {
+      window.ProfileApp.avInitial = ME.name.charAt(0).toUpperCase();
+      window.ProfileApp.avColor = G_COLORS[ME.guardia] || '#8a9ab5';
+      window.ProfileApp.name = ME.name.toUpperCase();
+      window.ProfileApp.guardiaLabel = G_LABEL[ME.guardia] || ME.guardia;
+    }
     sb.textContent = ME.name.toUpperCase();
     if (title) title.textContent = 'Usuario';
     evp.style.display = ''; rp.style.display = '';
@@ -3112,8 +2931,7 @@ function updateUBar() {
     if (hsub2) { hsub2.textContent = ''; hsub2.style.display = 'none'; }
     const heyebrow2 = document.getElementById('h-eyebrow');
     if (heyebrow2) heyebrow2.style.display = '';
-    const hoyWrap = document.getElementById('hoy-card-wrap');
-    if (hoyWrap) hoyWrap.innerHTML = '';
+    if (window.HoyCardApp) window.HoyCardApp.visible = false;
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = 'none';
     const _ab2 = document.getElementById('mnav-admin'); if (_ab2) _ab2.style.display = 'none';
@@ -3427,8 +3245,8 @@ async function saveEvent() {
     try { renderEvP(); } catch(_) {}
     try { renderCal(); } catch(_) {}
     try { if (S) renderRT(RT); } catch(_) {}
-    try { if (document.getElementById('admin-licencias')?.style.display !== 'none') renderAdminLicencias(); } catch(_) {}
-    try { if (document.getElementById('admin-rel-content')) renderAdminRelevante(); } catch(_) {}
+    try { if (document.getElementById('admin-licencias')?.style.display !== 'none' && window.AdminLicenciasApp) window.AdminLicenciasApp.refresh(); } catch(_) {}
+    try { if (window.AdminRelevanteApp) window.AdminRelevanteApp.refresh(); } catch(_) {}
 
   } catch(e) {
     // Error real — mostrar al usuario y restaurar botón
@@ -3470,7 +3288,7 @@ async function deleteEvent(id) {
   try { renderEvP(); } catch(_) {}
   try { renderCal(); } catch(_) {}
   try { if (S) renderRT(RT); } catch(_) {}
-  try { if (document.getElementById('admin-rel-content')) renderAdminRelevante(); } catch(_) {}
+  try { if (window.AdminRelevanteApp) window.AdminRelevanteApp.refresh(); } catch(_) {}
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3651,9 +3469,8 @@ function turnoRealDe(g, ds) {
 }
 
 function renderHoyCard() {
-  const wrap = document.getElementById('hoy-card-wrap');
-  if (!wrap) return;
-  if (!ME) { wrap.innerHTML = ''; return; }
+  if (!window.HoyCardApp) return; // Vue todavía no montó (no debería pasar, pero por las dudas)
+  if (!ME) { window.HoyCardApp.visible = false; return; }
 
   const now = new Date();
   const todayStr = dk(now.getFullYear(), now.getMonth()+1, now.getDate());
@@ -3696,24 +3513,24 @@ function renderHoyCard() {
   const fechaTxt = `${DIAS[now.getDay()]} ${now.getDate()} de ${MESES[now.getMonth()]}`;
   const TCVAR = { 1:'var(--t1)', 2:'var(--t2)', 3:'var(--t3)', 4:'var(--t4)' };
 
-  let ledColor, badgeHtml, readoutHtml;
+  let ledColor, badgeText, badgeColor, ledText, ledBig, tituloTxt, rangoHtml;
   if (esLicHoy) {
     const li = LIC[licHoy[0].type] || { name: licHoy[0].type, color:'#8a9ab5' };
-    ledColor = li.color;
-    badgeHtml = `<div class="hoy-badge" style="color:${li.color};background:${li.color}22;border:1px solid ${li.color}77">${li.name.toUpperCase()}</div>`;
-    readoutHtml = `<div class="hoy-led" style="--hoy-color:${li.color}"><span style="font-size:19px">${licHoy[0].type}</span></div>
-      <div class="hoy-txt"><h2>${li.name}</h2><div class="rng">Hoy no trabajás</div></div>`;
+    ledColor = li.color; badgeColor = li.color;
+    badgeText = li.name.toUpperCase();
+    ledText = licHoy[0].type; ledBig = false;
+    tituloTxt = li.name; rangoHtml = 'Hoy no trabajás';
   } else if (turnoHoy === 'F') {
-    ledColor = 'var(--red)';
-    badgeHtml = `<div class="hoy-badge" style="color:var(--red);background:color-mix(in srgb, var(--red) 16%, transparent);border:1px solid var(--red)">FRANCO</div>`;
-    readoutHtml = `<div class="hoy-led" style="--hoy-color:var(--red)"><span>F</span></div>
-      <div class="hoy-txt"><h2>Franco</h2><div class="rng">Hoy no trabajás</div></div>`;
+    ledColor = 'var(--red)'; badgeColor = 'var(--red)';
+    badgeText = 'FRANCO';
+    ledText = 'F'; ledBig = true;
+    tituloTxt = 'Franco'; rangoHtml = 'Hoy no trabajás';
   } else {
     const cvar = TCVAR[turnoHoy];
-    ledColor = cvar;
-    badgeHtml = `<div class="hoy-badge" style="color:${cvar};background:color-mix(in srgb, ${cvar} 16%, transparent);border:1px solid ${cvar}">EN TURNO</div>`;
-    readoutHtml = `<div class="hoy-led" style="--hoy-color:${cvar}"><span>${turnoHoy}</span></div>
-      <div class="hoy-txt"><h2>Turno ${turnoHoy}</h2><div class="rng">Hoy <b>${TURNO_HORAS[turnoHoy]}</b></div></div>`;
+    ledColor = cvar; badgeColor = cvar;
+    badgeText = 'EN TURNO';
+    ledText = String(turnoHoy); ledBig = true;
+    tituloTxt = 'Turno ' + turnoHoy; rangoHtml = `Hoy <b>${TURNO_HORAS[turnoHoy]}</b>`;
   }
 
   let manTxt;
@@ -3721,19 +3538,11 @@ function renderHoyCard() {
   else if (turnoTom === 'F') manTxt = 'Franco';
   else manTxt = 'Turno ' + turnoTom;
 
-  wrap.innerHTML = `
-    <div class="hoy-card" style="--hoy-glow:color-mix(in srgb, ${ledColor} 22%, transparent)">
-      <div class="hoy-top">
-        <div class="hoy-date">${fechaTxt}</div>
-        ${badgeHtml}
-      </div>
-      <div class="hoy-readout">${readoutHtml}</div>
-      <div class="hoy-foot">
-        <div class="hf-item"><div class="k">Mañana</div><div class="v">${manTxt}</div></div>
-        <div class="hf-item"><div class="k">Relevante</div><div class="v">${relInfo}</div></div>
-        ${racha > 0 ? `<div class="hf-item"><div class="k">Seguidos</div><div class="v amber">${racha} día${racha!==1?'s':''}</div></div>` : ''}
-      </div>
-    </div>`;
+  Object.assign(window.HoyCardApp, {
+    visible: true, fechaTxt, badgeText, badgeColor,
+    ledColor, ledText, ledBig, tituloTxt, rangoHtml,
+    manTxt, relInfo, racha,
+  });
 }
 
 async function renderCal(){
@@ -4502,10 +4311,18 @@ function renderRecPanel(){
 // ═══════════════════════════════════════════════════════════════════════════
 // RELEVANTE PANEL
 // ═══════════════════════════════════════════════════════════════════════════
-function toggleRelPanel(){const body=document.getElementById('rel-body'),arr=document.getElementById('rel-arr');const open=body.classList.toggle('open');arr.textContent=open?'▲':'▼';if(open)renderRelPanel();}
-function renderRelPanel(){if(!ME||ME.guardia!=='REL')return;renderRelFranco();renderRelCoverageList();}
-function renderRelFranco(){
-  const div=document.getElementById('rel-franco-stats');div.innerHTML='';
+function toggleRelPanel(){
+  if (!window.RelPanelApp) return;
+  window.RelPanelApp.open = !window.RelPanelApp.open;
+  if (window.RelPanelApp.open) renderRelPanel();
+}
+function renderRelPanel(){
+  if(!ME||ME.guardia!=='REL')return;
+  if (!window.RelPanelApp) return;
+  Object.assign(window.RelPanelApp, computeFrancoStats());
+  window.RelPanelApp.coverages = getMyRelCoveragesDisplay();
+}
+function computeFrancoStats(){
   const now=new Date();
   const y=now.getFullYear(),m=now.getMonth()+1;
   const todayStr=dk(y,m,now.getDate());
@@ -4564,33 +4381,26 @@ function renderRelFranco(){
     ? totalFrancoHours + 'h'
     : totalFrancoHours.toFixed(1) + 'h';
 
-  div.innerHTML=`
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">${workedCount}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
-      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">${francoFullDays}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
-      <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">${hDisplay}</div><div class="rec-stat-lbl">HS FRANCO</div></div>
-    </div>
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px">
-      ${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}
-      <span style="color:var(--adim);margin-left:6px">· hs incluye parciales</span>
-    </div>`;
+  const statsFootTxt = `${MES_L[m]} ${y} · hasta hoy ${todayStr.slice(8)} ${MES_S[m]}
+      <span style="color:var(--adim);margin-left:6px">· hs incluye parciales</span>`;
+
+  return { workedCount, francoFullDays, hDisplay, statsFootTxt };
 }
-function renderRelCoverageList(){
-  const list=document.getElementById('rel-coverage-list');list.innerHTML='';
-  const myCovs=REL_COVERAGES.filter(c=>c.userId===ME.id).sort((a,b)=>b.fromDate.localeCompare(a.fromDate));
-  if(myCovs.length===0){list.innerHTML='<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:6px;letter-spacing:1px">Sin coberturas registradas</div>';return;}
-  myCovs.forEach(cov=>{
-    const item=el('div','ev-item','');
-    const lbar=el('div','ev-lbar','');lbar.style.background='#8a9ab5';item.appendChild(lbar);
-    const info=el('div','ev-info','');
-    info.appendChild(el('div','ev-who',`T${cov.turno} · Guardia ${cov.guardia} · ${cov.quien}`));
-    const dts=el('div','ev-dates','');dts.textContent=cov.fromDate===cov.toDate?formatDate(cov.fromDate):`${formatDate(cov.fromDate)} → ${formatDate(cov.toDate)}`;info.appendChild(dts);
-    if(cov.note){info.appendChild(el('div','ev-note',cov.note));}
-    const ts=el('div','ev-ts','');ts.innerHTML=`⏱ ${fmtTs(new Date(cov.createdAt))}`;info.appendChild(ts);
-    item.appendChild(info);
-    const del=el('button','ev-del','✕');del.onclick=async()=>{if(!confirm('¿Eliminar cobertura?'))return;REL_COVERAGES=REL_COVERAGES.filter(c=>c.id!==cov.id);await deleteOneRelCoverage(cov.id);renderRelPanel();};item.appendChild(del);
-    list.appendChild(item);
-  });
+function getMyRelCoveragesDisplay(){
+  return REL_COVERAGES
+    .filter(c=>c.userId===ME.id)
+    .sort((a,b)=>b.fromDate.localeCompare(a.fromDate))
+    .map(cov => ({
+      ...cov,
+      datesTxt: cov.fromDate===cov.toDate ? formatDate(cov.fromDate) : `${formatDate(cov.fromDate)} → ${formatDate(cov.toDate)}`,
+      tsTxt: fmtTs(new Date(cov.createdAt)),
+    }));
+}
+async function deleteRelCoverageCore(id){
+  if(!confirm('¿Eliminar cobertura?'))return;
+  REL_COVERAGES=REL_COVERAGES.filter(c=>c.id!==id);
+  await deleteOneRelCoverage(id);
+  renderRelPanel();
 }
 function openAddRelCoverage(){
   const n=new Date();const today=dk(n.getFullYear(),n.getMonth()+1,n.getDate());
@@ -4841,7 +4651,7 @@ function switchView(name) {
   }
 
   if (name === 'admin') {
-    try { renderAuditPanel(); } catch(_) {}
+    try { if (window.AdminAccesosApp) window.AdminAccesosApp.refresh(); } catch(_) {}
     try { admInit(); } catch(_) {}
     const b = document.getElementById('sec-audit-body');
     const arrow = document.getElementById('sec-audit-arrow');
@@ -5112,8 +4922,10 @@ Object.assign(window, {
   switchView, showSection, triggerInstall, toggleTheme,
   selectGuardiaGrid, handleDayClick, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
-  identShowTab, identLogin, identRegister, rgOnUsinaChange, rgOnSectorChange,
-  openChangePwd, confirmPassword, closePwdModal, adminResetPwd,
+  identGetUsinas, identGetSectores, identGetPuestos, identGetGuardias, identLoginCore, identRegisterCore, identRecoverCore,
+  openChangePwd, confirmPassword, closePwdModal, adminResetPwdCore, adminSetLegajoCore,
+  getAuditData, getPwdListData, unlinkDevice, clearUserLogs,
+  deleteRelCoverageCore,
   openAddEvent, saveEvent, deleteEvent, closeM, showET, evNavMonth,
   findCTSwap, populateCTSelect,
   dsInit, dsSave, dsCancel, dsOpen, adjDCH,
@@ -5124,18 +4936,19 @@ Object.assign(window, {
   openRelPicker, relPickerCancel,
   openCellActions, closeCellActions, openLicPopupForDay, showLicDetail, closeLicPopup, changeLicType, toggleLicChangePanel, openRecPopup, openUsinaEdit, saveUsinaField, closeUsinaPopup,
   buscar, renderVacTable,
-  renderAuditPanel, clearUserLogs, unlinkDevice,
   showCombiTab,
   saveUsina, renderUsinaPanel,
-  showAdminTab, renderAdminLicencias, renderAdminRelevante, renderAdminApariencia, applyCellTheme, applyStoredCellTheme,
-  renderAdminUsuarios, nuOnUsinaChange, nuOnSectorChange, adminCreateUser, adminOpenMoveUser, adminDeleteUserConfirm,
+  showAdminTab, applyCellTheme, applyStoredCellTheme,
+  getAdminDiagGuardiasList, getAdminDiagData, formatSelRange, adminDiagAddLicCore, adminDiagApplyCore,
+  getAdminLicenciasData,
+  getThemesData, getCurrentCellTheme,
+  getAdminUsersGrouped, adminCreateUserCore, adminDeleteUserCore, adminMoveUserCore,
   avInit, avOnUsinaChange, avOnSectorChange, avApply, avReset, avToggleExpand,
   admInit, admOnUsinaChange, admOnSectorChange, admApply, admReset,
   buildUserGrid,
-  renderAdminHistorial, clearAdminHistory, renderAdminExportar, exportLicencias, exportRecargas, exportUsuarios, logChange,
+  getAdminHistoryData, clearAdminHistoryCore, getExportMonthInfo, exportLicencias, exportRecargas, exportUsuarios, logChange,
   relLicSave,
   adminDeleteEvent, adminDeleteDuplicates, adminOpenAddEvent,
-  adminDiagSelectG, adminDiagMouseDown, adminDiagTouchStart, adminDiagApply, adminDiagDayClick, adminDiagAddLic,
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5406,55 +5219,31 @@ async function revertirDescuento(ev) {
 }
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Historial de cambios (admin) ──────────────────────────────────────────
-function renderAdminHistorial() {
-  const div = document.getElementById('admin-hist-content');
-  if (!div) return;
-
-  // Leer historial guardado en localStorage
+// ── API expuesta para el componente Vue de Admin > Historial ───────────────
+function getAdminHistoryData() {
   let history = [];
   try { history = JSON.parse(localStorage.getItem('gd-history') || '[]'); } catch(_) {}
+  if (!history.length) return { count: 0, groups: [] };
 
-  if (!history.length) {
-    div.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:12px 0;text-align:center">Sin cambios registrados aún.<br>Los próximos cambios quedarán acá.</div>';
-    return;
-  }
-
-  // Mostrar más recientes primero
   const sorted = [...history].reverse();
   const byDate = {};
+  const order = [];
   sorted.forEach(h => {
     const d = h.date || '?';
-    if (!byDate[d]) byDate[d] = [];
+    if (!byDate[d]) { byDate[d] = []; order.push(d); }
     byDate[d].push(h);
   });
-
-  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span style="font-family:var(--font-mono);font-size:9px;color:var(--tdim)">${history.length} cambio${history.length!==1?'s':''} registrado${history.length!==1?'s':''}</span>
-    <button onclick="clearAdminHistory()" style="background:none;border:1px solid var(--red);color:var(--red);font-family:var(--font-mono);font-size:8px;padding:3px 8px;border-radius:3px;cursor:pointer">LIMPIAR</button>
-  </div>`;
-
-  Object.entries(byDate).forEach(([date, items]) => {
-    html += `<div style="font-family:var(--font-mono);font-size:8px;color:var(--amber);letter-spacing:2px;margin:10px 0 4px">${date}</div>`;
-    items.forEach(h => {
-      const icons = {licencia:'📋', recargo:'💰', relevante:'⭐', usuario:'👤', config:'⚙️'};
-      const icon = icons[h.type] || '•';
-      html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:var(--panel);border-radius:5px;margin-bottom:3px;border-left:2px solid var(--border)">
-        <span style="font-size:13px;flex-shrink:0">${icon}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;color:var(--tbright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.desc}</div>
-          <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono)">${h.user} · ${h.time}</div>
-        </div>
-      </div>`;
-    });
-  });
-
-  div.innerHTML = html;
+  const icons = {licencia:'📋', recargo:'💰', relevante:'⭐', usuario:'👤', config:'⚙️'};
+  const groups = order.map(date => ({
+    date,
+    items: byDate[date].map(h => ({ ...h, icon: icons[h.type] || '•' })),
+  }));
+  return { count: history.length, groups };
 }
-
-function clearAdminHistory() {
-  if (!confirm('¿Limpiar todo el historial de cambios?')) return;
+function clearAdminHistoryCore() {
+  if (!confirm('¿Limpiar todo el historial de cambios?')) return false;
   localStorage.removeItem('gd-history');
-  renderAdminHistorial();
+  return true;
 }
 
 // Registrar un cambio en el historial local
@@ -5476,46 +5265,13 @@ function logChange(type, desc) {
 }
 
 // ── Exportar (admin) ──────────────────────────────────────────────────────
-function renderAdminExportar() {
-  const div = document.getElementById('admin-export-content');
-  if (!div) return;
-
+// ── API expuesta para el componente Vue de Admin > Exportar ────────────────
+function getExportMonthInfo() {
   const now = new Date();
-  const mesNombre = now.toLocaleDateString('es-AR', {month:'long', year:'numeric'});
-  const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-
-  div.innerHTML = `
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:12px">EXPORTAR DATOS</div>
-
-    <!-- Resumen del mes -->
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
-      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">📋 Resumen de licencias — ${mesNombre}</div>
-      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las licencias del mes actual para copiar o compartir</div>
-      <button onclick="exportLicencias('${ym}')" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
-        COPIAR RESUMEN DEL MES
-      </button>
-    </div>
-
-    <!-- Resumen de recargas -->
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
-      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">💰 Recargas del mes — ${mesNombre}</div>
-      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las recargas registradas este mes</div>
-      <button onclick="exportRecargas('${ym}')" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
-        COPIAR RECARGAS DEL MES
-      </button>
-    </div>
-
-    <!-- Todos los usuarios -->
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
-      <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">👥 Estado de usuarios</div>
-      <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Resumen de dispositivos vinculados y accesos</div>
-      <button onclick="exportUsuarios()" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;width:100%">
-        COPIAR ESTADO DE USUARIOS
-      </button>
-    </div>
-
-    <div id="export-msg" style="font-family:var(--font-mono);font-size:10px;color:var(--green);text-align:center;margin-top:10px;min-height:18px"></div>
-  `;
+  return {
+    mesNombre: now.toLocaleDateString('es-AR', {month:'long', year:'numeric'}),
+    ym: `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`,
+  };
 }
 
 function exportLicencias(ym) {
@@ -5575,8 +5331,10 @@ function copyToClipboard(txt) {
 }
 
 function showExportMsg(msg) {
-  const el = document.getElementById('export-msg');
-  if (el) { el.textContent = msg; setTimeout(() => { if(el) el.textContent=''; }, 3000); }
+  if (window.AdminExportApp) {
+    window.AdminExportApp.msg = msg;
+    setTimeout(() => { if (window.AdminExportApp) window.AdminExportApp.msg = ''; }, 3000);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5584,95 +5342,35 @@ function showExportMsg(msg) {
 // ── Tab: Alta de usuario (Usina → Sector → Puesto → Guardia) ───────────────
 function nuSectorOptions(usina) { return SECTORES_POR_USINA[usina] || []; }
 
-function renderAdminUsuarios() {
-  const div = document.getElementById('admin-users-content');
-  if (!div) return;
-
-  const usinaOpts = USINAS.map(u => `<option value="${u}">${u}</option>`).join('');
-
-  let html = `
-    <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:2px;margin-bottom:10px">➕ CREAR USUARIO</div>
-    <div class="mfg"><label>Nombre</label>
-      <input type="text" id="nu-name" placeholder="Ej: Ezequiel" style="font-size:15px;padding:9px 12px;">
-    </div>
-    <div class="modal-row">
-      <div class="mfg"><label>Usina</label>
-        <select id="nu-usina" onchange="nuOnUsinaChange()">${usinaOpts}</select>
-      </div>
-      <div class="mfg"><label>Sector</label>
-        <select id="nu-sector" onchange="nuOnSectorChange()"></select>
-      </div>
-    </div>
-    <div class="modal-row">
-      <div class="mfg" id="nu-puesto-wrap"><label>Puesto</label>
-        <select id="nu-puesto"></select>
-      </div>
-      <div class="mfg"><label>Guardia</label>
-        <select id="nu-guardia"></select>
-      </div>
-    </div>
-    <div id="nu-puesto-note" style="display:none;font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
-      &#9432; Este sector todavía no tiene puestos habilitados — el usuario queda sin puesto asignado.
-    </div>
-    <div class="modal-row">
-      <div class="mfg"><label>Contraseña</label>
-        <div class="pwd-input-wrap"><input type="password" id="nu-pwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
-      </div>
-      <div class="mfg"><label>Repetir contraseña</label>
-        <div class="pwd-input-wrap"><input type="password" id="nu-pwd2" placeholder="Repetir" autocomplete="new-password"></div>
-      </div>
-    </div>
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
-      &#9432; Comunicale esta contraseña a la persona — la va a necesitar para entrar la primera vez.
-    </div>
-    <div class="err-msg" id="nu-err"></div>
-    <div class="btn-row" style="margin-top:6px">
-      <button class="btn" onclick="adminCreateUser()">CREAR USUARIO</button>
-    </div>
-
-    <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:2px;margin:22px 0 10px">👥 USUARIOS EXISTENTES</div>
-    <div id="nu-list" style="display:flex;flex-direction:column;gap:8px"></div>
-  `;
-  div.innerHTML = html;
-  nuOnUsinaChange(); // pobla el select de sector según la usina por defecto
-  renderAdminUsersList();
+// ── API expuesta para el componente Vue de Admin > Usuarios ────────────────
+function getAdminUsersGrouped() {
+  const groups = new Map();
+  USERS.forEach(u => {
+    const key = userGroupKey(u);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(u);
+  });
+  return [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([key, list]) => ({
+      key, label: groupLabel(list[0]),
+      users: list.map(u => ({
+        id: u.id, name: u.name, guardia: u.guardia,
+        initial: u.name.charAt(0).toUpperCase(),
+        color: G_COLORS[u.guardia] || '#8a9ab5',
+        guardiaLabel: G_LABEL[u.guardia] || u.guardia,
+        usina: u.usina, sector: u.sector, puesto: u.puesto,
+      })),
+    }));
 }
 
-function nuOnUsinaChange() {
-  const usina = document.getElementById('nu-usina').value;
-  const sectorSel = document.getElementById('nu-sector');
-  sectorSel.innerHTML = nuSectorOptions(usina).map(s => `<option value="${s}">${s}</option>`).join('');
-  nuOnSectorChange();
-}
-function nuOnSectorChange() {
-  const usina = document.getElementById('nu-usina').value;
-  const sector = document.getElementById('nu-sector').value;
-  const puestos = puestosDeSector(usina, sector);
-  const tienePuesto = puestos.length > 0;
-  document.getElementById('nu-puesto-wrap').style.display = tienePuesto ? '' : 'none';
-  document.getElementById('nu-puesto-note').style.display = tienePuesto ? 'none' : '';
-  document.getElementById('nu-puesto').innerHTML = puestos.map(p => `<option value="${p}">${p}</option>`).join('');
-  document.getElementById('nu-guardia').innerHTML = guardiaOptionsHtml(usina, sector);
-}
-
-async function adminCreateUser() {
-  const name = (document.getElementById('nu-name').value || '').trim();
-  const usina = document.getElementById('nu-usina').value;
-  const sector = document.getElementById('nu-sector').value;
-  const tienePuesto = sectorTienePuesto(usina, sector);
-  const puesto = tienePuesto ? document.getElementById('nu-puesto').value : '';
-  const guardia = document.getElementById('nu-guardia').value;
-  const pwd = document.getElementById('nu-pwd').value;
-  const pwd2 = document.getElementById('nu-pwd2').value;
-  const err = document.getElementById('nu-err');
-  err.textContent = ''; err.classList.remove('show');
-
-  if (!name) { err.textContent = '⚠ Ingresá un nombre.'; err.classList.add('show'); return; }
+async function adminCreateUserCore({ name, usina, sector, puesto, guardia, pwd, pwd2 }) {
+  name = (name || '').trim();
+  if (!name) return { error: '⚠ Ingresá un nombre.' };
   if (USERS.find(u => u.name.toLowerCase() === name.toLowerCase())) {
-    err.textContent = '⚠ Ya existe un usuario con ese nombre.'; err.classList.add('show'); return;
+    return { error: '⚠ Ya existe un usuario con ese nombre.' };
   }
-  if (!pwd || pwd.length < 4) { err.textContent = '⚠ La contraseña debe tener al menos 4 caracteres.'; err.classList.add('show'); return; }
-  if (pwd !== pwd2) { err.textContent = '⚠ Las contraseñas no coinciden.'; err.classList.add('show'); return; }
+  if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
+  if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
 
   const pwdHash = await hashPwd(name, pwd);
   const id = 'u_' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'') + '_' + Date.now().toString(36);
@@ -5680,97 +5378,45 @@ async function adminCreateUser() {
   USERS.push(u);
   await fbSet('users', id, u);
   logChange('config', `Usuario creado por el administrador: ${name} (${groupLabel(u)} · ${G_LABEL[guardia]||guardia})`);
-
-  document.getElementById('nu-name').value = '';
-  document.getElementById('nu-pwd').value = '';
-  document.getElementById('nu-pwd2').value = '';
   buildUserGrid();
-  renderAdminUsersList();
+  return { ok: true };
 }
 
-function renderAdminUsersList() {
-  const wrap = document.getElementById('nu-list');
-  if (!wrap) return;
-  const groups = new Map();
-  USERS.forEach(u => {
-    const key = userGroupKey(u);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(u);
-  });
-  let html = '';
-  [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0])).forEach(([key, list]) => {
-    html += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);letter-spacing:1px;margin-top:6px">${groupLabel(list[0])}</div>`;
-    list.forEach(u => {
-      html += `
-        <div style="display:flex;align-items:center;gap:8px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
-          <div style="width:26px;height:26px;border-radius:4px;background:${G_COLORS[u.guardia]||'#8a9ab5'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${u.name.charAt(0).toUpperCase()}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:12px;font-weight:700;color:var(--tbright)">${u.name}</div>
-            <div style="font-size:10px;color:var(--tdim)">${G_LABEL[u.guardia]||u.guardia}</div>
-          </div>
-          <button class="btn btn-outline" style="font-size:10px;padding:5px 10px;flex-shrink:0" onclick="adminOpenMoveUser('${u.id}')">MOVER</button>
-          <button class="btn btn-danger" style="font-size:10px;padding:5px 10px;flex-shrink:0" onclick="adminDeleteUserConfirm('${u.id}')">BORRAR</button>
-        </div>`;
-    });
-  });
-  wrap.innerHTML = html || '<div style="font-size:11px;color:var(--tdim)">Sin usuarios.</div>';
-}
-
-// Borrar un usuario definitivamente (no se puede deshacer)
-async function adminDeleteUserConfirm(userId) {
+async function adminDeleteUserCore(userId) {
   const u = USERS.find(x => x.id === userId);
-  if (!u) return;
-  if (u.name === ADMIN_NAME) { alert('No podés borrar al administrador.'); return; }
-  if (!confirm(`¿Borrar a ${u.name} definitivamente?\n\nEsto NO borra sus licencias ni recargos ya cargados, solo su acceso. No se puede deshacer.`)) return;
+  if (!u) return { error: 'Usuario no encontrado.' };
+  if (u.name === ADMIN_NAME) return { error: 'No podés borrar al administrador.' };
+  if (!confirm(`¿Borrar a ${u.name} definitivamente?\n\nEsto NO borra sus licencias ni recargos ya cargados, solo su acceso. No se puede deshacer.`)) return { cancelled: true };
   await fbDel('users', u.id);
   USERS = USERS.filter(x => x.id !== u.id);
   logChange('config', `Usuario borrado por el administrador: ${u.name} (${groupLabel(u)})`);
   if (ME && ME.id === u.id) { ME = null; lsDel('gd-me-id'); }
   buildUserGrid();
-  renderAdminUsersList();
+  return { ok: true };
 }
 
-// Reasignar a un usuario existente de sector/puesto/guardia (ej. lo pasan de sector)
-function adminOpenMoveUser(userId) {
+async function adminMoveUserCore(userId, { usina, sector, puesto }) {
   const u = USERS.find(x => x.id === userId);
-  if (!u) return;
-  const usina = prompt('Usina (PN / NP):', u.usina || 'PN');
-  if (usina === null) return;
-  if (!USINAS.includes(usina)) { alert('Usina inválida. Usá PN o NP.'); return; }
-  const sectores = nuSectorOptions(usina);
-  const sector = prompt('Sector:\n' + sectores.join('\n'), u.sector || sectores[0]);
-  if (sector === null) return;
-  if (!sectores.includes(sector)) { alert('Sector inválido para esa usina.'); return; }
-  let puesto = '';
-  if (sectorTienePuesto(usina, sector)) {
-    const puestos = puestosDeSector(usina, sector);
-    puesto = prompt('Puesto:\n' + puestos.join('\n'), u.puesto || puestos[0]) || '';
-    if (puesto && !puestos.includes(puesto)) { alert('Puesto inválido.'); return; }
-  }
-  u.usina = usina; u.sector = sector; u.puesto = puesto;
-  fbSet('users', u.id, u);
+  if (!u) return { error: 'Usuario no encontrado.' };
+  u.usina = usina; u.sector = sector; u.puesto = puesto || '';
+  await fbSet('users', u.id, u);
   logChange('config', `Usuario reasignado: ${u.name} → ${groupLabel(u)}`);
   buildUserGrid();
-  renderAdminUsersList();
+  return { ok: true };
 }
 
-
-function renderAdminApariencia() {
-  const div = document.getElementById('admin-appear-content');
-
-  // Tema actual guardado (o default cristal)
-  const cur = localStorage.getItem('diag-cell-theme') || 'cristal';
-
-  const themes = [
+// ── API expuesta para el componente Vue de Admin > Apariencia ──────────────
+function getThemesData() {
+  return [
     {
       id: 'cristal',
-      name: 'Panel de Control',
-      desc: 'Bloques sólidos con glow — como luces de estado',
+      name: 'Corporativo',
+      desc: 'Fondo tenue con borde de color — sobrio, sin brillo',
       preview: [
-        { bg: '#4ea1e8', border: '#4ea1e8', color: '#fff', t: '1', glow: '#4ea1e8' },
-        { bg: '#3ecf8e', border: '#3ecf8e', color: '#fff', t: '2', glow: '#3ecf8e' },
-        { bg: '#f0a336', border: '#f0a336', color: '#fff', t: '3', glow: '#f0a336' },
-        { bg: 'transparent', border: '#ef5b5b', color: '#ef5b5b', t: 'F' },
+        { bg: '#eaf0f8', border: '#34618f', color: '#34618f', t: '1' },
+        { bg: '#e6f2ec', border: '#1f7a4d', color: '#1f7a4d', t: '2' },
+        { bg: '#f3ecdf', border: '#a9691f', color: '#a9691f', t: '3' },
+        { bg: 'transparent', border: '#c0293b', color: '#c0293b', t: 'F' },
       ]
     },
     {
@@ -5796,50 +5442,13 @@ function renderAdminApariencia() {
       ]
     },
   ];
-
-  let html = `<div style="margin-bottom:14px;font-size:11px;color:var(--tdim)">
-    Elegí el estilo visual de las celdas del diagrama. Se aplica para todos los usuarios.
-  </div>
-  <div style="display:flex;flex-direction:column;gap:12px">`;
-
-  themes.forEach(th => {
-    const isActive = cur === th.id;
-    html += `<div onclick="applyCellTheme('${th.id}')" style="
-      background:var(--panel);border:2px solid ${isActive?'var(--amber)':'var(--border)'};
-      border-radius:10px;padding:14px;cursor:pointer;
-      box-shadow:${isActive?'0 0 16px rgba(245,166,35,.15)':'none'};
-      transition:all .2s;
-    ">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div>
-          <span style="font-weight:700;color:${isActive?'var(--amber)':'var(--tbright)'};font-size:13px">${th.name}</span>
-          ${isActive?'<span style="margin-left:8px;font-size:9px;background:var(--amber);color:#000;border-radius:3px;padding:1px 6px;font-weight:700;letter-spacing:1px">ACTIVO</span>':''}
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--tdim);margin-bottom:10px">${th.desc}</div>
-      <div style="display:flex;gap:6px">
-        ${th.preview.map(p=>`
-          <div style="
-            flex:1;height:40px;border-radius:6px;
-            background:${p.bg};border:1px solid ${p.border};
-            display:flex;align-items:center;justify-content:center;
-            ${p.glow?`box-shadow:0 0 8px ${p.glow}44;`:''}
-            font-family:monospace;font-size:14px;font-weight:900;
-            color:${p.color};
-            ${p.glow?`text-shadow:0 0 8px ${p.glow}88;`:''}
-          ">${p.t}</div>`).join('')}
-      </div>
-    </div>`;
-  });
-
-  html += '</div>';
-  div.innerHTML = html;
 }
+function getCurrentCellTheme() { return localStorage.getItem('diag-cell-theme') || 'cristal'; }
 
 function applyCellTheme(themeId) {
   localStorage.setItem('diag-cell-theme', themeId);
   applyStoredCellTheme();
-  renderAdminApariencia(); // refrescar para mostrar activo
+  if (window.AdminAparienciaApp) window.AdminAparienciaApp.current = themeId;
 }
 
 function applyStoredCellTheme() {
@@ -5856,19 +5465,17 @@ function showAdminTab(tab) {
     const btn = document.getElementById('atab-'+t);
     if (btn) btn.classList.toggle('on', t===tab);
   });
-  if (tab === 'accesos') renderAuditPanel();
-  if (tab === 'usuarios') renderAdminUsuarios();
-  if (tab === 'licencias') renderAdminLicencias();
-  if (tab === 'relevante') renderAdminRelevante();
-  if (tab === 'apariencia') renderAdminApariencia();
-  if (tab === 'historial') renderAdminHistorial();
-  if (tab === 'exportar') renderAdminExportar();
+  if (tab === 'accesos' && window.AdminAccesosApp) window.AdminAccesosApp.refresh();
+  if (tab === 'usuarios' && window.AdminUsersApp) window.AdminUsersApp.refresh();
+  if (tab === 'licencias' && window.AdminLicenciasApp) window.AdminLicenciasApp.refresh();
+  if (tab === 'relevante' && window.AdminRelevanteApp) window.AdminRelevanteApp.refresh();
+  if (tab === 'apariencia' && window.AdminAparienciaApp) window.AdminAparienciaApp.current = getCurrentCellTheme();
+  if (tab === 'historial' && window.AdminHistorialApp) window.AdminHistorialApp.refresh();
+  if (tab === 'exportar') { /* estático, no necesita refresco */ }
 }
 
-// ── Tab: Todas las licencias ──────────────────────────────────────────────
-function renderAdminLicencias() {
-  const div = document.getElementById('admin-lic-content');
-  if (!div) return;
+// ── API expuesta para el componente Vue de Admin > Licencias ───────────────
+function getAdminLicenciasData() {
   const sorted = [...EVENTS].sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
   // Detectar duplicados: mismo usuario, mismo tipo, misma fecha de inicio
   const seen = {};
@@ -5882,51 +5489,27 @@ function renderAdminLicencias() {
   const byUser = {};
   sorted.forEach(ev => { const u = ev.userName||'?'; if (!byUser[u]) byUser[u]=[]; byUser[u].push(ev); });
 
-  let html = '';
-
-  // Botón borrar duplicados si hay
-  if (dupIds.size > 0) {
-    html += `<div style="background:rgba(220,38,38,.12);border:1px solid var(--red);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div>
-        <div style="font-size:11px;color:var(--red);font-weight:600">⚠ ${dupIds.size} licencia${dupIds.size>1?'s duplicadas detectadas':'  duplicada detectada'}</div>
-        <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">Mismo tipo y fecha en el mismo usuario</div>
-      </div>
-      <button onclick="adminDeleteDuplicates(${JSON.stringify([...dupIds])})"
-        style="background:var(--red);border:none;border-radius:4px;padding:6px 12px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap;flex-shrink:0">
-        BORRAR TODAS
-      </button>
-    </div>`;
-  }
-
-  usersInMyGroup().forEach(p => {
+  const groups = usersInMyGroup().map(p => {
     const evs = byUser[p.name] || [];
-    const col = G_COLORS[p.guardia]||'#8a9ab5';
-    const countLabel = evs.length ? `${evs.length} licencia${evs.length>1?'s':''}` : 'Sin licencias';
-    html += `<div style="margin-bottom:14px">
-      <div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:6px;font-weight:700">${p.name.toUpperCase()} · ${G_LABEL[p.guardia]||p.guardia} · ${countLabel}</div>`;
-    evs.forEach(ev => {
-      const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-      const desc = ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '';
-      const isDup = dupIds.has(ev.id);
-      html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${isDup?'var(--red)':li.color};margin-bottom:4px;${isDup?'opacity:.75':''}" id="ev-row-${ev.id}">
-        <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
-        <div style="flex:1">
-          <div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
-          <div style="font-size:9px;color:var(--tdim)">${li.name}${desc}${isDup?' · <span style="color:var(--red)">DUPLICADA</span>':''}</div>
-        </div>
-        <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono);flex-shrink:0">${ev.createdAtStr||''}</span>
-        <button onclick="adminDeleteEvent('${ev.id}')"
-          style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer;flex-shrink:0" title="Eliminar">✕</button>
-      </div>`;
-    });
-    // Botón para que el admin agregue nueva licencia para este usuario
-    html += `<button onclick="adminOpenAddEvent('${p.name}')"
-      style="width:100%;background:none;border:1px dashed var(--border);color:var(--tdim);border-radius:6px;padding:6px;font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-top:2px;letter-spacing:1px">
-      + AGREGAR LICENCIA A ${p.name.toUpperCase()}
-    </button>`;
-    html += '</div>';
+    return {
+      name: p.name,
+      guardiaLabel: G_LABEL[p.guardia]||p.guardia,
+      color: G_COLORS[p.guardia]||'#8a9ab5',
+      countLabel: evs.length ? `${evs.length} licencia${evs.length>1?'s':''}` : 'Sin licencias',
+      events: evs.map(ev => {
+        const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+        const isDup = dupIds.has(ev.id);
+        return {
+          id: ev.id, type: ev.type, typeColor: li.color, name: li.name,
+          desc: ev.descuento ? ` · ↓${ev.descuento.valor}${ev.descuento.tipo==='dc'?'hs':'d'}` : '',
+          dateTxt: formatDate(ev.startDate) + (ev.startDate!==ev.endDate ? ' → '+formatDate(ev.endDate) : ''),
+          createdAtStr: ev.createdAtStr||'', isDup,
+        };
+      }),
+    };
   });
-  div.innerHTML = html;
+
+  return { dupIds: [...dupIds], groups };
 }
 
 function adminOpenAddEvent(userName) {
@@ -5945,7 +5528,7 @@ async function adminDeleteEvent(id) {
   if (!confirm('¿Eliminar esta licencia?')) return;
   await deleteEvent(id);
   logChange('licencia', `Admin eliminó licencia ID ${id}`);
-  renderAdminLicencias();
+  if (window.AdminLicenciasApp) window.AdminLicenciasApp.refresh();
 }
 
 async function adminDeleteDuplicates(ids) {
@@ -5954,237 +5537,103 @@ async function adminDeleteDuplicates(ids) {
     await deleteEvent(id);
   }
   logChange('licencia', `Admin eliminó ${ids.length} licencias duplicadas`);
-  renderAdminLicencias();
+  if (window.AdminLicenciasApp) window.AdminLicenciasApp.refresh();
 }
 
 // ── Tab: Panel REL de Lucas ───────────────────────────────────────────────
-// _adminDiagG: guardia actualmente seleccionada en el editor de diagrama admin
-let _adminDiagG = 'REL';
-let _adminDiagDragging = false, _adminDiagStart = null, _adminDiagEnd = null;
 
-function renderAdminRelevante() {
-  const div = document.getElementById('admin-rel-content');
-  if (!div) return;
+// ── API expuesta para el componente Vue de Admin > Relevante ──────────────
+// Nota de diseño: antes _adminDiagG/_adminDiagStart/_adminDiagEnd/_adminDiagDragging
+// eran variables globales que vivían acá y se pisaban desde manejadores de
+// mousedown/touchstart puestos a mano con addEventListener. Ahora ese estado
+// vive DENTRO del componente Vue (más simple y sin riesgo de que otro código
+// las pise sin querer) — el módulo solo expone funciones puras que reciben
+// esos valores como parámetro en vez de leerlos de una variable compartida.
+function getAdminDiagGuardiasList() {
+  const grupoActivo = viewGroupUser();
+  const list = [
+    { g:'A', color: G_COLORS['A'] }, { g:'B', color: G_COLORS['B'] },
+    { g:'C', color: G_COLORS['C'] }, { g:'D', color: G_COLORS['D'] },
+    { g:'E', color: G_COLORS['E'] },
+  ];
+  if (grupoTieneOP(grupoActivo)) list.push({ g:'OP', color: G_COLORS['OP']||'#3dba78' });
+  list.push({ g:'REL', color: '#8a9ab5' });
+  return list;
+}
+
+function getAdminDiagData(g) {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth()+1;
   const todayStr = dk(y,m,now.getDate());
   const monthDays = getMonthDays(y,m);
   const grupoActivo = viewGroupUser();
 
-  // ── Selector de guardia — OP solo aparece si el grupo administrado es Planta de Agua · PN
-  const guardias = [
-    { g:'A', label:'Guardia A', color: G_COLORS['A'] },
-    { g:'B', label:'Guardia B', color: G_COLORS['B'] },
-    { g:'C', label:'Guardia C', color: G_COLORS['C'] },
-    { g:'D', label:'Guardia D', color: G_COLORS['D'] },
-    { g:'E', label:'Guardia E', color: G_COLORS['E'] },
-    ...(grupoTieneOP(grupoActivo) ? [{ g:'OP', label:'Operador', color: G_COLORS['OP']||'#3dba78' }] : []),
-    { g:'REL', label:'Relevante', color: '#8a9ab5' },
-  ];
-  // Si veníamos parados en OP y cambiamos a un grupo sin OP, volvemos a A
-  if (_adminDiagG === 'OP' && !grupoTieneOP(grupoActivo)) _adminDiagG = 'A';
-
-  let selHtml = `<div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-bottom:8px">Administrando: <strong style="color:var(--amber)">${groupLabel(grupoActivo)}</strong></div>`;
-  selHtml += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">`;
-  guardias.forEach(({g, label, color}) => {
-    const isOn = _adminDiagG === g;
-    selHtml += `<button onclick="adminDiagSelectG('${g}')"
-      style="background:${isOn ? color : 'var(--panel)'};color:${isOn ? '#111' : color};
-             border:1px solid ${color};border-radius:5px;padding:5px 12px;
-             font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer">
-      ${g}
-    </button>`;
-  });
-  selHtml += `</div>`;
-
-  // ── Mini calendario editable ─────────────────────────────────────────
-  const g = _adminDiagG;
-  const col = G_COLORS[g] || '#8a9ab5';
-  // El usuario de esa guardia, pero SOLO dentro del grupo que se está administrando
   const user = usersInMyGroup().find(u => u.guardia === g);
   const userName = user ? user.name : g;
-  // El schedule de REL correcto para el grupo administrado (propio o el que el admin eligió ver)
   const relSched = activeRelSchedule();
-
   const TCOLS = {1:'var(--t1)',2:'var(--t2)',3:'var(--t3)',4:'var(--t4)'};
 
-  let calHtml = `<div style="font-family:var(--font-mono);font-size:9px;color:${col};letter-spacing:2px;margin-bottom:8px">`;
-  calHtml += `${g === 'REL' ? 'RELEVANTE' + (userName !== 'REL' ? ' · ' + userName.toUpperCase() : '') : userName.toUpperCase() + ' · GUARDIA ' + g} · ${MES_L[m].toUpperCase()} ${y}</div>`;
-
-
-
-  // Grid de días
-  calHtml += `<div id="admin-diag-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px">`;
-  ['D','L','M','M','J','V','S'].forEach(d => {
-    calHtml += `<div style="text-align:center;font-size:8px;font-family:var(--font-mono);color:var(--adim);padding:2px">${d}</div>`;
-  });
+  const calTitle = (g === 'REL' ? 'RELEVANTE' + (userName !== 'REL' ? ' · ' + userName.toUpperCase() : '') : userName.toUpperCase() + ' · GUARDIA ' + g) + ' · ' + MES_L[m].toUpperCase() + ' ' + y;
   const firstDay = new Date(y, m-1, 1).getDay();
-  for (let i = 0; i < firstDay; i++) calHtml += '<div></div>';
 
-  monthDays.forEach(date => {
+  const days = monthDays.map(date => {
     const {d} = pd(date);
     const isToday = date === todayStr;
-    let turno, bgColor, textColor, label;
-
+    let bgColor, textColor, label;
     if (g === 'REL') {
-      turno = relSched[date];
+      const turno = relSched[date];
       if (turno === 'F') { bgColor='rgba(220,38,38,.25)'; textColor='#ff2d2d'; label='F'; }
       else if (turno !== undefined) { bgColor=`${TCOLS[turno]}22`; textColor=TCOLS[turno]; label=String(turno); }
       else { bgColor='var(--panel)'; textColor='var(--adim)'; label='·'; }
     } else {
-      turno = getTurno(g, date);
+      const turno = getTurno(g, date);
       const ctSwap = findCTSwap(g, date);
       const effective = ctSwap ? ctSwap.swappedTurno : turno;
       const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
       if (effective === 'F') { bgColor='rgba(220,38,38,.15)'; textColor='#ff2d2d44'; label='F'; }
-      else { bgColor=`${TCOLS[effective]}15`; textColor=`${TCOLS[effective]}`; label=String(effective); }
+      else { bgColor=`${TCOLS[effective]}15`; textColor=TCOLS[effective]; label=String(effective); }
       if (dayEvs.length) { bgColor='rgba(139,92,246,.2)'; textColor='#a78bfa'; label=dayEvs[0].type; }
     }
-
-    calHtml += `<div data-adg="${date}"
-      style="text-align:center;padding:4px 2px;border-radius:5px;background:${bgColor};
-             border:${isToday?'1px solid var(--amber)':'1px solid transparent'};
-             cursor:pointer;user-select:none;-webkit-user-select:none"
-      onmousedown="adminDiagMouseDown('${date}',event)" ontouchstart="adminDiagTouchStart('${date}',event)">
-      <div style="font-size:7px;color:var(--adim)">${d}</div>
-      <div style="font-size:10px;font-weight:700;color:${textColor}">${label}</div>
-    </div>`;
+    return { date, d, isToday, bgColor, textColor, label };
   });
-  calHtml += '</div>';
 
-  // Info de selección + botones para TODAS las guardias
-  calHtml += `<div id="admin-diag-sel-info" style="font-family:var(--font-mono);font-size:9px;color:var(--adim);text-align:center;margin-bottom:8px">Tocá un día o arrastrá un rango</div>`;
-
-  if (g === 'REL') {
-    calHtml += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">ASIGNAR TURNO REL</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">
-      ${[{v:'1',lbl:'T1',c:'var(--t1)'},{v:'2',lbl:'T2',c:'var(--t2)'},{v:'3',lbl:'T3',c:'var(--t3)'},{v:'4',lbl:'T4',c:'var(--t4)'},{v:'F',lbl:'Franco',c:'var(--red)'},{v:'',lbl:'✕ Limpiar',c:'var(--tdim)'}]
-        .map(({v,lbl,c}) => `<button onclick="adminDiagApply('${v}')"
-          style="border:1px solid ${c};color:${c};background:none;border-radius:5px;padding:7px 4px;
-                 font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer">${lbl}</button>`).join('')}
-    </div>`;
-  } else {
-    calHtml += `<div style="background:rgba(234,179,8,.08);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-family:var(--font-mono);font-size:9px;color:var(--tdim)">
-      ℹ Los turnos de G${g} son automáticos. Podés agregar licencias para los días seleccionados.
-    </div>`;
-  }
-
-  // Botón agregar licencia — siempre visible para todas las guardias
-  calHtml += `<button onclick="adminDiagAddLic()"
-    style="width:100%;background:var(--amber);border:none;border-radius:6px;padding:10px;
-           font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#111;margin-bottom:14px">
-    + AGREGAR LICENCIA${userName && userName !== g ? ' A ' + userName.toUpperCase() : ''}
-  </button>`;
-
-  // Licencias del usuario — el mismo, ya scoped al grupo administrado
   const evs2 = user ? EVENTS.filter(e => e.userId === user.id).sort((a,b) => b.startDate.localeCompare(a.startDate)) : [];
-  const evHtml = evs2.length > 0
-    ? evs2.map(ev => {
-        const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
-        return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;border-left:3px solid ${li.color};margin-bottom:4px">
-          <span style="font-size:10px;font-weight:700;color:${li.color};min-width:28px">${ev.type}</span>
-          <div style="flex:1">
-            <div style="font-size:11px;color:var(--tbright)">${formatDate(ev.startDate)}${ev.startDate!==ev.endDate?' → '+formatDate(ev.endDate):''}</div>
-            <div style="font-size:9px;color:var(--tdim)">${li.name}</div>
-          </div>
-          <button onclick="adminDeleteEvent('${ev.id}')"
-            style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer">✕</button>
-        </div>`;
-      }).join('')
-    : `<div style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">${user ? 'Sin licencias.' : 'No hay nadie con esa guardia en este grupo todavía.'}</div>`;
-
-  calHtml += `<div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">LICENCIAS</div>`;
-  calHtml += evHtml;
-
-  div.innerHTML = selHtml + calHtml;
-
-  // Eventos de drag en el grid para REL
-  if (g === 'REL') {
-    const grid = document.getElementById('admin-diag-grid');
-    if (grid) {
-      grid.addEventListener('mousemove', e => {
-        if (!_adminDiagDragging) return;
-        const cell = e.target.closest('[data-adg]');
-        if (!cell) return;
-        _adminDiagEnd = cell.dataset.adg;
-        adminDiagHighlight();
-      });
-      grid.addEventListener('mouseup', () => { _adminDiagDragging = false; adminDiagShowInfo(); });
-      grid.addEventListener('touchmove', e => {
-        e.preventDefault();
-        const t = e.touches[0];
-        const el2 = document.elementFromPoint(t.clientX, t.clientY);
-        const cell = el2 && el2.closest('[data-adg]');
-        if (cell) { _adminDiagEnd = cell.dataset.adg; adminDiagHighlight(); }
-      }, {passive:false});
-      grid.addEventListener('touchend', () => { _adminDiagDragging = false; adminDiagShowInfo(); });
-    }
-  }
-}
-
-function adminDiagSelectG(g) {
-  _adminDiagG = g;
-  _adminDiagStart = null;
-  _adminDiagEnd = null;
-  renderAdminRelevante();
-}
-
-function adminDiagMouseDown(date, e) {
-  e.preventDefault();
-  _adminDiagDragging = true;
-  _adminDiagStart = date;
-  _adminDiagEnd = date;
-  adminDiagHighlight();
-  adminDiagShowInfo();
-}
-function adminDiagTouchStart(date, e) {
-  e.preventDefault();
-  _adminDiagDragging = true;
-  _adminDiagStart = date;
-  _adminDiagEnd = date;
-  adminDiagHighlight();
-  adminDiagShowInfo();
-}
-
-function adminDiagHighlight() {
-  const grid = document.getElementById('admin-diag-grid');
-  if (!grid || !_adminDiagStart) return;
-  const [a, b] = _adminDiagStart <= _adminDiagEnd
-    ? [_adminDiagStart, _adminDiagEnd]
-    : [_adminDiagEnd, _adminDiagStart];
-  grid.querySelectorAll('[data-adg]').forEach(cell => {
-    const d = cell.dataset.adg;
-    cell.style.outline = (d >= a && d <= b) ? '2px solid var(--amber)' : '';
+  const events = evs2.map(ev => {
+    const li = LIC[ev.type]||{name:ev.type,color:'#8a9ab5'};
+    return {
+      id: ev.id, type: ev.type, color: li.color, name: li.name,
+      dateTxt: formatDate(ev.startDate) + (ev.startDate!==ev.endDate ? ' → '+formatDate(ev.endDate) : ''),
+    };
   });
+
+  return {
+    grupoLabel: groupLabel(grupoActivo),
+    calTitle, blanksCount: firstDay, days,
+    userName, hasUser: !!user, events,
+    showRelButtons: g === 'REL',
+  };
 }
 
-function adminDiagShowInfo() {
-  const info = document.getElementById('admin-diag-sel-info');
-  if (!info || !_adminDiagStart) return;
-  const [a, b] = _adminDiagStart <= (_adminDiagEnd||_adminDiagStart)
-    ? [_adminDiagStart, _adminDiagEnd||_adminDiagStart]
-    : [_adminDiagEnd||_adminDiagStart, _adminDiagStart];
+// Normaliza un rango de fechas (por si el arrastre fue "al revés")
+function rangeAB(start, end) {
+  if (!start) return null;
+  const s = start, e = end || start;
+  return s <= e ? [s, e] : [e, s];
+}
+function formatSelRange(start, end) {
+  const range = rangeAB(start, end);
+  if (!range) return 'Tocá un día o arrastrá un rango';
+  const [a, b] = range;
   const {d:d1,m:m1,y:y1} = pd(a), {d:d2,m:m2} = pd(b);
-  info.textContent = a === b ? `${d1} ${MES_S[m1]} ${y1}` : `${d1} ${MES_S[m1]} → ${d2} ${MES_S[m2]}`;
+  return a === b ? `${d1} ${MES_S[m1]} ${y1}` : `${d1} ${MES_S[m1]} → ${d2} ${MES_S[m2]}`;
 }
 
-function adminDiagDayClick(date) {
-  // No usado — ahora todas las celdas usan mousedown
-}
-
-function adminDiagAddLic() {
-  // Buscar solo dentro del grupo que se está administrando (propio o el elegido)
-  const targetName = usersInMyGroup().find(u => u.guardia === _adminDiagG)?.name || '';
+function adminDiagAddLicCore(g, start, end) {
+  const targetName = usersInMyGroup().find(u => u.guardia === g)?.name || '';
   if (!targetName) { alert('No hay nadie con esa guardia en este grupo.'); return; }
-  // Precargar fecha si hay selección
-  const [a] = _adminDiagStart && _adminDiagEnd
-    ? (_adminDiagStart <= _adminDiagEnd ? [_adminDiagStart, _adminDiagEnd] : [_adminDiagEnd, _adminDiagStart])
-    : [null, null];
-  const [,b] = _adminDiagStart && _adminDiagEnd
-    ? (_adminDiagStart <= _adminDiagEnd ? [_adminDiagStart, _adminDiagEnd] : [_adminDiagEnd, _adminDiagStart])
-    : [null, null];
+  const range = rangeAB(start, end);
   adminOpenAddEvent(targetName);
-  // Precargar fechas si hay selección activa
-  if (a) {
+  if (range) {
+    const [a, b] = range;
     setTimeout(() => {
       const from = document.getElementById('ev-from');
       const to   = document.getElementById('ev-to');
@@ -6194,16 +5643,15 @@ function adminDiagAddLic() {
   }
 }
 
-async function adminDiagApply(val) {
-  if (!_adminDiagStart) return;
+async function adminDiagApplyCore(g, start, end, val) {
+  const range = rangeAB(start, end);
+  if (!range) return;
+  const [a, b] = range;
   const grupoActivo = viewGroupUser();
   const relSched = activeRelSchedule();
-  const [a, b] = _adminDiagStart <= (_adminDiagEnd||_adminDiagStart)
-    ? [_adminDiagStart, _adminDiagEnd||_adminDiagStart]
-    : [_adminDiagEnd||_adminDiagStart, _adminDiagStart];
   let cur = new Date(a+'T12:00:00');
-  const end = new Date(b+'T12:00:00');
-  while (cur <= end) {
+  const endD = new Date(b+'T12:00:00');
+  while (cur <= endD) {
     const ds = dk(cur.getFullYear(), cur.getMonth()+1, cur.getDate());
     if (val === '') delete relSched[ds];
     else relSched[ds] = val === 'F' ? 'F' : parseInt(val);
@@ -6211,8 +5659,6 @@ async function adminDiagApply(val) {
   }
   await saveRelSchedule(relSched, grupoActivo);
   logChange('config', `Admin asignó turno ${val||'(limpio)'} al Relevante de ${groupLabel(grupoActivo)}: ${a}${a!==b?' → '+b:''}`);
-  _adminDiagStart = null; _adminDiagEnd = null;
-  renderAdminRelevante();
   renderCal();
   if (window.S) renderRT(window.RT||'dia');
 }
@@ -6322,7 +5768,7 @@ async function renderUsinaPanel() {
 // INIT
 // ═══════════════════════════════════════════════════════════════════════════
 (async()=>{
-  const _theme = lsGet('gd-theme') || 'dark';
+  const _theme = lsGet('gd-theme') || 'light';
   document.body.classList.add(_theme);
   const _tbtn = document.getElementById('theme-toggle-btn');
   if (_tbtn) _tbtn.innerHTML = _theme === 'dark'
@@ -6367,7 +5813,7 @@ async function renderUsinaPanel() {
     renderEvP();
     renderRecPanel();
     if (ME.guardia==='REL') renderRelPanel();
-    if (ME.name===ADMIN_NAME) renderAuditPanel();
+    if (ME.name===ADMIN_NAME && window.AdminAccesosApp) window.AdminAccesosApp.refresh();
     renderUsinaPanel();
     initNotifications();
   }
@@ -6662,6 +6108,886 @@ async function renderUsinaPanel() {
 
   Object.assign(window, { icsOpen, icsClose, icsGenerate });
 })();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Card "HOY" (primera pieza migrada del rediseño)
+     Vue solo se encarga de la PRESENTACIÓN (el template de abajo). Todo el
+     cálculo (turno de hoy, racha, relevante, etc.) sigue viviendo en
+     renderHoyCard(), dentro del módulo principal — ese código ya está
+     probado y no se tocó su lógica, solo dónde termina: en vez de armar
+     un string de HTML, ahora completa estos mismos campos y Vue dibuja
+     el resultado solo. Es el patrón a seguir para ir migrando el resto
+     pantalla por pantalla, sin arriesgar lo que ya funciona.
+════════════════════════════════════════════════════════════════════════ -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script>
+  const HoyCardApp = Vue.createApp({
+    data() {
+      return {
+        visible: false,
+        fechaTxt: '', badgeText: '', badgeColor: '',
+        ledColor: '', ledText: '', ledBig: false,
+        tituloTxt: '', rangoHtml: '',
+        manTxt: '', relInfo: '', racha: 0,
+      };
+    },
+    computed: {
+      hoyGlowStyle() { return { '--hoy-glow': `color-mix(in srgb, ${this.ledColor} 22%, transparent)` }; },
+      badgeStyle() {
+        return {
+          color: this.badgeColor,
+          background: `color-mix(in srgb, ${this.badgeColor} 16%, transparent)`,
+          border: `1px solid ${this.badgeColor}`,
+        };
+      },
+      ledStyle() { return { '--hoy-color': this.ledColor }; },
+    },
+    template: `
+      <div class="hoy-card" v-if="visible" :style="hoyGlowStyle">
+        <div class="hoy-top">
+          <div class="hoy-date">{{ fechaTxt }}</div>
+          <div class="hoy-badge" :style="badgeStyle">{{ badgeText }}</div>
+        </div>
+        <div class="hoy-readout">
+          <div class="hoy-led" :style="ledStyle"><span :style="ledBig ? '' : 'font-size:19px'">{{ ledText }}</span></div>
+          <div class="hoy-txt">
+            <h2>{{ tituloTxt }}</h2>
+            <div class="rng" v-html="rangoHtml"></div>
+          </div>
+        </div>
+        <div class="hoy-foot">
+          <div class="hf-item"><div class="k">Mañana</div><div class="v">{{ manTxt }}</div></div>
+          <div class="hf-item"><div class="k">Relevante</div><div class="v">{{ relInfo }}</div></div>
+          <div class="hf-item" v-if="racha > 0"><div class="k">Seguidos</div><div class="v amber">{{ racha }} día{{ racha!==1?'s':'' }}</div></div>
+        </div>
+      </div>
+    `,
+  }).mount('#hoy-card-wrap');
+  window.HoyCardApp = HoyCardApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Ingresar / Soy nuevo-a (segunda pieza migrada)
+     Mismo patrón que la card de HOY: la validación y el guardado en
+     Firestore siguen viviendo en el módulo (identLoginCore/identRegisterCore
+     — código ya probado). Acá Vue solo junta lo que la persona tipeó y
+     arma los combos en cascada Usina→Sector→Puesto→Guardia con
+     "computed"/"watch" — antes eso eran cuatro funciones separadas
+     escribiendo innerHTML a mano; ahora es reactivo solo.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const IdentApp = Vue.createApp({
+    data() {
+      return {
+        tab: 'login',
+        loginName: '', loginPwd: '', loginErr: '', loginBusy: false,
+        regName: '', regUsina: 'PN', regSector: '', regPuesto: '', regGuardia: 'A',
+        regPwd: '', regPwd2: '', regLegajo: '', regErr: '', regBusy: false,
+        recName: '', recLegajo: '', recPwd: '', recPwd2: '', recErr: '', recBusy: false,
+      };
+    },
+    computed: {
+      usinas() { return window.identGetUsinas ? window.identGetUsinas() : []; },
+      sectores() { return window.identGetSectores ? window.identGetSectores(this.regUsina) : []; },
+      puestos() { return window.identGetPuestos ? window.identGetPuestos(this.regUsina, this.regSector) : []; },
+      tienePuesto() { return this.puestos.length > 0; },
+      guardias() { return window.identGetGuardias ? window.identGetGuardias(this.regUsina, this.regSector) : []; },
+    },
+    watch: {
+      regUsina() { this.regSector = this.sectores[0] || ''; },
+      regSector() {
+        this.regPuesto = this.puestos[0] || '';
+        const gs = this.guardias;
+        if (!gs.find(x => x.g === this.regGuardia)) this.regGuardia = gs[0] ? gs[0].g : 'A';
+      },
+    },
+    mounted() {
+      this.regSector = this.sectores[0] || '';
+    },
+    methods: {
+      showTab(t) { this.tab = t; this.loginErr = ''; this.regErr = ''; this.recErr = ''; },
+      async doLogin() {
+        if (this.loginBusy) return;
+        this.loginErr = ''; this.loginBusy = true;
+        try {
+          const res = await window.identLoginCore(this.loginName, this.loginPwd);
+          if (res.error) { this.loginErr = res.error; this.loginPwd = ''; }
+        } finally { this.loginBusy = false; }
+      },
+      async doRegister() {
+        if (this.regBusy) return;
+        this.regErr = ''; this.regBusy = true;
+        try {
+          const res = await window.identRegisterCore({
+            name: this.regName, usina: this.regUsina, sector: this.regSector,
+            puesto: this.tienePuesto ? this.regPuesto : '', guardia: this.regGuardia,
+            pwd: this.regPwd, pwd2: this.regPwd2, legajo: this.regLegajo,
+          });
+          if (res.error) { this.regErr = res.error; }
+          else { this.regPwd = ''; this.regPwd2 = ''; }
+        } finally { this.regBusy = false; }
+      },
+      async doRecover() {
+        if (this.recBusy) return;
+        this.recErr = ''; this.recBusy = true;
+        try {
+          const res = await window.identRecoverCore({
+            name: this.recName, legajo: this.recLegajo, pwd: this.recPwd, pwd2: this.recPwd2,
+          });
+          if (res.error) { this.recErr = res.error; }
+          else { this.recPwd = ''; this.recPwd2 = ''; }
+        } finally { this.recBusy = false; }
+      },
+    },
+    template: `
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="tab" :class="{on: tab==='login'}" @click="showTab('login')" style="flex:1">INGRESAR</button>
+        <button class="tab" :class="{on: tab==='register'}" @click="showTab('register')" style="flex:1">SOY NUEVO/A</button>
+      </div>
+
+      <div v-if="tab==='login'">
+        <p class="no-user-msg">&#9673; Ingresá con tu nombre y tu contraseña.</p>
+        <div class="mfg"><label>Nombre</label>
+          <input type="text" v-model="loginName" placeholder="Tu nombre y apellido" autocomplete="username">
+        </div>
+        <div class="mfg"><label>Contraseña</label>
+          <div class="pwd-input-wrap">
+            <input type="password" v-model="loginPwd" placeholder="••••••" autocomplete="current-password" @keydown.enter="doLogin">
+          </div>
+        </div>
+        <div class="err-msg" :class="{show: loginErr}">{{ loginErr }}</div>
+        <button class="btn" style="width:100%;margin-top:6px" :disabled="loginBusy" @click="doLogin">{{ loginBusy ? 'INGRESANDO...' : 'INGRESAR' }}</button>
+        <div style="text-align:center;margin-top:12px">
+          <a href="#" @click.prevent="showTab('recover')" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);text-decoration:underline">¿Olvidaste tu contraseña?</a>
+        </div>
+      </div>
+
+      <div v-else-if="tab==='register'">
+        <p class="no-user-msg">&#9673; Es la única vez que te va a pedir estos datos.</p>
+        <div class="mfg"><label>Nombre y apellido</label>
+          <input type="text" v-model="regName" placeholder="Ej: Ezequiel Torres" autocomplete="name">
+        </div>
+        <div class="modal-row">
+          <div class="mfg"><label>Usina</label>
+            <select v-model="regUsina"><option v-for="u in usinas" :key="u" :value="u">{{ u }}</option></select>
+          </div>
+          <div class="mfg"><label>Sector</label>
+            <select v-model="regSector"><option v-for="s in sectores" :key="s" :value="s">{{ s }}</option></select>
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="mfg" v-show="tienePuesto"><label>Puesto</label>
+            <select v-model="regPuesto"><option v-for="p in puestos" :key="p" :value="p">{{ p }}</option></select>
+          </div>
+          <div class="mfg"><label>Guardia</label>
+            <select v-model="regGuardia"><option v-for="g in guardias" :key="g.g" :value="g.g">{{ g.label }}</option></select>
+          </div>
+        </div>
+        <div v-if="!tienePuesto" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
+          &#9432; Este sector todavía no tiene puestos habilitados — quedás sin puesto asignado.
+        </div>
+        <div class="mfg"><label>Legajo</label>
+          <input type="text" v-model="regLegajo" placeholder="Tu número de legajo" inputmode="numeric">
+        </div>
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
+          &#9432; Lo vas a necesitar si algún día te olvidás la contraseña — así no dependés de nadie más para recuperarla.
+        </div>
+        <div class="modal-row">
+          <div class="mfg"><label>Contraseña</label>
+            <div class="pwd-input-wrap"><input type="password" v-model="regPwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
+          </div>
+          <div class="mfg"><label>Repetir contraseña</label>
+            <div class="pwd-input-wrap"><input type="password" v-model="regPwd2" placeholder="Repetir" autocomplete="new-password" @keydown.enter="doRegister"></div>
+          </div>
+        </div>
+        <div class="err-msg" :class="{show: regErr}">{{ regErr }}</div>
+        <button class="btn" style="width:100%;margin-top:6px" :disabled="regBusy" @click="doRegister">{{ regBusy ? 'CREANDO...' : 'CREAR MI ACCESO' }}</button>
+      </div>
+
+      <div v-else>
+        <p class="no-user-msg">&#9673; Poné tu nombre y tu legajo para fijar una contraseña nueva.</p>
+        <div class="mfg"><label>Nombre</label>
+          <input type="text" v-model="recName" placeholder="Tu nombre y apellido" autocomplete="username">
+        </div>
+        <div class="mfg"><label>Legajo</label>
+          <input type="text" v-model="recLegajo" placeholder="Tu número de legajo" inputmode="numeric">
+        </div>
+        <div class="modal-row">
+          <div class="mfg"><label>Nueva contraseña</label>
+            <div class="pwd-input-wrap"><input type="password" v-model="recPwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
+          </div>
+          <div class="mfg"><label>Repetir</label>
+            <div class="pwd-input-wrap"><input type="password" v-model="recPwd2" placeholder="Repetir" autocomplete="new-password" @keydown.enter="doRecover"></div>
+          </div>
+        </div>
+        <div class="err-msg" :class="{show: recErr}">{{ recErr }}</div>
+        <button class="btn" style="width:100%;margin-top:6px" :disabled="recBusy" @click="doRecover">{{ recBusy ? 'GUARDANDO...' : 'RECUPERAR ACCESO' }}</button>
+        <div style="text-align:center;margin-top:12px">
+          <a href="#" @click.prevent="showTab('login')" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);text-decoration:underline">Volver a ingresar</a>
+        </div>
+      </div>
+    `,
+  }).mount('#no-user-state');
+  window.IdentApp = IdentApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Perfil (tarjeta + botones), tercera pieza migrada.
+     El panel Relevante queda afuera a propósito (ver comentario en el HTML).
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const ProfileApp = Vue.createApp({
+    data() {
+      return { avInitial: '', avColor: '#8a9ab5', name: '', guardiaLabel: '' };
+    },
+    methods: {
+      irALicencias() { window.switchView('licencias'); },
+      cambiarContrasena() { window.openChangePwd(); },
+      salir() { window.logout(); },
+    },
+    template: `
+      <div class="user-identified">
+        <div class="uav" :style="{background: avColor}">{{ avInitial }}</div>
+        <div>
+          <div class="unm">{{ name }}</div>
+          <div class="ugd">{{ guardiaLabel }}</div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" @click="irALicencias">&#9776; MIS LICENCIAS</button>
+      </div>
+      <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
+        <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
+          🏭 USINA DIGITAL
+        </a>
+        <button class="btn btn-outline" @click="cambiarContrasena">🔑 CONTRASEÑA</button>
+        <button class="btn btn-danger" @click="salir">SALIR</button>
+      </div>
+    `,
+  }).mount('#profile-vue-root');
+  window.ProfileApp = ProfileApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Panel Relevante (cuarta pieza migrada). El cálculo de
+     horas de franco y la lista de coberturas siguen viviendo en el módulo
+     (computeFrancoStats / getMyRelCoveragesDisplay) — Vue solo dibuja el
+     resultado y el desplegable de abrir/cerrar.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const RelPanelApp = Vue.createApp({
+    data() {
+      return {
+        open: false,
+        workedCount: 0, francoFullDays: 0, hDisplay: '0h', statsFootTxt: '',
+        coverages: [],
+      };
+    },
+    methods: {
+      toggle() { window.toggleRelPanel(); },
+      addCoverage() { window.openAddRelCoverage(); },
+      async deleteCoverage(id) { await window.deleteRelCoverageCore(id); },
+    },
+    template: `
+      <div class="rel-panel-inner">
+        <div class="rel-panel-hdr" @click="toggle">
+          <div class="rel-panel-title">&#9679; PANEL RELEVANTE</div>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--tdim)">{{ open ? '▲' : '▼' }}</span>
+        </div>
+        <div class="rel-body" :class="{open: open}">
+          <div style="margin-bottom:16px;">
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">HORAS DE FRANCO — MES ACTUAL</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">{{ workedCount }}</div><div class="rec-stat-lbl">DÍAS TRAB.</div></div>
+              <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">{{ francoFullDays }}</div><div class="rec-stat-lbl">DÍAS FRANCO</div></div>
+              <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">{{ hDisplay }}</div><div class="rec-stat-lbl">HS FRANCO</div></div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:7px;letter-spacing:1px" v-html="statsFootTxt"></div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:3px;margin-bottom:8px;">LICENCIAS QUE CUBRO</div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+              <div v-if="coverages.length===0" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:6px;letter-spacing:1px">Sin coberturas registradas</div>
+              <div v-for="cov in coverages" :key="cov.id" class="ev-item">
+                <div class="ev-lbar" style="background:#8a9ab5"></div>
+                <div class="ev-info">
+                  <div class="ev-who">T{{ cov.turno }} · Guardia {{ cov.guardia }} · {{ cov.quien }}</div>
+                  <div class="ev-dates">{{ cov.datesTxt }}</div>
+                  <div class="ev-note" v-if="cov.note">{{ cov.note }}</div>
+                  <div class="ev-ts">⏱ {{ cov.tsTxt }}</div>
+                </div>
+                <button class="ev-del" @click="deleteCoverage(cov.id)">✕</button>
+              </div>
+            </div>
+            <button class="btn btn-outline" @click="addCoverage" style="font-size:11px;padding:6px 12px;">+ AGREGAR COBERTURA</button>
+          </div>
+        </div>
+      </div>
+    `,
+  }).mount('#rel-panel');
+  window.RelPanelApp = RelPanelApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Admin > Usuarios (quinta pieza migrada). Alta de
+     usuario y lista con mover/borrar. El "mover" ahora es un editor en
+     línea con combos reales, en vez de tres cuadros de prompt() del
+     navegador uno atrás del otro — mismo resultado final, mejor manera
+     de completarlo.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const AdminUsersApp = Vue.createApp({
+    data() {
+      return {
+        cName: '', cUsina: 'PN', cSector: '', cPuesto: '', cGuardia: 'A',
+        cPwd: '', cPwd2: '', cErr: '', cBusy: false,
+        groups: [],
+        editingId: null, eUsina: '', eSector: '', ePuesto: '', eBusy: false,
+      };
+    },
+    computed: {
+      cSectores() { return window.identGetSectores(this.cUsina); },
+      cPuestos() { return window.identGetPuestos(this.cUsina, this.cSector); },
+      cTienePuesto() { return this.cPuestos.length > 0; },
+      cGuardias() { return window.identGetGuardias(this.cUsina, this.cSector); },
+      eSectores() { return window.identGetSectores(this.eUsina); },
+      ePuestos() { return window.identGetPuestos(this.eUsina, this.eSector); },
+      eTienePuesto() { return this.ePuestos.length > 0; },
+    },
+    mounted() {
+      this.cSector = this.cSectores[0] || '';
+      this.onCSectorChange();
+      this.refresh();
+    },
+    methods: {
+      onCUsinaChange() { this.cSector = this.cSectores[0] || ''; this.onCSectorChange(); },
+      onCSectorChange() {
+        this.cPuesto = this.cPuestos[0] || '';
+        const gs = this.cGuardias;
+        this.cGuardia = gs[0] ? gs[0].g : 'A';
+      },
+      onEUsinaChange() { this.eSector = this.eSectores[0] || ''; this.onESectorChange(); },
+      onESectorChange() { this.ePuesto = this.ePuestos[0] || ''; },
+      refresh() { this.groups = window.getAdminUsersGrouped(); },
+      async createUser() {
+        if (this.cBusy) return;
+        this.cErr = ''; this.cBusy = true;
+        try {
+          const res = await window.adminCreateUserCore({
+            name: this.cName, usina: this.cUsina, sector: this.cSector,
+            puesto: this.cTienePuesto ? this.cPuesto : '', guardia: this.cGuardia,
+            pwd: this.cPwd, pwd2: this.cPwd2,
+          });
+          if (res.error) { this.cErr = res.error; }
+          else { this.cName = ''; this.cPwd = ''; this.cPwd2 = ''; this.refresh(); }
+        } finally { this.cBusy = false; }
+      },
+      startMove(u) {
+        this.editingId = u.id;
+        this.eUsina = u.usina || 'PN';
+        this.eSector = u.sector || '';
+        this.ePuesto = u.puesto || '';
+      },
+      cancelMove() { this.editingId = null; },
+      async confirmMove(u) {
+        if (this.eBusy) return;
+        this.eBusy = true;
+        try {
+          const res = await window.adminMoveUserCore(u.id, {
+            usina: this.eUsina, sector: this.eSector,
+            puesto: this.eTienePuesto ? this.ePuesto : '',
+          });
+          if (!res.error) { this.editingId = null; this.refresh(); }
+        } finally { this.eBusy = false; }
+      },
+      async deleteUser(u) {
+        const res = await window.adminDeleteUserCore(u.id);
+        if (res.error) { alert(res.error); return; }
+        if (res.ok) this.refresh();
+      },
+    },
+    template: `
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:2px;margin-bottom:10px">➕ CREAR USUARIO</div>
+      <div class="mfg"><label>Nombre</label>
+        <input type="text" v-model="cName" placeholder="Ej: Ezequiel" style="font-size:15px;padding:9px 12px;">
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>Usina</label>
+          <select v-model="cUsina" @change="onCUsinaChange"><option value="PN">PN</option><option value="NP">NP</option></select>
+        </div>
+        <div class="mfg"><label>Sector</label>
+          <select v-model="cSector" @change="onCSectorChange"><option v-for="s in cSectores" :key="s" :value="s">{{ s }}</option></select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="mfg" v-show="cTienePuesto"><label>Puesto</label>
+          <select v-model="cPuesto"><option v-for="p in cPuestos" :key="p" :value="p">{{ p }}</option></select>
+        </div>
+        <div class="mfg"><label>Guardia</label>
+          <select v-model="cGuardia"><option v-for="g in cGuardias" :key="g.g" :value="g.g">{{ g.label }}</option></select>
+        </div>
+      </div>
+      <div v-if="!cTienePuesto" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
+        &#9432; Este sector todavía no tiene puestos habilitados — el usuario queda sin puesto asignado.
+      </div>
+      <div class="modal-row">
+        <div class="mfg"><label>Contraseña</label>
+          <div class="pwd-input-wrap"><input type="password" v-model="cPwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
+        </div>
+        <div class="mfg"><label>Repetir contraseña</label>
+          <div class="pwd-input-wrap"><input type="password" v-model="cPwd2" placeholder="Repetir" autocomplete="new-password"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
+        &#9432; Comunicale esta contraseña a la persona — la va a necesitar para entrar la primera vez.
+      </div>
+      <div class="err-msg" :class="{show: cErr}">{{ cErr }}</div>
+      <div class="btn-row" style="margin-top:6px">
+        <button class="btn" :disabled="cBusy" @click="createUser">{{ cBusy ? 'CREANDO...' : 'CREAR USUARIO' }}</button>
+      </div>
+
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--adim);letter-spacing:2px;margin:22px 0 10px">👥 USUARIOS EXISTENTES</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div v-if="groups.length===0" style="font-size:11px;color:var(--tdim)">Sin usuarios.</div>
+        <template v-for="grp in groups" :key="grp.key">
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);letter-spacing:1px;margin-top:6px">{{ grp.label }}</div>
+          <div v-for="u in grp.users" :key="u.id">
+            <div v-if="editingId !== u.id" style="display:flex;align-items:center;gap:8px;background:var(--cell-bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px">
+              <div style="width:26px;height:26px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0" :style="{background: u.color}">{{ u.initial }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:700;color:var(--tbright)">{{ u.name }}</div>
+                <div style="font-size:10px;color:var(--tdim)">{{ u.guardiaLabel }}</div>
+              </div>
+              <button class="btn btn-outline" style="font-size:10px;padding:5px 10px;flex-shrink:0" @click="startMove(u)">MOVER</button>
+              <button class="btn btn-danger" style="font-size:10px;padding:5px 10px;flex-shrink:0" @click="deleteUser(u)">BORRAR</button>
+            </div>
+            <div v-else style="background:var(--cell-bg);border:1px solid var(--amber);border-radius:6px;padding:10px">
+              <div style="font-size:11px;font-weight:700;margin-bottom:8px">Mover a {{ u.name }}</div>
+              <div class="modal-row">
+                <div class="mfg"><label>Usina</label>
+                  <select v-model="eUsina" @change="onEUsinaChange"><option value="PN">PN</option><option value="NP">NP</option></select>
+                </div>
+                <div class="mfg"><label>Sector</label>
+                  <select v-model="eSector" @change="onESectorChange"><option v-for="s in eSectores" :key="s" :value="s">{{ s }}</option></select>
+                </div>
+              </div>
+              <div class="mfg" v-show="eTienePuesto"><label>Puesto</label>
+                <select v-model="ePuesto"><option v-for="p in ePuestos" :key="p" :value="p">{{ p }}</option></select>
+              </div>
+              <div class="btn-row" style="margin-top:8px">
+                <button class="btn" :disabled="eBusy" style="font-size:10px;padding:6px 12px" @click="confirmMove(u)">{{ eBusy ? 'GUARDANDO...' : 'GUARDAR' }}</button>
+                <button class="btn btn-outline" style="font-size:10px;padding:6px 12px" @click="cancelMove">CANCELAR</button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    `,
+  }).mount('#admin-users-content');
+  window.AdminUsersApp = AdminUsersApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTES VUE — Admin > Apariencia / Historial / Exportar
+     (sexta, séptima y octava pieza — las tres juntas por ser chicas).
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const AdminAparienciaApp = Vue.createApp({
+    data() { return { themes: [], current: 'cristal' }; },
+    mounted() { this.themes = window.getThemesData(); this.current = window.getCurrentCellTheme(); },
+    methods: { pick(id) { window.applyCellTheme(id); } },
+    template: `
+      <div style="margin-bottom:14px;font-size:11px;color:var(--tdim)">
+        Elegí el estilo visual de las celdas del diagrama. Se aplica para todos los usuarios.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div v-for="th in themes" :key="th.id" @click="pick(th.id)"
+          :style="{background:'var(--panel)', border: '2px solid ' + (current===th.id ? 'var(--accent)' : 'var(--border)'),
+                    borderRadius:'10px', padding:'14px', cursor:'pointer'}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div>
+              <span :style="{fontWeight:700, color: current===th.id ? 'var(--accent)' : 'var(--tbright)', fontSize:'13px'}">{{ th.name }}</span>
+              <span v-if="current===th.id" style="margin-left:8px;font-size:9px;background:var(--accent);color:#fff;border-radius:3px;padding:1px 6px;font-weight:700;letter-spacing:1px">ACTIVO</span>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--tdim);margin-bottom:10px">{{ th.desc }}</div>
+          <div style="display:flex;gap:6px">
+            <div v-for="(p,i) in th.preview" :key="i"
+              :style="{flex:1, height:'40px', borderRadius:'6px', background:p.bg, border:'1px solid '+p.border,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        boxShadow: p.glow ? ('0 0 8px '+p.glow+'44') : 'none',
+                        fontFamily:'monospace', fontSize:'14px', fontWeight:900, color:p.color,
+                        textShadow: p.glow ? ('0 0 8px '+p.glow+'88') : 'none'}">{{ p.t }}</div>
+          </div>
+        </div>
+      </div>
+    `,
+  }).mount('#admin-appear-content');
+  window.AdminAparienciaApp = AdminAparienciaApp;
+
+  const AdminHistorialApp = Vue.createApp({
+    data() { return { count: 0, groups: [] }; },
+    mounted() { this.refresh(); },
+    methods: {
+      refresh() { Object.assign(this, window.getAdminHistoryData()); },
+      clear() { if (window.clearAdminHistoryCore()) this.refresh(); },
+    },
+    template: `
+      <div v-if="count===0" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);padding:12px 0;text-align:center">
+        Sin cambios registrados aún.<br>Los próximos cambios quedarán acá.
+      </div>
+      <template v-else>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-family:var(--font-mono);font-size:9px;color:var(--tdim)">{{ count }} cambio{{ count!==1?'s':'' }} registrado{{ count!==1?'s':'' }}</span>
+          <button @click="clear" style="background:none;border:1px solid var(--red);color:var(--red);font-family:var(--font-mono);font-size:8px;padding:3px 8px;border-radius:3px;cursor:pointer">LIMPIAR</button>
+        </div>
+        <template v-for="grp in groups" :key="grp.date">
+          <div style="font-family:var(--font-mono);font-size:8px;color:var(--amber);letter-spacing:2px;margin:10px 0 4px">{{ grp.date }}</div>
+          <div v-for="(h,i) in grp.items" :key="i" style="display:flex;align-items:flex-start;gap:8px;padding:6px 10px;background:var(--panel);border-radius:5px;margin-bottom:3px;border-left:2px solid var(--border)">
+            <span style="font-size:13px;flex-shrink:0">{{ h.icon }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;color:var(--tbright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.desc }}</div>
+              <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono)">{{ h.user }} · {{ h.time }}</div>
+            </div>
+          </div>
+        </template>
+      </template>
+    `,
+  }).mount('#admin-hist-content');
+  window.AdminHistorialApp = AdminHistorialApp;
+
+  const AdminExportarApp = Vue.createApp({
+    data() { return { mesNombre: '', ym: '', msg: '' }; },
+    mounted() { Object.assign(this, window.getExportMonthInfo()); },
+    methods: {
+      licencias() { window.exportLicencias(this.ym); },
+      recargas() { window.exportRecargas(this.ym); },
+      usuarios() { window.exportUsuarios(); },
+    },
+    template: `
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);letter-spacing:2px;margin-bottom:12px">EXPORTAR DATOS</div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
+        <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">📋 Resumen de licencias — {{ mesNombre }}</div>
+        <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las licencias del mes actual para copiar o compartir</div>
+        <button @click="licencias" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#fff;width:100%">
+          COPIAR RESUMEN DEL MES
+        </button>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px">
+        <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">💰 Recargas del mes — {{ mesNombre }}</div>
+        <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Lista de todas las recargas registradas este mes</div>
+        <button @click="recargas" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#fff;width:100%">
+          COPIAR RECARGAS DEL MES
+        </button>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px">
+        <div style="font-size:12px;color:var(--tbright);font-weight:600;margin-bottom:4px">👥 Estado de usuarios</div>
+        <div style="font-size:10px;color:var(--tdim);margin-bottom:10px">Resumen de dispositivos vinculados y accesos</div>
+        <button @click="usuarios" style="background:var(--amber);border:none;border-radius:4px;padding:8px 16px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#fff;width:100%">
+          COPIAR ESTADO DE USUARIOS
+        </button>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--green);text-align:center;margin-top:10px;min-height:18px">{{ msg }}</div>
+    `,
+  }).mount('#admin-export-content');
+  window.AdminExportApp = AdminExportarApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Admin > Accesos (novena pieza). Completaba una
+     migración que había quedado a medias: los datos (getAuditData,
+     getPwdListData) y las acciones (adminResetPwdCore, unlinkDevice,
+     clearUserLogs) ya estaban listos — faltaba este componente.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const AdminAccesosApp = Vue.createApp({
+    data() {
+      return {
+        totalAccesos: 0, last24h: 0, uniqueUsers: 0, cards: [],
+        pwdList: [], pwdDrafts: {}, pwdMsgs: {},
+        legajoDrafts: {}, legajoMsgs: {},
+      };
+    },
+    mounted() { this.refresh(); },
+    methods: {
+      async refresh() {
+        Object.assign(this, await window.getAuditData());
+        this.pwdList = window.getPwdListData();
+      },
+      async resetPwd(name) {
+        const val = this.pwdDrafts[name] || '';
+        const res = await window.adminResetPwdCore(name, val);
+        if (res.error) { this.pwdMsgs = { ...this.pwdMsgs, [name]: { txt: res.error, ok: false } }; }
+        else {
+          this.pwdDrafts = { ...this.pwdDrafts, [name]: '' };
+          this.pwdMsgs = { ...this.pwdMsgs, [name]: { txt: '✓ Nueva contraseña guardada.', ok: true } };
+          this.pwdList = window.getPwdListData();
+        }
+        setTimeout(() => { this.pwdMsgs = { ...this.pwdMsgs, [name]: null }; }, 2500);
+      },
+      async setLegajo(name) {
+        const val = this.legajoDrafts[name] || '';
+        const res = await window.adminSetLegajoCore(name, val);
+        if (res.error) { this.legajoMsgs = { ...this.legajoMsgs, [name]: { txt: res.error, ok: false } }; }
+        else {
+          this.legajoDrafts = { ...this.legajoDrafts, [name]: '' };
+          this.legajoMsgs = { ...this.legajoMsgs, [name]: { txt: '✓ Legajo guardado — ya puede recuperar su clave solo.', ok: true } };
+          this.pwdList = window.getPwdListData();
+        }
+        setTimeout(() => { this.legajoMsgs = { ...this.legajoMsgs, [name]: null }; }, 3000);
+      },
+      unlink(userId, deviceId) { window.unlinkDevice(userId, deviceId).then(() => this.refresh()); },
+      clearLogs(name) { window.clearUserLogs(name).then(() => this.refresh()); },
+    },
+    template: `
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="rec-stat"><div class="rec-stat-val" style="color:var(--amber)">{{ totalAccesos }}</div><div class="rec-stat-lbl">TOTAL ACCESOS</div></div>
+        <div class="rec-stat"><div class="rec-stat-val" style="color:var(--green)">{{ last24h }}</div><div class="rec-stat-lbl">ÚLTIMAS 24HS</div></div>
+        <div class="rec-stat"><div class="rec-stat-val" style="color:#8a9ab5">{{ uniqueUsers }}</div><div class="rec-stat-lbl">USUARIOS ACTIVOS</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div v-for="c in cards" :key="c.name" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:24px;height:24px;border-radius:4px;flex-shrink:0" :style="{background:c.color}"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;color:var(--tbright)">{{ c.name }}</div>
+              <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono)">{{ c.guardiaLabel }} · {{ c.count }} acceso{{ c.count!==1?'s':'' }}</div>
+            </div>
+            <button v-if="c.count>0" @click="clearLogs(c.name)" style="background:none;border:1px solid var(--border);color:var(--tdim);font-family:var(--font-mono);font-size:8px;padding:3px 7px;border-radius:3px;cursor:pointer;flex-shrink:0">BORRAR LOG</button>
+          </div>
+          <div v-if="c.lastLog" style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:6px;padding-left:32px">
+            {{ c.lastLog.ua }} · {{ c.lastLog.geo }} · {{ c.lastLog.date }} {{ c.lastLog.time }}
+          </div>
+          <div v-if="c.devices.length" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;padding-left:32px">
+            <div v-for="d in c.devices" :key="d.id" style="display:flex;align-items:center;gap:4px;background:var(--cell-bg);border:1px solid var(--border);border-radius:100px;padding:2px 4px 2px 8px;font-family:var(--font-mono);font-size:8px;color:var(--tdim)">
+              {{ d.isMe ? '● este dispositivo' : '📱 ' + d.shortId }}
+              <button v-if="c.userId" @click="unlink(c.userId, d.id)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:1px 4px">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pwd-admin-section">
+        <div class="pwd-admin-title">🔐 CONTRASEÑAS Y LEGAJO DE RECUPERACIÓN</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+          <div v-for="p in pwdList" :key="p.name" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0" :style="{background:p.guardiaColor}">{{ p.name.charAt(0) }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--text);letter-spacing:1px">
+                {{ p.name.toUpperCase() }}
+                <span v-if="p.hasPwd" style="color:var(--green)">● CON CONTRASEÑA</span>
+                <span v-else style="color:var(--tdim)">○ SIN CONTRASEÑA</span>
+              </div>
+              <div v-if="p.origen" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:2px">{{ p.origen }}{{ p.fecha ? ' · ' + p.fecha : '' }}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+                <input v-model="pwdDrafts[p.name]" type="text" :placeholder="p.hasPwd ? 'Nueva contraseña...' : 'Crear contraseña...'"
+                  style="flex:1;min-width:0;background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;color:var(--amber);font-family:var(--font-mono);outline:none"
+                  @keydown.enter="resetPwd(p.name)">
+                <button @click="resetPwd(p.name)" style="background:var(--amber);border:none;border-radius:3px;padding:5px 10px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap">{{ p.hasPwd ? 'RESETEAR' : 'CREAR' }}</button>
+              </div>
+              <div v-if="pwdMsgs[p.name]" :style="{fontFamily:'var(--font-mono)', fontSize:'9px', marginTop:'3px', letterSpacing:'1px', color: pwdMsgs[p.name].ok ? 'var(--green)' : '#e05252'}">{{ pwdMsgs[p.name].txt }}</div>
+
+              <div style="font-family:var(--font-mono);font-size:9px;margin-top:8px" :style="{color: p.hasLegajo ? 'var(--green)' : 'var(--tdim)'}">
+                {{ p.hasLegajo ? '● TIENE LEGAJO DE RECUPERACIÓN' : '○ SIN LEGAJO — no puede recuperar la clave solo' }}
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+                <input v-model="legajoDrafts[p.name]" type="text" :placeholder="p.hasLegajo ? 'Nuevo legajo...' : 'Cargar legajo...'"
+                  style="flex:1;min-width:0;background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;color:var(--tbright);font-family:var(--font-mono);outline:none"
+                  @keydown.enter="setLegajo(p.name)">
+                <button @click="setLegajo(p.name)" style="background:var(--cell-bg);border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:var(--tbright);white-space:nowrap">{{ p.hasLegajo ? 'CAMBIAR' : 'CARGAR' }}</button>
+              </div>
+              <div v-if="legajoMsgs[p.name]" :style="{fontFamily:'var(--font-mono)', fontSize:'9px', marginTop:'3px', letterSpacing:'1px', color: legajoMsgs[p.name].ok ? 'var(--green)' : '#e05252'}">{{ legajoMsgs[p.name].txt }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+  }).mount('#admin-accesos');
+  window.AdminAccesosApp = AdminAccesosApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Admin > Licencias (décima pieza migrada).
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const AdminLicenciasApp = Vue.createApp({
+    data() { return { dupIds: [], groups: [] }; },
+    mounted() { this.refresh(); },
+    methods: {
+      refresh() { Object.assign(this, window.getAdminLicenciasData()); },
+      addEvent(name) { window.adminOpenAddEvent(name); },
+      deleteEvent(id) { window.adminDeleteEvent(id); },
+      deleteDuplicates() { window.adminDeleteDuplicates(this.dupIds); },
+    },
+    template: `
+      <div v-if="dupIds.length>0" style="background:rgba(220,38,38,.12);border:1px solid var(--red);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:11px;color:var(--red);font-weight:600">⚠ {{ dupIds.length }} licencia{{ dupIds.length>1?'s duplicadas detectadas':'  duplicada detectada' }}</div>
+          <div style="font-size:9px;color:var(--tdim);font-family:var(--font-mono);margin-top:2px">Mismo tipo y fecha en el mismo usuario</div>
+        </div>
+        <button @click="deleteDuplicates" style="background:var(--red);border:none;border-radius:4px;padding:6px 12px;font-family:var(--font-mono);font-size:9px;font-weight:700;cursor:pointer;color:#fff;white-space:nowrap;flex-shrink:0">
+          BORRAR TODAS
+        </button>
+      </div>
+      <div v-for="grp in groups" :key="grp.name" style="margin-bottom:14px">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;margin-bottom:6px;font-weight:700" :style="{color:grp.color}">
+          {{ grp.name.toUpperCase() }} · {{ grp.guardiaLabel }} · {{ grp.countLabel }}
+        </div>
+        <div v-for="ev in grp.events" :key="ev.id" :style="{display:'flex', alignItems:'center', gap:'8px', padding:'6px 10px', background:'var(--panel)', borderRadius:'6px', borderLeft:'3px solid '+(ev.isDup?'var(--red)':ev.typeColor), marginBottom:'4px', opacity: ev.isDup?.75:1}">
+          <span style="font-size:10px;font-weight:700;min-width:28px" :style="{color:ev.typeColor}">{{ ev.type }}</span>
+          <div style="flex:1">
+            <div style="font-size:11px;color:var(--tbright)">{{ ev.dateTxt }}</div>
+            <div style="font-size:9px;color:var(--tdim)">{{ ev.name }}{{ ev.desc }}<span v-if="ev.isDup" style="color:var(--red)"> · DUPLICADA</span></div>
+          </div>
+          <span style="font-size:8px;color:var(--adim);font-family:var(--font-mono);flex-shrink:0">{{ ev.createdAtStr }}</span>
+          <button @click="deleteEvent(ev.id)" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer;flex-shrink:0" title="Eliminar">✕</button>
+        </div>
+        <button @click="addEvent(grp.name)" style="width:100%;background:none;border:1px dashed var(--border);color:var(--tdim);border-radius:6px;padding:6px;font-family:var(--font-mono);font-size:9px;cursor:pointer;margin-top:2px;letter-spacing:1px">
+          + AGREGAR LICENCIA A {{ grp.name.toUpperCase() }}
+        </button>
+      </div>
+    `,
+  }).mount('#admin-lic-content');
+  window.AdminLicenciasApp = AdminLicenciasApp;
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COMPONENTE VUE — Admin > Relevante (undécima y última pieza del panel
+     Admin). Es la más delicada: antes el arrastre táctil/mouse se manejaba
+     con variables globales (_adminDiagStart/_adminDiagEnd/_adminDiagDragging)
+     y addEventListener puestos a mano. Ahora ese estado vive DENTRO de este
+     componente — Vue se encarga de repintar el resaltado del rango
+     seleccionado solo, sin loops manuales de querySelectorAll.
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  const AdminRelevanteApp = Vue.createApp({
+    data() {
+      return {
+        selectedG: 'REL', guardias: [],
+        grupoLabel: '', calTitle: '', blanksCount: 0, days: [],
+        userName: '', hasUser: false, events: [], showRelButtons: true,
+        dragStart: null, dragEnd: null, dragging: false,
+      };
+    },
+    computed: {
+      selInfoTxt() { return window.formatSelRange(this.dragStart, this.dragEnd); },
+      blanksArr() { return Array.from({length: this.blanksCount}, (_, i) => i); },
+      addLicLabel() {
+        return this.userName && this.userName !== this.selectedG
+          ? '+ AGREGAR LICENCIA A ' + this.userName.toUpperCase()
+          : '+ AGREGAR LICENCIA';
+      },
+    },
+    mounted() { this.refresh(); },
+    methods: {
+      refresh() {
+        this.guardias = window.getAdminDiagGuardiasList();
+        // Si veníamos parados en OP y el grupo activo ya no lo tiene, volver a A
+        if (this.selectedG === 'OP' && !this.guardias.find(x => x.g === 'OP')) this.selectedG = 'A';
+        Object.assign(this, window.getAdminDiagData(this.selectedG));
+      },
+      selectG(g) {
+        this.selectedG = g;
+        this.dragStart = null; this.dragEnd = null;
+        this.refresh();
+      },
+      isInRange(date) {
+        if (!this.dragStart) return false;
+        const a = this.dragStart, b = this.dragEnd || this.dragStart;
+        const [lo, hi] = a <= b ? [a, b] : [b, a];
+        return date >= lo && date <= hi;
+      },
+      onDown(date) {
+        this.dragging = true;
+        this.dragStart = date;
+        this.dragEnd = date;
+      },
+      onGridMouseMove(e) {
+        if (!this.dragging) return;
+        const cell = e.target.closest && e.target.closest('[data-adg]');
+        if (cell) this.dragEnd = cell.dataset.adg;
+      },
+      onGridTouchMove(e) {
+        if (!this.dragging) return;
+        const t = e.touches[0];
+        const el2 = document.elementFromPoint(t.clientX, t.clientY);
+        const cell = el2 && el2.closest('[data-adg]');
+        if (cell) this.dragEnd = cell.dataset.adg;
+      },
+      onGridUp() { this.dragging = false; },
+      addLic() { window.adminDiagAddLicCore(this.selectedG, this.dragStart, this.dragEnd); },
+      async apply(val) {
+        await window.adminDiagApplyCore(this.selectedG, this.dragStart, this.dragEnd, val);
+        this.dragStart = null; this.dragEnd = null;
+        this.refresh();
+      },
+      async deleteEvent(id) {
+        await window.adminDeleteEvent(id);
+        this.refresh();
+      },
+    },
+    template: `
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-bottom:8px">Administrando: <strong style="color:var(--amber)">{{ grupoLabel }}</strong></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+        <button v-for="gd in guardias" :key="gd.g" @click="selectG(gd.g)"
+          :style="{background: selectedG===gd.g ? gd.color : 'var(--panel)', color: selectedG===gd.g ? '#111' : gd.color,
+                    border:'1px solid '+gd.color, borderRadius:'5px', padding:'5px 12px',
+                    fontFamily:'var(--font-mono)', fontSize:'10px', fontWeight:700, cursor:'pointer'}">
+          {{ gd.g }}
+        </button>
+      </div>
+
+      <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:2px;margin-bottom:8px;color:var(--amber)">{{ calTitle }}</div>
+
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:12px"
+        @mousemove="onGridMouseMove" @mouseup="onGridUp"
+        @touchmove.prevent="onGridTouchMove" @touchend="onGridUp">
+        <div v-for="d in ['D','L','M','M','J','V','S']" :key="d" style="text-align:center;font-size:8px;font-family:var(--font-mono);color:var(--adim);padding:2px">{{ d }}</div>
+        <div v-for="b in blanksArr" :key="'b'+b"></div>
+        <div v-for="day in days" :key="day.date" :data-adg="day.date"
+          @mousedown.prevent="onDown(day.date)" @touchstart.prevent="onDown(day.date)"
+          :style="{textAlign:'center', padding:'4px 2px', borderRadius:'5px', background:day.bgColor,
+                    border: day.isToday ? '1px solid var(--amber)' : '1px solid transparent',
+                    outline: isInRange(day.date) ? '2px solid var(--amber)' : 'none',
+                    cursor:'pointer', userSelect:'none', WebkitUserSelect:'none'}">
+          <div style="font-size:7px;color:var(--adim)">{{ day.d }}</div>
+          <div style="font-size:10px;font-weight:700" :style="{color:day.textColor}">{{ day.label }}</div>
+        </div>
+      </div>
+
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);text-align:center;margin-bottom:8px">{{ selInfoTxt }}</div>
+
+      <div v-if="showRelButtons">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">ASIGNAR TURNO REL</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px">
+          <button v-for="opt in [{v:'1',lbl:'T1',c:'var(--t1)'},{v:'2',lbl:'T2',c:'var(--t2)'},{v:'3',lbl:'T3',c:'var(--t3)'},{v:'4',lbl:'T4',c:'var(--t4)'},{v:'F',lbl:'Franco',c:'var(--red)'},{v:'',lbl:'✕ Limpiar',c:'var(--tdim)'}]"
+            :key="opt.v" @click="apply(opt.v)"
+            :style="{border:'1px solid '+opt.c, color:opt.c, background:'none', borderRadius:'5px', padding:'7px 4px',
+                      fontFamily:'var(--font-mono)', fontSize:'10px', fontWeight:700, cursor:'pointer'}">{{ opt.lbl }}</button>
+        </div>
+      </div>
+      <div v-else style="background:rgba(234,179,8,.08);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-family:var(--font-mono);font-size:9px;color:var(--tdim)">
+        ℹ Los turnos de G{{ selectedG }} son automáticos. Podés agregar licencias para los días seleccionados.
+      </div>
+
+      <button @click="addLic" style="width:100%;background:var(--amber);border:none;border-radius:6px;padding:10px;font-family:var(--font-mono);font-size:10px;font-weight:700;cursor:pointer;color:#fff;margin-bottom:14px">
+        {{ addLicLabel }}
+      </button>
+
+      <div style="font-family:var(--font-mono);font-size:9px;color:var(--adim);letter-spacing:2px;margin-bottom:6px">LICENCIAS</div>
+      <div v-if="events.length===0" style="font-size:10px;color:var(--tdim);font-family:var(--font-mono)">{{ hasUser ? 'Sin licencias.' : 'No hay nadie con esa guardia en este grupo todavía.' }}</div>
+      <div v-for="ev in events" :key="ev.id" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border-radius:6px;margin-bottom:4px" :style="{borderLeft:'3px solid '+ev.color}">
+        <span style="font-size:10px;font-weight:700;min-width:28px" :style="{color:ev.color}">{{ ev.type }}</span>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--tbright)">{{ ev.dateTxt }}</div>
+          <div style="font-size:9px;color:var(--tdim)">{{ ev.name }}</div>
+        </div>
+        <button @click="deleteEvent(ev.id)" style="background:none;border:1px solid var(--red);color:var(--red);border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:9px;cursor:pointer">✕</button>
+      </div>
+    `,
+  }).mount('#admin-rel-content');
+  window.AdminRelevanteApp = AdminRelevanteApp;
 </script>
 </body>
 </html>
