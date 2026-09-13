@@ -470,8 +470,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .tscr::-webkit-scrollbar { height: 3px; }
 .tscr::-webkit-scrollbar-track { background: var(--cell-bg); }
 .tscr::-webkit-scrollbar-thumb { background: var(--border); }
-table.gt { border-collapse: collapse; min-width: max-content; }
-table.gt th { padding: 8px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 56px; border-radius: 6px; }
+table.gt { border-collapse: separate; border-spacing: 3px; min-width: max-content; }
+table.gt th { padding: 8px 2px; text-align: center; border: 1px solid var(--border); font-family: var(--font-ui); font-size: 10px; font-weight: 700; color: var(--tdim); background: var(--cell-bg); position: sticky; top: 0; z-index: 3; min-width: 56px; border-radius: 10px; }
 table.gt th.gn { min-width: 74px; width: 74px; font-family: var(--font-ui); position: sticky; left: 0; z-index: 5; border-right: 1px solid var(--border2,#c8d4e3); }
 table.gt th .dd { font-size: 7px; color: var(--tdim); }
 table.gt th .dn { font-family: var(--font-ui); font-size: 16px; font-weight: 800; color: var(--tbright); letter-spacing: -.3px; }
@@ -480,22 +480,22 @@ table.gt th.sc .dn { color: var(--amber); } table.gt th.sc { border-color: var(-
 table.gt th.th-today { border-color: var(--amber) !important; }
 table.gt th.th-today .dn { color: var(--amber); }
 .today-dot { width: 4px; height: 4px; background: var(--amber); border-radius: 50%; margin: 1px auto 0; }
-table.gt td.gn { font-family: var(--font-ui); font-size: 11px; font-weight: 800; color: var(--tdim); letter-spacing: .2px; padding: 4px 10px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
+table.gt td.gn { font-family: var(--font-ui); font-size: 11px; font-weight: 800; color: var(--tdim); letter-spacing: .2px; padding: 4px 10px; white-space: nowrap; background: var(--cell-bg); position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); border-radius: 10px; }
 table.gt tr.gs td.gn { color: var(--amber); border-left: 2px solid var(--amber); }
 table.gt tr.srow td.gn { color: var(--blue); border-left: 2px solid var(--blue); }
 table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); min-width: 56px; height: 52px; position: relative; vertical-align: middle;
-  border-radius: 8px;
+  border-radius: 12px;
   transition: all .15s ease;
 }
 table.gt td:not(.gn):hover { filter: brightness(1.1); transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index: 1; }
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
 .cn { font-family: var(--font-ui); font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0; }
-.t1 { background: color-mix(in srgb, var(--t1) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t1) !important; }
-.t2 { background: color-mix(in srgb, var(--t2) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t2) !important; }
-.t3 { background: color-mix(in srgb, var(--t3) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t3) !important; }
-.t4 { background: color-mix(in srgb, var(--t4) 12%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--t4) !important; }
+.t1 { background: color-mix(in srgb, var(--t1) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t1) 30%, var(--border)) !important; }
+.t2 { background: color-mix(in srgb, var(--t2) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t2) 30%, var(--border)) !important; }
+.t3 { background: color-mix(in srgb, var(--t3) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t3) 30%, var(--border)) !important; }
+.t4 { background: color-mix(in srgb, var(--t4) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t4) 30%, var(--border)) !important; }
 .t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
-.tf { background: color-mix(in srgb, var(--red) 8%, var(--panel)) !important; border-color: var(--border) !important; border-left: 3px solid var(--red) !important; }
+.tf { background: color-mix(in srgb, var(--red) 8%, var(--panel)) !important; border-color: color-mix(in srgb, var(--red) 30%, var(--border)) !important; }
 .tf .cn { color: var(--red); font-size: 13px; font-weight: 800; letter-spacing: 0; }
 table.gt td.cs .cn { color: color-mix(in srgb, var(--accent) 55%, var(--adim)); }
 /* Feriado: solo amarillo en el número del día del header */
@@ -2341,6 +2341,9 @@ async function identRegisterCore({ name, usina, sector, puesto, guardia, pwd, pw
   if (!name) return { error: '⚠ Ingresá tu nombre y apellido.' };
   if (USERS.find(u => u.name.toLowerCase() === name.toLowerCase())) {
     return { error: '⚠ Ya existe un usuario con ese nombre. Si sos vos, usá "INGRESAR".' };
+  }
+  if (!sector || !nuSectorOptions(usina).includes(sector)) {
+    return { error: '⚠ Elegí tu sector — es obligatorio, no puede quedar vacío.' };
   }
   if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
   if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
@@ -5369,6 +5372,9 @@ async function adminCreateUserCore({ name, usina, sector, puesto, guardia, pwd, 
   if (USERS.find(u => u.name.toLowerCase() === name.toLowerCase())) {
     return { error: '⚠ Ya existe un usuario con ese nombre.' };
   }
+  if (!sector || !nuSectorOptions(usina).includes(sector)) {
+    return { error: '⚠ Elegí un sector — es obligatorio, no puede quedar vacío.' };
+  }
   if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
   if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
 
@@ -6120,8 +6126,8 @@ async function renderUsinaPanel() {
      el resultado solo. Es el patrón a seguir para ir migrando el resto
      pantalla por pantalla, sin arriesgar lo que ya funciona.
 ════════════════════════════════════════════════════════════════════════ -->
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
+<script type="module">
   const HoyCardApp = Vue.createApp({
     data() {
       return {
@@ -6176,7 +6182,7 @@ async function renderUsinaPanel() {
      "computed"/"watch" — antes eso eran cuatro funciones separadas
      escribiendo innerHTML a mano; ahora es reactivo solo.
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const IdentApp = Vue.createApp({
     data() {
       return {
@@ -6195,15 +6201,12 @@ async function renderUsinaPanel() {
       guardias() { return window.identGetGuardias ? window.identGetGuardias(this.regUsina, this.regSector) : []; },
     },
     watch: {
-      regUsina() { this.regSector = this.sectores[0] || ''; },
+      regUsina() { this.regSector = ''; },
       regSector() {
         this.regPuesto = this.puestos[0] || '';
         const gs = this.guardias;
         if (!gs.find(x => x.g === this.regGuardia)) this.regGuardia = gs[0] ? gs[0].g : 'A';
       },
-    },
-    mounted() {
-      this.regSector = this.sectores[0] || '';
     },
     methods: {
       showTab(t) { this.tab = t; this.loginErr = ''; this.regErr = ''; this.recErr = ''; },
@@ -6273,7 +6276,7 @@ async function renderUsinaPanel() {
             <select v-model="regUsina"><option v-for="u in usinas" :key="u" :value="u">{{ u }}</option></select>
           </div>
           <div class="mfg"><label>Sector</label>
-            <select v-model="regSector"><option v-for="s in sectores" :key="s" :value="s">{{ s }}</option></select>
+            <select v-model="regSector"><option value="" disabled>Elegí tu sector...</option><option v-for="s in sectores" :key="s" :value="s">{{ s }}</option></select>
           </div>
         </div>
         <div class="modal-row">
@@ -6336,7 +6339,7 @@ async function renderUsinaPanel() {
      COMPONENTE VUE — Perfil (tarjeta + botones), tercera pieza migrada.
      El panel Relevante queda afuera a propósito (ver comentario en el HTML).
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const ProfileApp = Vue.createApp({
     data() {
       return { avInitial: '', avColor: '#8a9ab5', name: '', guardiaLabel: '' };
@@ -6375,7 +6378,7 @@ async function renderUsinaPanel() {
      (computeFrancoStats / getMyRelCoveragesDisplay) — Vue solo dibuja el
      resultado y el desplegable de abrir/cerrar.
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const RelPanelApp = Vue.createApp({
     data() {
       return {
@@ -6436,7 +6439,7 @@ async function renderUsinaPanel() {
      navegador uno atrás del otro — mismo resultado final, mejor manera
      de completarlo.
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const AdminUsersApp = Vue.createApp({
     data() {
       return {
@@ -6456,18 +6459,16 @@ async function renderUsinaPanel() {
       eTienePuesto() { return this.ePuestos.length > 0; },
     },
     mounted() {
-      this.cSector = this.cSectores[0] || '';
-      this.onCSectorChange();
       this.refresh();
     },
     methods: {
-      onCUsinaChange() { this.cSector = this.cSectores[0] || ''; this.onCSectorChange(); },
+      onCUsinaChange() { this.cSector = ''; },
       onCSectorChange() {
         this.cPuesto = this.cPuestos[0] || '';
         const gs = this.cGuardias;
         this.cGuardia = gs[0] ? gs[0].g : 'A';
       },
-      onEUsinaChange() { this.eSector = this.eSectores[0] || ''; this.onESectorChange(); },
+      onEUsinaChange() { this.eSector = ''; },
       onESectorChange() { this.ePuesto = this.ePuestos[0] || ''; },
       refresh() { this.groups = window.getAdminUsersGrouped(); },
       async createUser() {
@@ -6517,7 +6518,7 @@ async function renderUsinaPanel() {
           <select v-model="cUsina" @change="onCUsinaChange"><option value="PN">PN</option><option value="NP">NP</option></select>
         </div>
         <div class="mfg"><label>Sector</label>
-          <select v-model="cSector" @change="onCSectorChange"><option v-for="s in cSectores" :key="s" :value="s">{{ s }}</option></select>
+          <select v-model="cSector" @change="onCSectorChange"><option value="" disabled>Elegí un sector...</option><option v-for="s in cSectores" :key="s" :value="s">{{ s }}</option></select>
         </div>
       </div>
       <div class="modal-row">
@@ -6592,7 +6593,7 @@ async function renderUsinaPanel() {
      COMPONENTES VUE — Admin > Apariencia / Historial / Exportar
      (sexta, séptima y octava pieza — las tres juntas por ser chicas).
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const AdminAparienciaApp = Vue.createApp({
     data() { return { themes: [], current: 'cristal' }; },
     mounted() { this.themes = window.getThemesData(); this.current = window.getCurrentCellTheme(); },
@@ -6700,7 +6701,7 @@ async function renderUsinaPanel() {
      getPwdListData) y las acciones (adminResetPwdCore, unlinkDevice,
      clearUserLogs) ya estaban listos — faltaba este componente.
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const AdminAccesosApp = Vue.createApp({
     data() {
       return {
@@ -6810,7 +6811,7 @@ async function renderUsinaPanel() {
 <!-- ══════════════════════════════════════════════════════════════════════
      COMPONENTE VUE — Admin > Licencias (décima pieza migrada).
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const AdminLicenciasApp = Vue.createApp({
     data() { return { dupIds: [], groups: [] }; },
     mounted() { this.refresh(); },
@@ -6860,7 +6861,7 @@ async function renderUsinaPanel() {
      componente — Vue se encarga de repintar el resaltado del rango
      seleccionado solo, sin loops manuales de querySelectorAll.
 ════════════════════════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
   const AdminRelevanteApp = Vue.createApp({
     data() {
       return {
