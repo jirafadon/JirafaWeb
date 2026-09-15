@@ -1001,25 +1001,6 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
 
     <div id="hoy-card-wrap"></div>
 
-    <div id="admin-view-collapsed" onclick="avToggleExpand()" style="display:none;align-items:center;gap:10px;background:var(--panel);border:1px dashed var(--border2);border-radius:13px;padding:11px 13px;margin-bottom:10px;cursor:pointer">
-      <div style="width:26px;height:26px;border-radius:8px;background:color-mix(in srgb, var(--amber) 14%, transparent);border:1px solid color-mix(in srgb, var(--amber) 35%, transparent);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">👁</div>
-      <div style="flex:1;min-width:0;font-size:11.5px;color:var(--tdim)">
-        <b id="av-collapsed-label" style="color:var(--tbright);display:block;font-size:12.5px;margin-bottom:1px">Mirando tu propio grupo</b>
-        Tocá para ver otro servicio
-      </div>
-      <div style="color:var(--adim);font-size:16px">›</div>
-    </div>
-    <div id="admin-view-bar" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--cell-bg);border:1px solid var(--amber);border-radius:6px;padding:8px 10px;margin-bottom:10px">
-      <span style="font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:1px;white-space:nowrap">👁 VER SERVICIO</span>
-      <select id="av-usina" onchange="avOnUsinaChange()" style="flex:1;min-width:70px"></select>
-      <select id="av-sector" onchange="avOnSectorChange()" style="flex:1.4;min-width:110px"></select>
-      <select id="av-puesto" style="flex:1.2;min-width:100px"></select>
-      <button class="nav-btn" onclick="avApply()" style="font-size:9px;letter-spacing:1px">VER</button>
-      <button class="nav-btn" onclick="avReset()" style="font-size:9px;letter-spacing:1px">MI GRUPO</button>
-      <button class="nav-btn" onclick="avToggleExpand()" style="font-size:9px;letter-spacing:1px">✕</button>
-      <span id="av-current" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);width:100%"></span>
-    </div>
-
     <div class="cal-top">
       <div style="display:flex;align-items:center;gap:5px">
         <button class="nav-btn" onclick="calNav(-1)">&#9664;</button>
@@ -1061,6 +1042,25 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       <div class="tab-content on" id="t-dia"></div><div class="tab-content" id="t-semana"></div><div class="tab-content" id="t-mes"></div><div class="tab-content" id="t-anio"></div>
     </div>
     <div id="cal-body"></div>
+
+    <div id="admin-view-collapsed" onclick="avToggleExpand()" style="display:none;align-items:center;gap:10px;background:var(--panel);border:1px dashed var(--border2);border-radius:13px;padding:11px 13px;margin-top:14px;cursor:pointer">
+      <div style="width:26px;height:26px;border-radius:8px;background:color-mix(in srgb, var(--amber) 14%, transparent);border:1px solid color-mix(in srgb, var(--amber) 35%, transparent);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">👁</div>
+      <div style="flex:1;min-width:0;font-size:11.5px;color:var(--tdim)">
+        <b id="av-collapsed-label" style="color:var(--tbright);display:block;font-size:12.5px;margin-bottom:1px">Mirando tu propio grupo</b>
+        Tocá para ver otro servicio
+      </div>
+      <div style="color:var(--adim);font-size:16px">›</div>
+    </div>
+    <div id="admin-view-bar" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;background:var(--cell-bg);border:1px solid var(--amber);border-radius:6px;padding:8px 10px;margin-top:14px">
+      <span style="font-family:var(--font-mono);font-size:9px;color:var(--amber);letter-spacing:1px;white-space:nowrap">👁 VER SERVICIO</span>
+      <select id="av-usina" onchange="avOnUsinaChange()" style="flex:1;min-width:70px"></select>
+      <select id="av-sector" onchange="avOnSectorChange()" style="flex:1.4;min-width:110px"></select>
+      <select id="av-puesto" style="flex:1.2;min-width:100px"></select>
+      <button class="nav-btn" onclick="avApply()" style="font-size:9px;letter-spacing:1px">VER</button>
+      <button class="nav-btn" onclick="avReset()" style="font-size:9px;letter-spacing:1px">MI GRUPO</button>
+      <button class="nav-btn" onclick="avToggleExpand()" style="font-size:9px;letter-spacing:1px">✕</button>
+      <span id="av-current" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);width:100%"></span>
+    </div>
   
   </div>
 </div>
