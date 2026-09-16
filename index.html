@@ -138,11 +138,11 @@ body.dark {
   --accent-txt:#7fa8dd;
   --green-dim: #16281f;
 
-  --amber:     #5b8fd6;
-  --accent:    #5b8fd6;
+  --amber:     #4a86d9;
+  --accent:    #4a86d9;
   --red:       #cf6270;
   --green:     #4a9973;
-  --t1: #5b8fd6;
+  --t1: #4a86d9;
   --t2: #4a9973;
   --t3: #c99a52;
   --t4: #8f7ec2;
@@ -420,6 +420,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
 .rec-del:hover { color: var(--red); }
 .nav-btn { background: var(--panel); border: 1px solid var(--border); color: var(--tbright); font-family: var(--font-ui); font-size: 13px; font-weight: 600; padding: 7px 14px; border-radius: 10px; cursor: pointer; transition: all .15s; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
 .nav-btn:hover { border-color: var(--amber); color: var(--amber); }
+.nav-btn-today { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, var(--panel)); }
+.nav-btn-today:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--panel)); }
 
 /* ══════════════════════════════════════════════
    CARD "HOY" — estado del turno actual, de un vistazo
@@ -455,7 +457,8 @@ textarea:focus { outline: none; border-color: var(--amber); }
 ══════════════════════════════════════════════ */
 .cal-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 5px; }
 .cal-lbl { font-family: var(--font-ui); font-size: 14px; font-weight: 700; color: var(--tbright); letter-spacing: -.2px; }
-.cal-g-sel { background: var(--cell-bg); border: 1px solid var(--border); border-radius: 3px; color: var(--tbright); font-family: var(--font-mono); font-size: 11px; padding: 4px 8px; cursor: pointer; }
+.cal-g-sel { background: color-mix(in srgb, var(--accent) 7%, var(--cell-bg)); border: 1px solid transparent; border-radius: 20px; color: var(--tbright); font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .3px; padding: 4px 12px; cursor: pointer; }
+.cal-g-sel:hover { background: color-mix(in srgb, var(--accent) 13%, var(--cell-bg)); }
 .ctabs { display: flex; gap: 2px; background: var(--cell-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
 .ctab { flex-shrink:0; padding:6px 16px; background:none; border:none; color:var(--tdim); font-family:var(--font-ui); font-size:13px; font-weight:600; cursor:pointer; border-radius:20px; transition:all .15s; white-space:nowrap; }
 .ctab.on { background:var(--amber); color:#1a1206; font-weight:700; }
@@ -490,12 +493,13 @@ table.gt td { padding: 0; text-align: center; border: 1px solid var(--border); m
 table.gt td:not(.gn):hover { filter: brightness(1.1); transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index: 1; }
 .cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2px; }
 .cn { font-family: var(--font-ui); font-size: 14px; font-weight: 700; line-height: 1; letter-spacing: 0; }
-.t1 { background: color-mix(in srgb, var(--t1) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t1) 30%, var(--border)) !important; }
-.t2 { background: color-mix(in srgb, var(--t2) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t2) 30%, var(--border)) !important; }
-.t3 { background: color-mix(in srgb, var(--t3) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t3) 30%, var(--border)) !important; }
-.t4 { background: color-mix(in srgb, var(--t4) 12%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t4) 30%, var(--border)) !important; }
-.t1 .cn { color: var(--t1); } .t2 .cn { color: var(--t2); } .t3 .cn { color: var(--t3); } .t4 .cn { color: var(--t4); }
-.tf { background: color-mix(in srgb, var(--red) 8%, var(--panel)) !important; border-color: color-mix(in srgb, var(--red) 30%, var(--border)) !important; }
+.t1 { background: color-mix(in srgb, var(--t1) 20%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t1) 45%, var(--border)) !important; }
+.t2 { background: color-mix(in srgb, var(--t2) 20%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t2) 45%, var(--border)) !important; }
+.t3 { background: color-mix(in srgb, var(--t3) 20%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t3) 45%, var(--border)) !important; }
+.t4 { background: color-mix(in srgb, var(--t4) 20%, var(--panel)) !important; border-color: color-mix(in srgb, var(--t4) 45%, var(--border)) !important; }
+.t1 .cn { color: color-mix(in srgb, var(--t1) 88%, black); } .t2 .cn { color: color-mix(in srgb, var(--t2) 88%, black); } .t3 .cn { color: color-mix(in srgb, var(--t3) 88%, black); } .t4 .cn { color: color-mix(in srgb, var(--t4) 88%, black); }
+body.dark .t1 .cn { color: var(--t1); } body.dark .t2 .cn { color: var(--t2); } body.dark .t3 .cn { color: var(--t3); } body.dark .t4 .cn { color: var(--t4); }
+.tf { background: color-mix(in srgb, var(--red) 16%, var(--panel)) !important; border-color: color-mix(in srgb, var(--red) 45%, var(--border)) !important; }
 .tf .cn { color: var(--red); font-size: 13px; font-weight: 800; letter-spacing: 0; }
 table.gt td.cs .cn { color: color-mix(in srgb, var(--accent) 55%, var(--adim)); }
 /* Feriado: solo amarillo en el número del día del header */
@@ -1006,7 +1010,7 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
         <button class="nav-btn" onclick="calNav(-1)">&#9664;</button>
         <div class="cal-lbl" id="cal-lbl">CARGANDO...</div>
         <button class="nav-btn" onclick="calNav(1)">&#9654;</button>
-        <button class="nav-btn" onclick="calGoToday()" style="font-size:9px;letter-spacing:1px">HOY</button>
+        <button class="nav-btn nav-btn-today" onclick="calGoToday()" style="font-size:9px;letter-spacing:1px">HOY</button>
         <button class="nav-btn" onclick="icsOpen()" title="Exportar a calendario (.ics)" style="display:flex;align-items:center;gap:4px;font-size:9px;letter-spacing:1px">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14l2.5 2.5L16 11"/></svg>
           ICS
@@ -5587,16 +5591,16 @@ function getAdminDiagData(g) {
     let bgColor, textColor, label;
     if (g === 'REL') {
       const turno = relSched[date];
-      if (turno === 'F') { bgColor='rgba(220,38,38,.25)'; textColor='#ff2d2d'; label='F'; }
-      else if (turno !== undefined) { bgColor=`${TCOLS[turno]}22`; textColor=TCOLS[turno]; label=String(turno); }
+      if (turno === 'F') { bgColor='rgba(220,38,38,.28)'; textColor='#ff2d2d'; label='F'; }
+      else if (turno !== undefined) { bgColor=`${TCOLS[turno]}33`; textColor=TCOLS[turno]; label=String(turno); }
       else { bgColor='var(--panel)'; textColor='var(--adim)'; label='·'; }
     } else {
       const turno = getTurno(g, date);
       const ctSwap = findCTSwap(g, date);
       const effective = ctSwap ? ctSwap.swappedTurno : turno;
       const dayEvs = getEvsByDateAndG(date, g).filter(e => e.type !== 'CT');
-      if (effective === 'F') { bgColor='rgba(220,38,38,.15)'; textColor='#ff2d2d44'; label='F'; }
-      else { bgColor=`${TCOLS[effective]}15`; textColor=TCOLS[effective]; label=String(effective); }
+      if (effective === 'F') { bgColor='rgba(220,38,38,.28)'; textColor='#ff2d2d'; label='F'; }
+      else { bgColor=`${TCOLS[effective]}33`; textColor=TCOLS[effective]; label=String(effective); }
       if (dayEvs.length) { bgColor='rgba(139,92,246,.2)'; textColor='#a78bfa'; label=dayEvs[0].type; }
     }
     return { date, d, isToday, bgColor, textColor, label };
