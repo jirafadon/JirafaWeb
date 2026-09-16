@@ -1,6 +1,6 @@
 # Diagrama de Guardia · JirafaWeb
 
-PWA para gestionar el diagrama de guardias rotativas de la Planta de Agua PN (Puerto Nuevo, Dársena E — Av. Tomás Alva Edison 2701, Puerto de Buenos Aires).
+PWA para gestionar el diagrama de guardias rotativas
 
 🔗 **Producción:** https://diagramaguardia.vercel.app/
 
