@@ -820,7 +820,9 @@ table.vac td.vac-highlight { background: rgba(61,186,120,.15) !important; color:
 /* ── Indicadores Central Puerto ─────────────────────────────────────── */
 .s-indicadores { border-left-color: #4a9eda; }
 @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
-body.dark #admin-fab { background: var(--panel); border-color: var(--border); }
+.admin-link-row { display: flex; align-items: center; gap: 10px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; margin-top: 14px; transition: border-color .15s; }
+.admin-link-row:hover { border-color: var(--accent); }
+.admin-link-row .section-title { color: var(--tbright); }
 
 /* ── MAIN NAV — fija abajo, patrón nativo de app móvil ─────────────── */
 .main-nav {
@@ -961,11 +963,11 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
   .cg-turno { font-size: 30px; }
   .cn { font-size: 26px; }
   table.gt td.gn { min-width: 90px; }
-  #admin-fab, #install-banner { max-width: 1040px; }
+  #install-banner { max-width: 1040px; }
 }
 @media (min-width: 1300px) {
   .wrap { max-width: 1240px; }
-  #admin-fab, #install-banner { max-width: 1240px; }
+  #install-banner { max-width: 1240px; }
 }
 </style>
   <!-- Vercel Analytics — registra visitas reales en el dashboard de Vercel -->
@@ -1067,12 +1069,6 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
     </div>
   
   </div>
-</div>
-
-<!-- ADMIN FAB — solo visible para Jonatan -->
-<div id="admin-fab" onclick="switchView('admin')" style="display:none;position:fixed;bottom:calc(78px + env(safe-area-inset-bottom, 0px));right:16px;z-index:150;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px 16px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);-webkit-tap-highlight-color:transparent;max-width:480px">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-  <span style="font-size:13px;font-weight:600;color:var(--text);font-family:var(--font-ui)">Administrador</span>
 </div>
 
 <!-- ════ VIEW: LICENCIAS ════ -->
@@ -1354,6 +1350,10 @@ body.dark .cg-cell.cg-t4 { background: rgba(139,92,246,.15); }
       </div>
     </div>
   </div>
+</div>
+<div id="admin-link-row" class="admin-link-row" onclick="switchView('admin')" style="display:none">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  <span class="section-title">Administrador</span>
 </div>
 </div>
 
@@ -2904,7 +2904,7 @@ function updateUBar() {
     else document.getElementById('rel-panel').style.display = 'none';
     const _ab = document.getElementById('mnav-admin');
     if (_ab) _ab.style.display = 'none'; // admin siempre oculto en nav
-    const _adminFab = document.getElementById('admin-fab');
+    const _adminFab = document.getElementById('admin-link-row');
     if (_adminFab) _adminFab.style.display = ME.name === ADMIN_NAME ? 'flex' : 'none';
     // Selector "ver otro servicio" — solo para el administrador, colapsado por defecto
     const avBar = document.getElementById('admin-view-bar');
@@ -2942,7 +2942,7 @@ function updateUBar() {
     const usina = document.getElementById('sec-usina');
     if (usina) usina.style.display = 'none';
     const _ab2 = document.getElementById('mnav-admin'); if (_ab2) _ab2.style.display = 'none';
-    const _adminFab2 = document.getElementById('admin-fab');
+    const _adminFab2 = document.getElementById('admin-link-row');
     if (_adminFab2) _adminFab2.style.display = 'none';
     const avBar2 = document.getElementById('admin-view-bar');
     if (avBar2) avBar2.style.display = 'none';
