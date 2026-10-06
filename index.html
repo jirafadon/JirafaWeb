@@ -2428,6 +2428,18 @@ async function identRegisterCore({ name, usina, sector, puesto, guardia, pwd, pw
   const legajoHash = await hashLegajo(name, legajo);
   const id = 'u_' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'') + '_' + Date.now().toString(36);
   const u = { id, name, guardia, usina, sector, puesto, pwdHash, legajoHash, pwdUpdatedBy: 'registro', pwdUpdatedAt: new Date().toISOString(), preset: false, createdAt: new Date().toISOString() };
+
+  // Los nuevos registros nacen directamente en Firebase Authentication.
+  const authEmail = authEmailForUser(name);
+  let authCred;
+  try {
+    authCred = await createUserWithEmailAndPassword(auth, authEmail, pwd);
+  } catch (err) {
+    return { error: authErrorMessage(err) };
+  }
+  u.authUid = authCred.user.uid;
+  u.authEmail = authEmail;
+  u.authMigratedAt = new Date().toISOString();
   USERS.push(u);
   await fbSet('users', id, u);
   logChange('config', `Alta de usuario (autoregistro): ${name} (${groupLabel(u)} · ${G_LABEL[guardia]||guardia})`);
@@ -2648,6 +2660,18 @@ async function confirmPassword() {
   ME.pwdHash = pwdHash;
   ME.pwdUpdatedBy = 'self';
   ME.pwdUpdatedAt = new Date().toISOString();
+  if (auth.currentUser) {
+    try {
+      await updatePassword(auth.currentUser, n1);
+    } catch (err) {
+      if (err?.code === 'auth/requires-recent-login') {
+        document.getElementById('pwd-error').textContent = '⚠ Por seguridad, volvé a ingresar antes de cambiar la contraseña.';
+        return;
+      }
+      document.getElementById('pwd-error').textContent = authErrorMessage(err);
+      return;
+    }
+  }
   await fbSet('users', ME.id, ME);
   logChange('config', `Contraseña actualizada por el propio usuario: ${ME.name}`);
   document.getElementById('m-password').classList.add('off');
