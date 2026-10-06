@@ -1672,6 +1672,10 @@ import {
   getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, deleteDoc, onSnapshot,
   getDoc, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged, updatePassword
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 
 const firebaseConfig = {
@@ -1684,6 +1688,67 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+
+// ── Firebase Authentication ──────────────────────────────────────────────
+// La interfaz sigue usando "Nombre + contraseña". Internamente cada usuario
+// recibe una identidad Firebase Auth con un correo técnico estable. Esto nos
+// permite migrar gradualmente sin obligar a todos a cambiar su forma de acceso.
+function authEmailForUser(name) {
+  const key = String(name || '').trim().toLowerCase()
+    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return key + '@auth.diagrama-537aa.firebaseapp.com';
+}
+
+function authErrorMessage(err) {
+  const code = err?.code || '';
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') return '✕ Nombre o contraseña incorrectos.';
+  if (code === 'auth/email-already-in-use') return '⚠ Este usuario ya tiene una cuenta de autenticación. Volvé a ingresar para vincularla.';
+  if (code === 'auth/too-many-requests') return '⚠ Demasiados intentos. Esperá unos minutos y probá nuevamente.';
+  if (code === 'auth/weak-password') return '⚠ La contraseña debe tener al menos 6 caracteres para Firebase.';
+  return '⚠ No se pudo autenticar. Intentá nuevamente.';
+}
+
+async function ensureFirebaseAuthForUser(u, pwd) {
+  const email = u.authEmail || authEmailForUser(u.name);
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    u.authUid = cred.user.uid;
+    u.authEmail = email;
+    u.authMigratedAt = new Date().toISOString();
+    await fbSet('users', u.id, u);
+    return cred.user;
+  } catch (err) {
+    if (err?.code !== 'auth/email-already-in-use') throw err;
+    const cred = await signInWithEmailAndPassword(auth, email, pwd);
+    u.authUid = cred.user.uid;
+    u.authEmail = email;
+    u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
+    await fbSet('users', u.id, u);
+    return cred.user;
+  }
+}
+
+async function authLoginUser(u, pwd) {
+  const email = u.authEmail || authEmailForUser(u.name);
+  if (u.authUid) {
+    const cred = await signInWithEmailAndPassword(auth, email, pwd);
+    if (cred.user.uid !== u.authUid) throw new Error('auth-user-mismatch');
+    return cred.user;
+  }
+  // Puente de migración: valida una vez contra el hash histórico y crea
+  // inmediatamente la identidad Firebase Auth. Luego el usuario ya no depende
+  // del mecanismo de contraseña propio de la aplicación.
+  if (!u.pwdHash) throw new Error('legacy-password-missing');
+  const hash = await hashPwd(u.name, pwd);
+  if (hash !== u.pwdHash) throw new Error('legacy-wrong-password');
+  return await ensureFirebaseAuthForUser(u, pwd);
+}
+
+onAuthStateChanged(auth, user => {
+  window.GD_AUTH_USER = user || null;
+});
 enableIndexedDbPersistence(db).catch(err => {
   if (err.code === 'failed-precondition') { /* múltiples tabs */ }
   else if (err.code === 'unimplemented') { /* browser sin soporte */ }
@@ -2334,9 +2399,13 @@ async function identLoginCore(name, pwd) {
   if (!name || !pwd) return { error: '⚠ Completá nombre y contraseña.' };
   const u = USERS.find(x => x.name.toLowerCase() === name.toLowerCase());
   if (!u) return { error: '⚠ No encontramos ese usuario. ¿Sos nuevo/a? Usá la otra pestaña.' };
-  if (!u.pwdHash) return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
-  const hash = await hashPwd(u.name, pwd);
-  if (hash !== u.pwdHash) return { error: '✕ Contraseña incorrecta.' };
+  try {
+    await authLoginUser(u, pwd);
+  } catch (err) {
+    if (err?.message === 'legacy-wrong-password') return { error: '✕ Contraseña incorrecta.' };
+    if (err?.message === 'legacy-password-missing') return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
+    return { error: authErrorMessage(err) };
+  }
   await selectUser(u);
   return { ok: true };
 }
@@ -2813,6 +2882,13 @@ async function selectUser(u) {
   }
 
   ME = u;
+  // Vinculación de seguridad: el documento queda asociado a la identidad Auth.
+  if (auth.currentUser && u.authUid !== auth.currentUser.uid) {
+    u.authUid = auth.currentUser.uid;
+    u.authEmail = auth.currentUser.email || u.authEmail || authEmailForUser(u.name);
+    u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
+    await fbSet('users', u.id, u);
+  }
   await saveMe();
   await logAccess(u.name);
   updateUBar();
@@ -2826,6 +2902,7 @@ async function selectUser(u) {
 }
 
 async function logout() {
+  try { await signOut(auth); } catch (_) {}
   ME = null;
   lsDel('gd-me-id');       // limpiar sesión guardada en este dispositivo
   await saveMe();
