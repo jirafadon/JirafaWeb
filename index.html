@@ -1690,7 +1690,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
-const AUTH_MIGRATION_ENABLED = false; // Activar después de habilitar Email/Password + Google y probar la migración.
+const AUTH_MIGRATION_ENABLED = true; // Activar después de habilitar Email/Password + Google y probar la migración.
 window.AUTH_MIGRATION_UI = AUTH_MIGRATION_ENABLED;
 
 // ── Firebase Authentication ──────────────────────────────────────────────
