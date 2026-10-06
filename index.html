@@ -1672,6 +1672,11 @@ import {
   getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, deleteDoc, onSnapshot,
   getDoc, getDocs
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  signOut, onAuthStateChanged, updatePassword,
+  GoogleAuthProvider, signInWithPopup, linkWithPopup
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 
 const firebaseConfig = {
@@ -1684,6 +1689,146 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+const AUTH_MIGRATION_ENABLED = false; // Activar después de habilitar Email/Password + Google y probar la migración.
+window.AUTH_MIGRATION_UI = AUTH_MIGRATION_ENABLED;
+
+// ── Firebase Authentication ──────────────────────────────────────────────
+// Estrategia de migración:
+// - Las cuentas actuales conservan el acceso "Nombre + contraseña".
+// - Internamente, esa contraseña usa una identidad Firebase Auth estable.
+// - Google se vincula a ESA MISMA identidad mediante linkWithPopup.
+// - El acceso con Google nunca se asocia automáticamente por nombre.
+// - Los usuarios nuevos pueden registrarse con el flujo tradicional o iniciar
+//   el alta con Google y completar luego los datos propios de DiagramaGuardia.
+function authEmailForUser(name) {
+  const key = String(name || '').trim().toLowerCase()
+    .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return key + '@auth.diagrama-537aa.firebaseapp.com';
+}
+
+function authErrorMessage(err) {
+  const code = err?.code || '';
+  if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') return '✕ Nombre o contraseña incorrectos.';
+  if (code === 'auth/email-already-in-use') return '⚠ Este usuario ya tiene una cuenta de autenticación.';
+  if (code === 'auth/credential-already-in-use') return '⚠ Esa cuenta de Google ya está vinculada a otro usuario. No se puede asociar automáticamente.';
+  if (code === 'auth/provider-already-linked') return '✓ Google ya está vinculado a esta cuenta.';
+  if (code === 'auth/popup-closed-by-user') return '⚠ Cerraste la ventana de Google antes de terminar.';
+  if (code === 'auth/popup-blocked') return '⚠ El navegador bloqueó la ventana de Google. Permití ventanas emergentes para este sitio.';
+  if (code === 'auth/operation-not-allowed') return '⚠ El acceso con Google todavía no está habilitado en Firebase.';
+  if (code === 'auth/too-many-requests') return '⚠ Demasiados intentos. Esperá unos minutos y probá nuevamente.';
+  if (code === 'auth/weak-password') return '⚠ La contraseña debe tener al menos 6 caracteres para Firebase.';
+  return '⚠ No se pudo autenticar. Intentá nuevamente.';
+}
+
+function googleProvider() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  return provider;
+}
+
+function userHasGoogleProvider(user) {
+  return !!user?.providerData?.some(p => p.providerId === 'google.com');
+}
+
+function findUserByAuthUid(uid) {
+  return uid ? USERS.find(u => u.authUid === uid) || null : null;
+}
+
+async function ensureFirebaseAuthForUser(u, pwd) {
+  const email = u.authEmail || authEmailForUser(u.name);
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    u.authUid = cred.user.uid;
+    u.authEmail = email;
+    u.authMigratedAt = new Date().toISOString();
+    await fbSet('users', u.id, u);
+    return cred.user;
+  } catch (err) {
+    if (err?.code !== 'auth/email-already-in-use') throw err;
+    const cred = await signInWithEmailAndPassword(auth, email, pwd);
+    u.authUid = cred.user.uid;
+    u.authEmail = email;
+    u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
+    await fbSet('users', u.id, u);
+    return cred.user;
+  }
+}
+
+async function authLoginUser(u, pwd) {
+  if (!AUTH_MIGRATION_ENABLED) return null;
+  const email = u.authEmail || authEmailForUser(u.name);
+  if (u.authUid) {
+    const cred = await signInWithEmailAndPassword(auth, email, pwd);
+    if (cred.user.uid !== u.authUid) throw new Error('auth-user-mismatch');
+    return cred.user;
+  }
+  if (!u.pwdHash) throw new Error('legacy-password-missing');
+  const hash = await hashPwd(u.name, pwd);
+  if (hash !== u.pwdHash) throw new Error('legacy-wrong-password');
+  return await ensureFirebaseAuthForUser(u, pwd);
+}
+
+async function linkGoogleToCurrentUser(u = ME) {
+  if (!AUTH_MIGRATION_ENABLED) return { error: 'La migración de autenticación todavía está desactivada.' };
+  const current = auth.currentUser;
+  if (!current) return { error: 'Primero ingresá con tu usuario y contraseña.' };
+  if (u && u.authUid && u.authUid !== current.uid) return { error: 'La identidad de autenticación no coincide con este usuario.' };
+  if (userHasGoogleProvider(current)) {
+    if (u) {
+      u.authUid = current.uid;
+      u.authGoogleLinked = true;
+      u.authGoogleEmail = current.email || u.authGoogleEmail || null;
+      await fbSet('users', u.id, u);
+    }
+    return { ok: true, alreadyLinked: true, email: current.email || '' };
+  }
+  try {
+    const result = await linkWithPopup(current, googleProvider());
+    const linkedUser = result.user;
+    if (u) {
+      u.authUid = linkedUser.uid;
+      u.authGoogleLinked = true;
+      u.authGoogleEmail = linkedUser.email || null;
+      u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
+      await fbSet('users', u.id, u);
+    }
+    window.GD_AUTH_USER = linkedUser;
+    return { ok: true, email: linkedUser.email || '' };
+  } catch (err) {
+    return { error: authErrorMessage(err), code: err?.code || '' };
+  }
+}
+
+async function googleLoginCore() {
+  if (!AUTH_MIGRATION_ENABLED) return { error: 'El acceso con Google todavía no está activado.' };
+  try {
+    const result = await signInWithPopup(auth, googleProvider());
+    const firebaseUser = result.user;
+    window.GD_AUTH_USER = firebaseUser;
+    const u = findUserByAuthUid(firebaseUser.uid);
+
+    if (u) {
+      window.GD_PENDING_GOOGLE_AUTH = null;
+      await selectUser(u);
+      return { ok: true, user: u };
+    }
+
+    window.GD_PENDING_GOOGLE_AUTH = {
+      uid: firebaseUser.uid,
+      email: firebaseUser.email || '',
+      displayName: firebaseUser.displayName || ''
+    };
+    return { needsProfile: true, displayName: firebaseUser.displayName || '', email: firebaseUser.email || '' };
+  } catch (err) {
+    return { error: authErrorMessage(err), code: err?.code || '' };
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  window.GD_AUTH_USER = user || null;
+});
 enableIndexedDbPersistence(db).catch(err => {
   if (err.code === 'failed-precondition') { /* múltiples tabs */ }
   else if (err.code === 'unimplemented') { /* browser sin soporte */ }
@@ -2334,9 +2479,19 @@ async function identLoginCore(name, pwd) {
   if (!name || !pwd) return { error: '⚠ Completá nombre y contraseña.' };
   const u = USERS.find(x => x.name.toLowerCase() === name.toLowerCase());
   if (!u) return { error: '⚠ No encontramos ese usuario. ¿Sos nuevo/a? Usá la otra pestaña.' };
-  if (!u.pwdHash) return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
-  const hash = await hashPwd(u.name, pwd);
-  if (hash !== u.pwdHash) return { error: '✕ Contraseña incorrecta.' };
+  if (AUTH_MIGRATION_ENABLED) {
+    try {
+      await authLoginUser(u, pwd);
+    } catch (err) {
+    if (err?.message === 'legacy-wrong-password') return { error: '✕ Contraseña incorrecta.' };
+    if (err?.message === 'legacy-password-missing') return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
+      return { error: authErrorMessage(err) };
+    }
+  } else {
+    if (!u.pwdHash) return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
+    const hash = await hashPwd(u.name, pwd);
+    if (hash !== u.pwdHash) return { error: '✕ Contraseña incorrecta.' };
+  }
   await selectUser(u);
   return { ok: true };
 }
@@ -2350,17 +2505,45 @@ async function identRegisterCore({ name, usina, sector, puesto, guardia, pwd, pw
   if (!sector || !nuSectorOptions(usina).includes(sector)) {
     return { error: '⚠ Elegí tu sector — es obligatorio, no puede quedar vacío.' };
   }
-  if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
-  if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
+  const pendingGoogle = AUTH_MIGRATION_ENABLED && auth.currentUser &&
+    window.GD_PENDING_GOOGLE_AUTH?.uid === auth.currentUser.uid;
+  if (!pendingGoogle) {
+    if (!pwd || pwd.length < 4) return { error: '⚠ La contraseña debe tener al menos 4 caracteres.' };
+    if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
+  }
   legajo = (legajo || '').trim();
   if (!legajo || legajo.length < 3) return { error: '⚠ Ingresá tu número de legajo (lo vas a necesitar si te olvidás la contraseña).' };
 
-  const pwdHash = await hashPwd(name, pwd);
+  const pwdHash = pendingGoogle ? null : await hashPwd(name, pwd);
   const legajoHash = await hashLegajo(name, legajo);
   const id = 'u_' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'') + '_' + Date.now().toString(36);
   const u = { id, name, guardia, usina, sector, puesto, pwdHash, legajoHash, pwdUpdatedBy: 'registro', pwdUpdatedAt: new Date().toISOString(), preset: false, createdAt: new Date().toISOString() };
+
+  if (AUTH_MIGRATION_ENABLED && pendingGoogle) {
+    u.authUid = auth.currentUser.uid;
+    u.authEmail = auth.currentUser.email || null;
+    u.authGoogleLinked = userHasGoogleProvider(auth.currentUser);
+    u.authGoogleEmail = auth.currentUser.email || null;
+    u.authMigratedAt = new Date().toISOString();
+    u.authSignupMethod = 'google';
+  } else if (AUTH_MIGRATION_ENABLED) {
+    if (!pwd || pwd.length < 6) return { error: '⚠ La contraseña debe tener al menos 6 caracteres.' };
+    if (pwd !== pwd2) return { error: '⚠ Las contraseñas no coinciden.' };
+    const authEmail = authEmailForUser(name);
+    let authCred;
+    try {
+      authCred = await createUserWithEmailAndPassword(auth, authEmail, pwd);
+    } catch (err) {
+      return { error: authErrorMessage(err) };
+    }
+    u.authUid = authCred.user.uid;
+    u.authEmail = authEmail;
+    u.authMigratedAt = new Date().toISOString();
+    u.authSignupMethod = 'password';
+  }
   USERS.push(u);
   await fbSet('users', id, u);
+  window.GD_PENDING_GOOGLE_AUTH = null;
   logChange('config', `Alta de usuario (autoregistro): ${name} (${groupLabel(u)} · ${G_LABEL[guardia]||guardia})`);
   await selectUser(u);
   return { ok: true };
@@ -2579,6 +2762,18 @@ async function confirmPassword() {
   ME.pwdHash = pwdHash;
   ME.pwdUpdatedBy = 'self';
   ME.pwdUpdatedAt = new Date().toISOString();
+  if (AUTH_MIGRATION_ENABLED && auth.currentUser) {
+    try {
+      await updatePassword(auth.currentUser, n1);
+    } catch (err) {
+      if (err?.code === 'auth/requires-recent-login') {
+        document.getElementById('pwd-error').textContent = '⚠ Por seguridad, volvé a ingresar antes de cambiar la contraseña.';
+        return;
+      }
+      document.getElementById('pwd-error').textContent = authErrorMessage(err);
+      return;
+    }
+  }
   await fbSet('users', ME.id, ME);
   logChange('config', `Contraseña actualizada por el propio usuario: ${ME.name}`);
   document.getElementById('m-password').classList.add('off');
@@ -2594,6 +2789,9 @@ async function adminResetPwdCore(name, val) {
   if (!u) return { error: 'Usuario no encontrado.' };
   val = (val || '').trim();
   if (!val || val.length < 4) return { error: '⚠ Mínimo 4 caracteres.' };
+  if (AUTH_MIGRATION_ENABLED && u.authUid) {
+    return { error: '⚠ Esta cuenta ya usa Firebase Authentication. El reseteo administrativo se habilitará desde el backend seguro en la próxima etapa.' };
+  }
   u.pwdHash = await hashPwd(u.name, val);
   u.pwdUpdatedBy = 'admin';
   u.pwdUpdatedAt = new Date().toISOString();
@@ -2813,6 +3011,13 @@ async function selectUser(u) {
   }
 
   ME = u;
+  // Vinculación de seguridad: el documento queda asociado a la identidad Auth.
+  if (AUTH_MIGRATION_ENABLED && auth.currentUser && u.authUid !== auth.currentUser.uid) {
+    u.authUid = auth.currentUser.uid;
+    u.authEmail = auth.currentUser.email || u.authEmail || authEmailForUser(u.name);
+    u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
+    await fbSet('users', u.id, u);
+  }
   await saveMe();
   await logAccess(u.name);
   updateUBar();
@@ -2826,6 +3031,7 @@ async function selectUser(u) {
 }
 
 async function logout() {
+  if (AUTH_MIGRATION_ENABLED) { try { await signOut(auth); } catch (_) {} }
   ME = null;
   lsDel('gd-me-id');       // limpiar sesión guardada en este dispositivo
   await saveMe();
@@ -2869,6 +3075,7 @@ function updateUBar() {
       window.ProfileApp.avInitial = ME.name.charAt(0).toUpperCase();
       window.ProfileApp.avColor = G_COLORS[ME.guardia] || '#8a9ab5';
       window.ProfileApp.name = ME.name.toUpperCase();
+      if (window.ProfileApp.refreshAuth) window.ProfileApp.refreshAuth();
       window.ProfileApp.guardiaLabel = G_LABEL[ME.guardia] || ME.guardia;
     }
     sb.textContent = ME.name.toUpperCase();
@@ -4931,6 +5138,7 @@ Object.assign(window, {
   selectGuardiaGrid, handleDayClick, toggleSection, toggleTheme,
   selectUser, deleteUser, logout,
   identGetUsinas, identGetSectores, identGetPuestos, identGetGuardias, identLoginCore, identRegisterCore, identRecoverCore,
+  googleLoginCore, linkGoogleToCurrentUser, userHasGoogleProvider,
   openChangePwd, confirmPassword, closePwdModal, adminResetPwdCore, adminSetLegajoCore,
   getAuditData, getPwdListData, unlinkDevice, clearUserLogs,
   deleteRelCoverageCore,
@@ -6192,9 +6400,9 @@ async function renderUsinaPanel() {
     data() {
       return {
         tab: 'login',
-        loginName: '', loginPwd: '', loginErr: '', loginBusy: false,
+        loginName: '', loginPwd: '', loginErr: '', loginBusy: false, googleLoginBusy: false,
         regName: '', regUsina: 'PN', regSector: '', regPuesto: '', regGuardia: 'A',
-        regPwd: '', regPwd2: '', regLegajo: '', regErr: '', regBusy: false,
+        regPwd: '', regPwd2: '', regLegajo: '', regErr: '', regBusy: false, googleRegisterBusy: false, googlePending: false,
         recName: '', recLegajo: '', recPwd: '', recPwd2: '', recErr: '', recBusy: false,
       };
     },
@@ -6204,6 +6412,7 @@ async function renderUsinaPanel() {
       puestos() { return window.identGetPuestos ? window.identGetPuestos(this.regUsina, this.regSector) : []; },
       tienePuesto() { return this.puestos.length > 0; },
       guardias() { return window.identGetGuardias ? window.identGetGuardias(this.regUsina, this.regSector) : []; },
+      authUi() { return !!window.AUTH_MIGRATION_UI; },
     },
     watch: {
       regUsina() { this.regSector = ''; },
@@ -6215,6 +6424,33 @@ async function renderUsinaPanel() {
     },
     methods: {
       showTab(t) { this.tab = t; this.loginErr = ''; this.regErr = ''; this.recErr = ''; },
+      async doGoogleLogin() {
+        if (this.googleLoginBusy) return;
+        this.loginErr = ''; this.googleLoginBusy = true;
+        try {
+          const res = await window.googleLoginCore();
+          if (res.error) this.loginErr = res.error;
+          else if (res.needsProfile) {
+            this.googlePending = true;
+            this.regName = res.displayName || this.regName;
+            this.tab = 'register';
+            this.regErr = '✓ Google autenticado. Completá tus datos para crear tu perfil.';
+          }
+        } finally { this.googleLoginBusy = false; }
+      },
+      async doGoogleRegister() {
+        if (this.googleRegisterBusy) return;
+        this.regErr = ''; this.googleRegisterBusy = true;
+        try {
+          const res = await window.googleLoginCore();
+          if (res.error) this.regErr = res.error;
+          else if (res.needsProfile) {
+            this.googlePending = true;
+            this.regName = res.displayName || this.regName;
+            this.regErr = '✓ Google autenticado. Completá tus datos y confirmá el alta.';
+          }
+        } finally { this.googleRegisterBusy = false; }
+      },
       async doLogin() {
         if (this.loginBusy) return;
         this.loginErr = ''; this.loginBusy = true;
@@ -6233,7 +6469,7 @@ async function renderUsinaPanel() {
             pwd: this.regPwd, pwd2: this.regPwd2, legajo: this.regLegajo,
           });
           if (res.error) { this.regErr = res.error; }
-          else { this.regPwd = ''; this.regPwd2 = ''; }
+          else { this.regPwd = ''; this.regPwd2 = ''; this.googlePending = false; }
         } finally { this.regBusy = false; }
       },
       async doRecover() {
@@ -6265,7 +6501,13 @@ async function renderUsinaPanel() {
           </div>
         </div>
         <div class="err-msg" :class="{show: loginErr}">{{ loginErr }}</div>
-        <button class="btn" style="width:100%;margin-top:6px" :disabled="loginBusy" @click="doLogin">{{ loginBusy ? 'INGRESANDO...' : 'INGRESAR' }}</button>
+        <button class="btn" style="width:100%;margin-top:6px" :disabled="loginBusy || googleLoginBusy" @click="doLogin">{{ loginBusy ? 'INGRESANDO...' : 'INGRESAR' }}</button>
+        <div v-if="authUi" style="display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--adim);font-family:var(--font-mono);font-size:9px">
+          <span style="flex:1;height:1px;background:var(--border)"></span><span>O</span><span style="flex:1;height:1px;background:var(--border)"></span>
+        </div>
+        <button v-if="authUi" class="btn btn-outline" style="width:100%;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px" :disabled="loginBusy || googleLoginBusy" @click="doGoogleLogin">
+          {{ googleLoginBusy ? 'ABRIENDO GOOGLE...' : '🔵 CONTINUAR CON GOOGLE' }}
+        </button>
         <div style="text-align:center;margin-top:12px">
           <a href="#" @click.prevent="showTab('recover')" style="font-family:var(--font-mono);font-size:10px;color:var(--tdim);text-decoration:underline">¿Olvidaste tu contraseña?</a>
         </div>
@@ -6273,6 +6515,12 @@ async function renderUsinaPanel() {
 
       <div v-else-if="tab==='register'">
         <p class="no-user-msg">&#9673; Es la única vez que te va a pedir estos datos.</p>
+        <button v-if="authUi && !googlePending" class="btn btn-outline" style="width:100%;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px" :disabled="googleRegisterBusy" @click="doGoogleRegister">
+          {{ googleRegisterBusy ? 'ABRIENDO GOOGLE...' : '🔵 CREAR CON GOOGLE' }}
+        </button>
+        <div v-if="googlePending" style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;padding:8px 10px;margin-bottom:12px;font-family:var(--font-mono);font-size:9px;color:var(--accent-txt)">
+          ✓ Cuenta de Google autenticada. Ahora completá tus datos de DiagramaGuardia.
+        </div>
         <div class="mfg"><label>Nombre y apellido</label>
           <input type="text" v-model="regName" placeholder="Ej: Ezequiel Torres" autocomplete="name">
         </div>
@@ -6301,7 +6549,7 @@ async function renderUsinaPanel() {
         <div style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin:-4px 0 10px;">
           &#9432; Lo vas a necesitar si algún día te olvidás la contraseña — así no dependés de nadie más para recuperarla.
         </div>
-        <div class="modal-row">
+        <div v-if="!googlePending" class="modal-row">
           <div class="mfg"><label>Contraseña</label>
             <div class="pwd-input-wrap"><input type="password" v-model="regPwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password"></div>
           </div>
@@ -6310,7 +6558,7 @@ async function renderUsinaPanel() {
           </div>
         </div>
         <div class="err-msg" :class="{show: regErr}">{{ regErr }}</div>
-        <button class="btn" style="width:100%;margin-top:6px" :disabled="regBusy" @click="doRegister">{{ regBusy ? 'CREANDO...' : 'CREAR MI ACCESO' }}</button>
+        <button class="btn" style="width:100%;margin-top:6px" :disabled="regBusy || googleRegisterBusy" @click="doRegister">{{ regBusy ? 'CREANDO...' : (googlePending ? 'CREAR MI PERFIL' : 'CREAR MI ACCESO') }}</button>
       </div>
 
       <div v-else>
@@ -6347,12 +6595,31 @@ async function renderUsinaPanel() {
 <script type="module">
   const ProfileApp = Vue.createApp({
     data() {
-      return { avInitial: '', avColor: '#8a9ab5', name: '', guardiaLabel: '' };
+      return { avInitial: '', avColor: '#8a9ab5', name: '', guardiaLabel: '', googleLinked: false, googleBusy: false, googleMsg: '' };
+    },
+    computed: {
+      authUi() { return !!window.AUTH_MIGRATION_UI; },
     },
     methods: {
       irALicencias() { window.switchView('licencias'); },
       cambiarContrasena() { window.openChangePwd(); },
       salir() { window.logout(); },
+      refreshAuth() {
+        const u = window.GD_AUTH_USER;
+        this.googleLinked = !!(u && window.userHasGoogleProvider && window.userHasGoogleProvider(u));
+      },
+      async vincularGoogle() {
+        if (this.googleBusy) return;
+        this.googleBusy = true; this.googleMsg = '';
+        try {
+          const res = await window.linkGoogleToCurrentUser();
+          if (res.error) this.googleMsg = res.error;
+          else {
+            this.googleLinked = true;
+            this.googleMsg = res.email ? '✓ Google vinculado: ' + res.email : '✓ Google vinculado correctamente.';
+          }
+        } finally { this.googleBusy = false; }
+      },
     },
     template: `
       <div class="user-identified">
@@ -6365,6 +6632,13 @@ async function renderUsinaPanel() {
       <div class="btn-row">
         <button class="btn btn-outline" @click="irALicencias">&#9776; MIS LICENCIAS</button>
       </div>
+      <div v-if="authUi && !googleLinked" style="margin-top:10px;padding:10px 12px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:10px">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--accent-txt);letter-spacing:1px;margin-bottom:7px">🔐 AGREGÁ GOOGLE A TU CUENTA</div>
+        <div style="font-size:11px;color:var(--text);margin-bottom:8px">La próxima vez vas a poder entrar con Google sin dejar de usar tu usuario y contraseña.</div>
+        <button class="btn" style="width:100%" :disabled="googleBusy" @click="vincularGoogle">{{ googleBusy ? 'VINCULANDO...' : '🔵 VINCULAR CUENTA DE GOOGLE' }}</button>
+        <div v-if="googleMsg" style="font-family:var(--font-mono);font-size:9px;color:var(--tdim);margin-top:6px">{{ googleMsg }}</div>
+      </div>
+      <div v-else-if="authUi && googleLinked" style="margin-top:10px;font-family:var(--font-mono);font-size:9px;color:var(--green)">✓ GOOGLE VINCULADO — podés usar Google o tu contraseña.</div>
       <div class="btn-row" style="margin-top:6px;align-items:center;gap:8px;flex-wrap:wrap">
         <a href="https://abnr7ilah.accounts.ondemand.com/saml2/idp/sso?sp=https://www.successfactors.com/centralpue&idp=https://abnr7ilah.accounts.ondemand.com" target="_blank" rel="noopener" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#4a9eda;border-color:rgba(74,158,218,.4)">
           🏭 USINA DIGITAL
