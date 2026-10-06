@@ -1689,6 +1689,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const auth = getAuth(fbApp);
+const AUTH_MIGRATION_ENABLED = false; // Se activa después de habilitar Firebase Authentication y probar la migración.
 
 // ── Firebase Authentication ──────────────────────────────────────────────
 // La interfaz sigue usando "Nombre + contraseña". Internamente cada usuario
@@ -1731,6 +1732,7 @@ async function ensureFirebaseAuthForUser(u, pwd) {
 }
 
 async function authLoginUser(u, pwd) {
+  if (!AUTH_MIGRATION_ENABLED) return null;
   const email = u.authEmail || authEmailForUser(u.name);
   if (u.authUid) {
     const cred = await signInWithEmailAndPassword(auth, email, pwd);
@@ -2399,12 +2401,18 @@ async function identLoginCore(name, pwd) {
   if (!name || !pwd) return { error: '⚠ Completá nombre y contraseña.' };
   const u = USERS.find(x => x.name.toLowerCase() === name.toLowerCase());
   if (!u) return { error: '⚠ No encontramos ese usuario. ¿Sos nuevo/a? Usá la otra pestaña.' };
-  try {
-    await authLoginUser(u, pwd);
-  } catch (err) {
+  if (AUTH_MIGRATION_ENABLED) {
+    try {
+      await authLoginUser(u, pwd);
+    } catch (err) {
     if (err?.message === 'legacy-wrong-password') return { error: '✕ Contraseña incorrecta.' };
     if (err?.message === 'legacy-password-missing') return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
-    return { error: authErrorMessage(err) };
+      return { error: authErrorMessage(err) };
+    }
+  } else {
+    if (!u.pwdHash) return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
+    const hash = await hashPwd(u.name, pwd);
+    if (hash !== u.pwdHash) return { error: '✕ Contraseña incorrecta.' };
   }
   await selectUser(u);
   return { ok: true };
@@ -2429,17 +2437,19 @@ async function identRegisterCore({ name, usina, sector, puesto, guardia, pwd, pw
   const id = 'u_' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'') + '_' + Date.now().toString(36);
   const u = { id, name, guardia, usina, sector, puesto, pwdHash, legajoHash, pwdUpdatedBy: 'registro', pwdUpdatedAt: new Date().toISOString(), preset: false, createdAt: new Date().toISOString() };
 
-  // Los nuevos registros nacen directamente en Firebase Authentication.
-  const authEmail = authEmailForUser(name);
-  let authCred;
-  try {
-    authCred = await createUserWithEmailAndPassword(auth, authEmail, pwd);
-  } catch (err) {
-    return { error: authErrorMessage(err) };
+  // Los nuevos registros usan Firebase Authentication cuando la migración está activa.
+  if (AUTH_MIGRATION_ENABLED) {
+    const authEmail = authEmailForUser(name);
+    let authCred;
+    try {
+      authCred = await createUserWithEmailAndPassword(auth, authEmail, pwd);
+    } catch (err) {
+      return { error: authErrorMessage(err) };
+    }
+    u.authUid = authCred.user.uid;
+    u.authEmail = authEmail;
+    u.authMigratedAt = new Date().toISOString();
   }
-  u.authUid = authCred.user.uid;
-  u.authEmail = authEmail;
-  u.authMigratedAt = new Date().toISOString();
   USERS.push(u);
   await fbSet('users', id, u);
   logChange('config', `Alta de usuario (autoregistro): ${name} (${groupLabel(u)} · ${G_LABEL[guardia]||guardia})`);
@@ -2660,7 +2670,7 @@ async function confirmPassword() {
   ME.pwdHash = pwdHash;
   ME.pwdUpdatedBy = 'self';
   ME.pwdUpdatedAt = new Date().toISOString();
-  if (auth.currentUser) {
+  if (AUTH_MIGRATION_ENABLED && auth.currentUser) {
     try {
       await updatePassword(auth.currentUser, n1);
     } catch (err) {
@@ -2907,7 +2917,7 @@ async function selectUser(u) {
 
   ME = u;
   // Vinculación de seguridad: el documento queda asociado a la identidad Auth.
-  if (auth.currentUser && u.authUid !== auth.currentUser.uid) {
+  if (AUTH_MIGRATION_ENABLED && auth.currentUser && u.authUid !== auth.currentUser.uid) {
     u.authUid = auth.currentUser.uid;
     u.authEmail = auth.currentUser.email || u.authEmail || authEmailForUser(u.name);
     u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
@@ -2926,7 +2936,7 @@ async function selectUser(u) {
 }
 
 async function logout() {
-  try { await signOut(auth); } catch (_) {}
+  if (AUTH_MIGRATION_ENABLED) { try { await signOut(auth); } catch (_) {} }
   ME = null;
   lsDel('gd-me-id');       // limpiar sesión guardada en este dispositivo
   await saveMe();
