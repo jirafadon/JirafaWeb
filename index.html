@@ -1736,55 +1736,57 @@ function findUserByAuthUid(uid) {
   return uid ? USERS.find(u => u.authUid === uid) || null : null;
 }
 
-async function ensureFirebaseAuthForUser(u, pwd) {
+async function ensureFirebaseAuthForUser(u, legacyPwd) {
   const email = u.authEmail || authEmailForUser(u.name);
-  const authPwd = String(pwd || '').length >= 6
-    ? pwd
-    : Array.from(crypto.getRandomValues(new Uint8Array(24)))
-        .map(n => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'[n % 57]).join('');
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, authPwd);
-    if (authPwd !== pwd) window.GD_PASSWORD_UPGRADE_REQUIRED = true;
-    u.authUid = cred.user.uid;
-    u.authEmail = email;
-    u.authMigratedAt = new Date().toISOString();
-    await fbSet('users', u.id, u);
-    return cred.user;
-  } catch (err) {
-    if (err?.code !== 'auth/email-already-in-use') throw err;
-    if (String(pwd || '').length < 6) throw new Error('legacy-password-needs-upgrade');
-    const cred = await signInWithEmailAndPassword(auth, email, pwd);
-    u.authUid = cred.user.uid;
-    u.authEmail = email;
-    u.authMigratedAt = u.authMigratedAt || new Date().toISOString();
-    await fbSet('users', u.id, u);
-    return cred.user;
+  let newPwd = legacyPwd;
+
+  if (String(legacyPwd || '').length < 6) {
+    while (true) {
+      const n1 = window.prompt(
+        'Tu contraseña actual tiene 5 caracteres y Firebase requiere al menos 6.\n\n' +
+        'Elegí una nueva contraseña de 6 caracteres o más:'
+      );
+      if (n1 === null) throw new Error('password-upgrade-cancelled');
+      const n2 = window.prompt('Repetí la nueva contraseña:');
+      if (n2 === null) throw new Error('password-upgrade-cancelled');
+      if (n1.length < 6) {
+        window.alert('La nueva contraseña debe tener al menos 6 caracteres.');
+        continue;
+      }
+      if (n1 !== n2) {
+        window.alert('Las contraseñas no coinciden.');
+        continue;
+      }
+      newPwd = n1;
+      break;
+    }
   }
+
+  let cred;
+  try {
+    cred = await createUserWithEmailAndPassword(auth, email, newPwd);
+  } catch (err) {
+    if (err?.code === 'auth/email-already-in-use') {
+      throw new Error('auth-migration-account-exists');
+    }
+    throw err;
+  }
+
+  u.authUid = cred.user.uid;
+  u.authEmail = email;
+  u.authMigratedAt = new Date().toISOString();
+  u.authSignupMethod = 'password';
+  if (String(legacyPwd || '').length < 6) {
+    u.pwdHash = await hashPwd(u.name, newPwd);
+    u.pwdUpdatedBy = 'migracion-firebase';
+    u.pwdUpdatedAt = new Date().toISOString();
+  }
+  await fbSet('users', u.id, u);
+  return cred.user;
 }
 
 async function upgradeLegacyPassword(u) {
-  if (!window.GD_PASSWORD_UPGRADE_REQUIRED) return { ok: true };
-  const current = auth.currentUser;
-  if (!current) return { error: 'No hay una sesión de Firebase activa.' };
-  while (true) {
-    const n1 = window.prompt('Tu contraseña actual tiene 5 caracteres y Firebase requiere al menos 6.\\n\\nElegí una nueva contraseña de 6 caracteres o más:');
-    if (n1 === null) { await signOut(auth); return { error: 'Tenés que definir una nueva contraseña para completar la migración.' }; }
-    const n2 = window.prompt('Repetí la nueva contraseña:');
-    if (n2 === null) { await signOut(auth); return { error: 'Tenés que definir una nueva contraseña para completar la migración.' }; }
-    if (n1.length < 6) { window.alert('La nueva contraseña debe tener al menos 6 caracteres.'); continue; }
-    if (n1 !== n2) { window.alert('Las contraseñas no coinciden.'); continue; }
-    try {
-      await updatePassword(current, n1);
-      u.pwdHash = await hashPwd(u.name, n1);
-      u.pwdUpdatedBy = 'migracion-firebase';
-      u.pwdUpdatedAt = new Date().toISOString();
-      await fbSet('users', u.id, u);
-      window.GD_PASSWORD_UPGRADE_REQUIRED = false;
-      return { ok: true };
-    } catch (err) {
-      return { error: err?.message || 'No se pudo actualizar la contraseña.' };
-    }
-  }
+  return { ok: true };
 }
 
 async function authLoginUser(u, pwd) {
@@ -2516,6 +2518,8 @@ async function identLoginCore(name, pwd) {
     } catch (err) {
     if (err?.message === 'legacy-wrong-password') return { error: '✕ Contraseña incorrecta.' };
     if (err?.message === 'legacy-password-missing') return { error: '⚠ Este usuario no tiene contraseña configurada. Pedile al administrador que te la genere.' };
+    if (err?.message === 'password-upgrade-cancelled') return { error: '⚠ Tenés que definir una nueva contraseña para completar la migración.' };
+    if (err?.message === 'auth-migration-account-exists') return { error: '⚠ Esta cuenta tiene una migración de Firebase incompleta. Hay que repararla antes de volver a ingresar.' };
       return { error: authErrorMessage(err) };
     }
   } else {
